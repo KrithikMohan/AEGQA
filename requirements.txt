@@ -1,0 +1,13 @@
+# Core quantum computing
+qiskit>=1.0.0
+qiskit-aer>=0.14.0
+
+# Scientific Python
+numpy>=1.24.0
+scipy>=1.10.0
+
+# Progress bar
+tqdm>=4.60.0
+
+# Plotting (optional but used in run_pantheon_aeqga.py)
+matplotlib>=3.6.0
