@@ -1,13 +1,41 @@
-# Core quantum computing
-qiskit>=1.0.0
-qiskit-aer>=0.14.0
+# =============================================================================
+# AEQGA — Amplitude-Encoded Quantum Genetic Algorithm
+# Applied to Pantheon SNe Ia Cosmological Parameter Estimation
+#
+# Paper: Sarracino et al., arXiv:2602.15459 (2026)
+# =============================================================================
+#
+# To set up this environment:
+#
+#   python3 -m venv venv
+#   source venv/bin/activate       # Linux/macOS
+#   venv\Scripts\activate          # Windows
+#   pip install -r requirements.txt
+#   pip install ipython notebook   # for running the notebook
+#
+# To run the notebook:
+#   pip install nbformat jupyter
+#   jupyter notebook AEQGA.ipynb
+#
+# =============================================================================
 
-# Scientific Python
-numpy>=1.24.0
+# Core quantum computing (qiskit >= 1.0; verified with 2.5.x)
+qiskit>=2.5.0
+qiskit-aer>=0.17.0
+
+# Scientific Python (numpy >= 2.0; scipy >= 1.10)
+numpy>=2.0.0
 scipy>=1.10.0
 
-# Progress bar
+# Progress bar (tqdm >= 4.60)
 tqdm>=4.60.0
 
-# Plotting (optional but used in run_pantheon_aeqga.py)
+# Plotting (matplotlib >= 3.6; optional but used in run_pantheon_aeqga.py and notebook)
 matplotlib>=3.6.0
+
+# Jupyter / notebook support
+nbformat>=5.0.0
+jupyter>=1.0.0
+
+# Optional: ipython for interactive use
+ipython>=8.0.0
