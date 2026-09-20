@@ -7,21 +7,17 @@ Steps performed
 ---------------
 1. Clone the data (if not already present)
 2. Load Pantheon: 1048 SNe Ia, redshifts + standardised magnitudes + covariance
-3. Run the AEQGA to minimise chi^2(H0, Omega_m) in flat LCDM
+3. Run the AEQGA to minimise chi^2(H0, Omega_m) in flat ΛCDM
 4. Print the best-fit cosmological parameters
 5. Plot convergence curve  →  pantheon_convergence.png
 6. Plot 2-D chi^2 contours around the best-fit  →  pantheon_contours.png
 
 Usage
 -----
-    # Option A: let this script clone the data automatically
-    python run_pantheon_aeqga.py
-
-    # Option B: point at an existing local clone
     python run_pantheon_aeqga.py --data /path/to/sn_data/Pantheon
-
-    # Faster test (fewer generations, no contour plot)
     python run_pantheon_aeqga.py --fast
+
+Note: pop_size must be a power of two (paper §3.1) for amplitude encoding.
 
 Requirements
 ------------
@@ -45,11 +41,11 @@ parser.add_argument("--data", default=None,
 parser.add_argument("--fast", action="store_true",
                     help="Short run: 8 individuals, 20 generations")
 parser.add_argument("--pop",  type=int, default=8,
-                    help="Population size (default 8)")
+                    help="Population size (must be power of two, default 8)")
 parser.add_argument("--gen",  type=int, default=50,
                     help="Number of generations (default 50)")
-parser.add_argument("--shots", type=int, default=8192,
-                    help="Qiskit shots per generation (default 8192)")
+parser.add_argument("--shots", type=int, default=4096,
+                    help="Qiskit shots per generation (default 4096)")
 parser.add_argument("--no-contour", action="store_true",
                     help="Skip the 2-D contour plot (faster)")
 args = parser.parse_args()
@@ -59,6 +55,10 @@ if args.fast:
     args.gen  = 20
     args.shots = 4096
     args.no_contour = True
+
+# Validate pop_size is power of two
+if args.pop & (args.pop - 1) != 0:
+    sys.exit(f"ERROR: pop_size {args.pop} must be a power of two")
 
 # ---------------------------------------------------------------------------
 # Step 1 — Data
@@ -77,7 +77,7 @@ def get_data_dir():
         os.makedirs(parent, exist_ok=True)
         print(f"Cloning {DATA_REPO} ...")
         ret = subprocess.run(
-            ["git", "clone", "--depth", "1", DATA_REPO,
+            ["git", "clone", "--depth", 1, DATA_REPO,
              os.path.join(parent)],
             check=False
         )
@@ -95,7 +95,7 @@ data_dir = get_data_dir()
 print(f"Data directory: {data_dir}")
 
 # ---------------------------------------------------------------------------
-# Step 2 — Imports (after verifying data exists)
+# Step 2 — Imports
 # ---------------------------------------------------------------------------
 
 try:
@@ -107,7 +107,7 @@ except ImportError:
     )
 
 from pantheon_problem  import PantheonProblem, chi2_pantheon, load_pantheon
-from aeqga_algorithm   import AEQGAParameters, run_aeqga, plot_convergence
+from aeqga_algorithm   import AEQGAParameters, run_aeqga_dual, plot_convergence
 
 # ---------------------------------------------------------------------------
 # Step 3 — Build problem
@@ -116,11 +116,11 @@ from aeqga_algorithm   import AEQGAParameters, run_aeqga, plot_convergence
 print("\n=== Loading Pantheon data ===")
 problem = PantheonProblem(data_dir, use_full_cov=True, verbose=False)
 
-# Quick sanity check: chi2 at Planck best-fit
-x_planck = np.array([67.4, 0.298])
-chi2_planck = problem.compute_fitness(x_planck)
-print(f"chi2 at Planck best-fit (H0=67.4, Om=0.298) = {chi2_planck:.2f}")
-print(f"  (reduced chi2 ~ {chi2_planck / (problem._data['n_sn'] - 2):.3f}  "
+# Quick sanity check: chi2 at paper's SNe Ia best-fit
+x_paper = np.array([72.82, 0.363])
+chi2_paper = problem.compute_fitness(x_paper)
+print(f"chi2 at paper SNe Ia best-fit (H0=72.82, Om=0.363) = {chi2_paper:.2f}")
+print(f"  (reduced chi2 ~ {chi2_paper / (problem._data['n_sn'] - 2):.3f}  "
       f"[expected ~1.0 for a good fit])")
 
 # ---------------------------------------------------------------------------
@@ -132,15 +132,14 @@ print(f"\n=== Running AEQGA  (pop={args.pop}, gen={args.gen}, shots={args.shots}
 params = AEQGAParameters(
     pop_size     = args.pop,
     max_gen      = args.gen,
-    p_cross      = 0.7,
-    p_mut        = 0.15,
-    sigma_mut    = 0.05,   # tight — search bounds already narrow [60,80]x[0.1,0.6]
+    p_cross      = 0.5,    # paper's optimum (§4.1)
+    p_mut        = 0.5,    # paper's optimum (§4.1)
     num_shots    = args.shots,
     verbose      = False,
     progress_bar = True,
 )
 
-g_best, population_evol, bests_log = run_aeqga(problem, params)
+g_best, population_evol, bests_log = run_aeqga_dual(problem, params)
 
 H0_best = g_best.x[0]
 Om_best = g_best.x[1]
@@ -152,8 +151,8 @@ print(f"  Best-fit Omega_m = {Om_best:.4f}")
 print(f"  chi2_min         = {chi2_best:.2f}")
 print(f"  Reduced chi2     = {chi2_best / (problem._data['n_sn'] - 2):.4f}")
 print(f"  Found at gen     = {g_best.gen}")
-print(f"\n  Reference (Scolnic+18): H0 ~ 67.4, Omega_m ~ 0.298")
-print(f"  Reference (Planck 2018): H0 ~ 67.4, Omega_m ~ 0.315")
+print(f"\n  Paper SNe Ia (Sarracino+26): Ω_M = 0.363±0.016, H0 = 72.81±0.22")
+print(f"  Reference (Scolnic+18): H0 ~ 67.4, Omega_m ~ 0.298")
 
 # ---------------------------------------------------------------------------
 # Step 5 — Convergence plot
@@ -161,7 +160,7 @@ print(f"  Reference (Planck 2018): H0 ~ 67.4, Omega_m ~ 0.315")
 
 try:
     import matplotlib
-    matplotlib.use("Agg")   # headless
+    matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
     gens   = list(range(len(bests_log)))
@@ -169,8 +168,8 @@ try:
 
     fig, ax = plt.subplots(figsize=(8, 4))
     ax.plot(gens, fitvals, linewidth=2, color="steelblue")
-    ax.axhline(chi2_planck, color="tomato", linestyle="--", linewidth=1.2,
-               label=f"Planck ref chi2={chi2_planck:.0f}")
+    ax.axhline(chi2_paper, color="tomato", linestyle="--", linewidth=1.2,
+               label=f"Paper best-fit chi2={chi2_paper:.0f}")
     ax.set_xlabel("Generation", fontsize=12)
     ax.set_ylabel(r"Best $\chi^2$", fontsize=12)
     ax.set_title("AEQGA convergence — Pantheon SNe Ia", fontsize=13)
@@ -195,7 +194,7 @@ if not args.no_contour:
     n_H0 = 30
     n_Om = 30
     H0_arr = np.linspace(62.0, 74.0, n_H0)
-    Om_arr = np.linspace(0.20, 0.42, n_Om)
+    Om_arr = np.linspace(0.10, 0.45, n_Om)
     chi2_grid = np.empty((n_Om, n_H0))
 
     for i, Om in enumerate(Om_arr):
@@ -205,14 +204,12 @@ if not args.no_contour:
             print(f"  {i+1}/{n_Om} rows done")
 
     chi2_min_grid = chi2_grid.min()
-    delta_chi2    = chi2_grid - chi2_min_grid   # Delta chi2
+    delta_chi2    = chi2_grid - chi2_min_grid
 
     try:
         import matplotlib.pyplot as plt
 
         fig, ax = plt.subplots(figsize=(7, 6))
-        # 1-sigma, 2-sigma, 3-sigma contours for 2 parameters:
-        # Delta chi2 = 2.30, 6.18, 11.83
         levels = [2.30, 6.18, 11.83]
         cf = ax.contourf(H0_arr, Om_arr, delta_chi2,
                          levels=[0] + levels + [30],
@@ -222,11 +219,9 @@ if not args.no_contour:
                         colors=["white"], linewidths=1.2)
         ax.clabel(cs, fmt={2.30: "1σ", 6.18: "2σ", 11.83: "3σ"}, fontsize=9)
 
-        # Mark AEQGA best-fit
         ax.plot(H0_best, Om_best, "r*", markersize=14, label="AEQGA best-fit",
                 zorder=5)
-        # Mark Planck reference
-        ax.plot(67.4, 0.315, "w^", markersize=10, label="Planck 2018",
+        ax.plot(72.82, 0.363, "w^", markersize=10, label="Paper best-fit",
                 zorder=5)
 
         ax.set_xlabel(r"$H_0$ [km/s/Mpc]", fontsize=12)
