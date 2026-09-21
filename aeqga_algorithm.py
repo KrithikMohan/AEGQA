@@ -390,7 +390,7 @@ def run_aeqga_dual(
             g_best.fitness = float(best_fitness_gen)
             g_best.gen = gen
 
-        bests_log.append([g_best.x.copy(), g_best.fitness])
+        bests_log.append([g_best.x.tolist(), g_best.fitness])
         population_evol.append(new_population.copy())
 
         # ── Step 6: Prepare next generation ──────────────────
@@ -506,7 +506,7 @@ def run_aeqga_sv(
             g_best.fitness = float(best_fitness_gen)
             g_best.gen = gen
 
-        bests_log.append([g_best.x.copy(), g_best.fitness])
+        bests_log.append([g_best.x.tolist(), g_best.fitness])
         population_evol.append(new_population.copy())
         population = new_population
 
