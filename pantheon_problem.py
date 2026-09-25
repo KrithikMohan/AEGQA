@@ -36,6 +36,8 @@ import os
 import math
 import numpy as np
 
+# matplotlib imported lazily in contour helpers to allow headless usage
+
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -219,6 +221,117 @@ def _chi2_diag(delta: np.ndarray, sigma: np.ndarray) -> float:
     sum_w   = float(np.sum(w))
     sum_wd  = float(np.sum(w * delta))
     return chi2 - sum_wd**2 / sum_w
+
+
+# ---------------------------------------------------------------------------
+# Chi-squared with FIXED M (for contour plots, paper Fig.3)
+# ---------------------------------------------------------------------------
+
+def chi2_pantheon_fixed_M(H0: float, Omega_m: float, data: dict,
+                          M_ref: float = -19.36,
+                          use_full_cov: bool = True) -> float:
+    """Compute Pantheon chi^2 with M FIXED (not marginalised).
+
+    This produces elliptical contours in (H0, Omega_m) space because
+    the H0-dependence is preserved.  Used for objective-function contour
+    plots matching paper Fig.3 (green contours).
+
+    Parameters
+    ----------
+    H0       : Hubble constant [km/s/Mpc]
+    Omega_m  : matter density parameter
+    data     : dict from load_pantheon()
+    M_ref    : fixed absolute magnitude offset (default -19.36)
+    use_full_cov : use full covariance matrix (stat+sys)
+
+    Returns
+    -------
+    float : chi^2 (no M marginalisation)
+    """
+    zcmb  = data["zcmb"]
+    zhel  = data["zhel"]
+    mb    = data["mb"]
+    n_sn  = data["n_sn"]
+
+    mu_th = np.array([
+        distance_modulus(zcmb[i], zhel[i], H0, Omega_m)
+        for i in range(n_sn)
+    ])
+
+    delta = mb - mu_th - M_ref
+
+    if use_full_cov and data["cov_sys"] is not None:
+        C = data["cov_total"]
+        try:
+            L = np.linalg.cholesky(C)
+            y = np.linalg.solve(L, delta)
+            chi2 = float(y @ y)
+        except np.linalg.LinAlgError:
+            chi2 = float(np.sum(delta**2 / data["dmb"]**2))
+    else:
+        chi2 = float(np.sum(delta**2 / data["dmb"]**2))
+
+    return chi2
+
+
+# ---------------------------------------------------------------------------
+# KDE-based confidence contours (for results plots, paper Fig.4)
+# ---------------------------------------------------------------------------
+
+def compute_kde_contours(points: np.ndarray,
+                         grid_size: int = 100,
+                         h0_range: tuple = (60.0, 80.0),
+                         om_range: tuple = (0.0, 0.5),
+                         ) -> dict:
+    """Compute 2D Gaussian KDE from AEQGA best-fit points.
+
+    Implements paper Fig.4 confidence contours from n_iterations runs.
+
+    Parameters
+    ----------
+    points : shape (n, 2) — array of [H0, Omega_m] best-fits
+    grid_size : number of grid points per dimension
+    h0_range  : (min, max) for H0 axis
+    om_range  : (min, max) for Omega_m axis
+
+    Returns
+    -------
+    dict with keys:
+        H0_arr, Om_arr : 1D grid arrays
+        P_grid         : 2D probability density
+        mean           : (H0_mean, Om_mean)
+        std            : (H0_std, Om_std)
+        P_max          : maximum probability density
+    """
+    from scipy.stats import gaussian_kde
+
+    points = np.asarray(points)
+    if points.ndim != 2 or points.shape[1] != 2:
+        raise ValueError(f"points must be (n, 2), got {points.shape}")
+
+    mean = points.mean(axis=0)
+    std = points.std(axis=0)
+
+    kde = gaussian_kde(points.T)
+
+    H0_arr = np.linspace(h0_range[0], h0_range[1], grid_size)
+    Om_arr = np.linspace(om_range[0], om_range[1], grid_size)
+    H0_grid, Om_grid = np.meshgrid(H0_arr, Om_arr)
+    coords = np.vstack([H0_grid.ravel(), Om_grid.ravel()])
+    P_grid = kde(coords).reshape(grid_size, grid_size)
+
+    P_max = P_grid.max()
+
+    return {
+        "H0_arr": H0_arr,
+        "Om_arr": Om_arr,
+        "H0_grid": H0_grid,
+        "Om_grid": Om_grid,
+        "P_grid": P_grid,
+        "mean": mean,
+        "std": std,
+        "P_max": P_max,
+    }
 
 
 # ---------------------------------------------------------------------------

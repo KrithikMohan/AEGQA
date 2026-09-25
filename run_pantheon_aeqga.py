@@ -40,8 +40,8 @@ parser.add_argument("--data", default=None,
                     help="Path to Pantheon sub-folder of sn_data clone")
 parser.add_argument("--fast", action="store_true",
                     help="Short run: 8 individuals, 20 generations")
-parser.add_argument("--pop",  type=int, default=8,
-                    help="Population size (must be power of two, default 8)")
+parser.add_argument("--pop",  type=int, default=32,
+                    help="Population size (must be power of two, default 32)")
 parser.add_argument("--gen",  type=int, default=50,
                     help="Number of generations (default 50)")
 parser.add_argument("--shots", type=int, default=4096,
@@ -106,7 +106,7 @@ except ImportError:
         "Install with:  pip install qiskit qiskit-aer tqdm numpy matplotlib"
     )
 
-from pantheon_problem  import PantheonProblem, chi2_pantheon, load_pantheon
+from pantheon_problem  import PantheonProblem, chi2_pantheon, chi2_pantheon_fixed_M, load_pantheon
 from aeqga_algorithm   import AEQGAParameters, run_aeqga_dual, plot_convergence
 
 # ---------------------------------------------------------------------------
@@ -188,18 +188,19 @@ except Exception as e:
 
 if not args.no_contour:
     print("\n=== Computing 2-D chi^2 grid for contour plot ===")
+    print("    (using FIXED-M chi2 for elliptical contours — paper Fig.3)")
     print("    (this evaluates chi2 on a 30x30 grid — takes ~1 min)")
 
     data = problem._data
     n_H0 = 30
     n_Om = 30
-    H0_arr = np.linspace(62.0, 74.0, n_H0)
-    Om_arr = np.linspace(0.10, 0.45, n_Om)
+    H0_arr = np.linspace(62.0, 78.0, n_H0)
+    Om_arr = np.linspace(0.20, 0.50, n_Om)
     chi2_grid = np.empty((n_Om, n_H0))
 
     for i, Om in enumerate(Om_arr):
         for j, H0 in enumerate(H0_arr):
-            chi2_grid[i, j] = chi2_pantheon(H0, Om, data, use_full_cov=True)
+            chi2_grid[i, j] = chi2_pantheon_fixed_M(H0, Om, data, use_full_cov=True)
         if (i + 1) % 5 == 0:
             print(f"  {i+1}/{n_Om} rows done")
 
@@ -213,7 +214,7 @@ if not args.no_contour:
         levels = [2.30, 6.18, 11.83]
         cf = ax.contourf(H0_arr, Om_arr, delta_chi2,
                          levels=[0] + levels + [30],
-                         colors=["#1a6faf", "#3a9fd8", "#8ecde8", "#f0f0f0"])
+                         colors=["#2d5a27", "#4a8c3f", "#7db874", "#c8e6c0"])
         cs = ax.contour(H0_arr, Om_arr, delta_chi2,
                         levels=levels,
                         colors=["white"], linewidths=1.2)
@@ -221,12 +222,12 @@ if not args.no_contour:
 
         ax.plot(H0_best, Om_best, "r*", markersize=14, label="AEQGA best-fit",
                 zorder=5)
-        ax.plot(72.82, 0.363, "w^", markersize=10, label="Paper best-fit",
+        ax.plot(72.82, 0.363, "gD", markersize=10, label="Paper best-fit",
                 zorder=5)
 
         ax.set_xlabel(r"$H_0$ [km/s/Mpc]", fontsize=12)
         ax.set_ylabel(r"$\Omega_m$", fontsize=12)
-        ax.set_title("Pantheon SNe Ia — flat ΛCDM", fontsize=13)
+        ax.set_title("Objective Function Contour (Fixed M)", fontsize=13)
         ax.legend(fontsize=10)
         fig.tight_layout()
         fig.savefig("pantheon_contours.png", dpi=150)

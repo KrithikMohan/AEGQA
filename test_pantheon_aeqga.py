@@ -261,8 +261,8 @@ def test_aeqga_optimisation(prob):
 
     # Pop size MUST be power of two per paper §3.1
     params = AEQGAParameters(
-        pop_size     = 8,      # 2^3
-        max_gen      = 20,
+        pop_size     = 32,     # 2^5 — paper §3.1, §3.4
+        max_gen      = 50,
         n_iterations = 1,
         p_cross      = 0.5,    # paper's optimum (§4.1)
         p_mut        = 0.5,    # paper's optimum (§4.1)
