@@ -300,11 +300,12 @@ Three bugs were found and fixed in `AEQGA.ipynb`:
 ### 8.4 Output Files Verification
 
 ```
-aeqga_full_results.png     — 4-panel figure (STALE: from pop=8 run, regenerate)
-aeqga_results.json         — JSON run data (STALE: gen=3 premature, regenerate)
-pantheon_convergence.png   — convergence curve (from run_pantheon_aeqga.py)
-aeqga_parameter_evolution.png — parameter evolution (STALE: regenerate)
-aeqga_contour_map.png      — contour map (STALE: from mock run, regenerate)
+ aeqga_full_results.png     — 4-panel figure (STALE: from pop=8 run, regenerate)
+ aeqga_results.json         — JSON run data (STALE: gen=3 premature, regenerate)
+ pantheon_convergence.png   — convergence curve (from run_pantheon_aeqga.py)
+ aeqga_parameter_evolution.png — parameter evolution (STALE: regenerate)
+ aeqga_contour_map.png      — contour map (STALE: from mock run, regenerate)
+ aeqga_circuit_diagram.png  — full AEQGA circuit architecture
 ```
 
 After re-running the notebook with `pop_size=32` and real Pantheon data,

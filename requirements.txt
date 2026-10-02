@@ -22,6 +22,7 @@
 # Core quantum computing (qiskit >= 1.0; verified with 2.5.x)
 qiskit>=2.5.0
 qiskit-aer>=0.17.0
+pylatexenc>=2.10  # Required for qiskit.draw(output='mpl')
 
 # Scientific Python (numpy >= 2.0; scipy >= 1.10)
 numpy>=2.0.0
