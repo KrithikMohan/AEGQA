@@ -24,3 +24,13 @@ Thumbs.db
 
 # Data (large files, not tracked)
 sn_data/
+data/
+vendor/
+replication_outputs/
+outputs/png/*
+outputs/json/*
+!outputs/png/.gitkeep
+!outputs/json/.gitkeep
+*.egg-info/
+build/
+dist/

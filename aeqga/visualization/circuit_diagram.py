@@ -6,6 +6,7 @@ sequence. The selected qubits are one illustrative random realization.
 Run with the project virtual environment to export PNG, SVG, and PDF.
 """
 from pathlib import Path
+from aeqga.paths import output_path
 
 import matplotlib
 matplotlib.use("Agg")
@@ -142,9 +143,8 @@ def main():
     fig.text(.5,.039,
              "Example selected qubits; crossover and mutation are each applied with probability 0.5.",
              ha="center",fontsize=9,color="#555555")
-    output = Path(__file__).resolve().with_name("aeqga_circuit_diagram")
     for extension in ["png","svg","pdf"]:
-        fig.savefig(output.with_suffix("."+extension),dpi=240,facecolor="white")
+        fig.savefig(output_path(extension, 'aeqga_circuit_diagram.'+extension),dpi=240,facecolor="white")
     plt.close(fig)
     print("Saved aeqga_circuit_diagram.png, .svg, and .pdf")
 

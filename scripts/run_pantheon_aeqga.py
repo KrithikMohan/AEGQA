@@ -14,8 +14,8 @@ Steps performed
 
 Usage
 -----
-    python run_pantheon_aeqga.py --data /path/to/sn_data/Pantheon
-    python run_pantheon_aeqga.py --fast
+    python -m scripts.run_pantheon_aeqga --data /path/to/sn_data/Pantheon
+    python -m scripts.run_pantheon_aeqga --fast
 
 Note: pop_size must be a power of two (paper §3.1) for amplitude encoding.
 
@@ -30,6 +30,7 @@ import os
 import subprocess
 import sys
 import numpy as np
+from aeqga.paths import PROJECT_ROOT, output_path
 
 # ---------------------------------------------------------------------------
 # CLI
@@ -37,7 +38,12 @@ import numpy as np
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--data", default=None,
-                    help="Path to Pantheon sub-folder of sn_data clone")
+                    help="Path to the selected dataset sub-folder")
+parser.add_argument("--dataset", choices=["pantheon-plus", "pantheon"], default="pantheon-plus")
+parser.add_argument("--selection", choices=["all", "hubble_flow"], default="all")
+parser.add_argument("--redshift", choices=["cmb", "hd_hel"], default="hd_hel")
+parser.add_argument("--distance-grid", type=int, choices=[0,100,300], default=300,
+                    help="0: direct integration; 100/300: paper nearest-neighbor grid")
 parser.add_argument("--fast", action="store_true",
                     help="Short run: 8 individuals, 20 generations")
 parser.add_argument("--pop",  type=int, default=32,
@@ -70,7 +76,8 @@ def get_data_dir():
     if args.data:
         d = args.data
     else:
-        d = os.path.join(os.path.dirname(__file__), "sn_data", "Pantheon")
+        subset = "PantheonPlus" if args.dataset == "pantheon-plus" else "Pantheon"
+        d = str(PROJECT_ROOT / "sn_data" / subset)
 
     if not os.path.isdir(d):
         parent = os.path.dirname(d)
@@ -85,7 +92,7 @@ def get_data_dir():
             sys.exit(
                 f"\nERROR: git clone failed.\n"
                 f"Clone manually:\n  git clone {DATA_REPO}\n"
-                f"Then re-run with:  python run_pantheon_aeqga.py --data sn_data/Pantheon"
+                f"Then re-run with:  python -m scripts.run_pantheon_aeqga --data sn_data/Pantheon"
             )
     if not os.path.isdir(d):
         sys.exit(f"ERROR: Data directory not found: {d}")
@@ -106,15 +113,21 @@ except ImportError:
         "Install with:  pip install qiskit qiskit-aer tqdm numpy matplotlib"
     )
 
-from pantheon_problem  import PantheonProblem, chi2_pantheon, chi2_pantheon_fixed_M, load_pantheon
-from aeqga_algorithm   import AEQGAParameters, run_aeqga_dual, plot_convergence
+from aeqga.likelihoods.pantheon_problem import PantheonProblem, PantheonPlusProblem
+from aeqga.steps.evolution.aeqga_algorithm import AEQGAParameters, run_aeqga_dual, plot_convergence
 
 # ---------------------------------------------------------------------------
 # Step 3 — Build problem
 # ---------------------------------------------------------------------------
 
-print("\n=== Loading Pantheon data ===")
-problem = PantheonProblem(data_dir, use_full_cov=True, verbose=False)
+print(f"\n=== Loading {args.dataset} data ===")
+if args.dataset == "pantheon-plus":
+    problem = PantheonPlusProblem(data_dir, selection=args.selection,
+                                 redshift=args.redshift, grid_size=args.distance_grid)
+    print("Classical minimum:", problem.classical_minimum())
+else:
+    problem = PantheonProblem(data_dir, use_full_cov=True, verbose=False)
+    print("Legacy uncalibrated Pantheon: H0 is degenerate with marginalized M.")
 
 # Quick sanity check: chi2 at paper's SNe Ia best-fit
 x_paper = np.array([72.82, 0.363])
@@ -152,7 +165,6 @@ print(f"  chi2_min         = {chi2_best:.2f}")
 print(f"  Reduced chi2     = {chi2_best / (problem._data['n_sn'] - 2):.4f}")
 print(f"  Found at gen     = {g_best.gen}")
 print(f"\n  Paper SNe Ia (Sarracino+26): Ω_M = 0.363±0.016, H0 = 72.81±0.22")
-print(f"  Reference (Scolnic+18): H0 ~ 67.4, Omega_m ~ 0.298")
 
 # ---------------------------------------------------------------------------
 # Step 5 — Convergence plot
@@ -176,7 +188,7 @@ try:
     ax.legend()
     ax.grid(True, alpha=0.35)
     fig.tight_layout()
-    fig.savefig("pantheon_convergence.png", dpi=150)
+    fig.savefig(output_path('png', 'pantheon_convergence.png'), dpi=150)
     print("\nConvergence plot saved: pantheon_convergence.png")
 
 except Exception as e:
@@ -188,7 +200,7 @@ except Exception as e:
 
 if not args.no_contour:
     print("\n=== Computing 2-D chi^2 grid for contour plot ===")
-    print("    (using FIXED-M chi2 for elliptical contours — paper Fig.3)")
+    print("    (using the identical likelihood as the optimizer)")
     print("    (this evaluates chi2 on a 30x30 grid — takes ~1 min)")
 
     data = problem._data
@@ -200,7 +212,7 @@ if not args.no_contour:
 
     for i, Om in enumerate(Om_arr):
         for j, H0 in enumerate(H0_arr):
-            chi2_grid[i, j] = chi2_pantheon_fixed_M(H0, Om, data, use_full_cov=True)
+            chi2_grid[i, j] = problem.compute_fitness([H0, Om])
         if (i + 1) % 5 == 0:
             print(f"  {i+1}/{n_Om} rows done")
 
@@ -227,10 +239,10 @@ if not args.no_contour:
 
         ax.set_xlabel(r"$H_0$ [km/s/Mpc]", fontsize=12)
         ax.set_ylabel(r"$\Omega_m$", fontsize=12)
-        ax.set_title("Objective Function Contour (Fixed M)", fontsize=13)
+        ax.set_title("Objective function — same likelihood as AEQGA", fontsize=13)
         ax.legend(fontsize=10)
         fig.tight_layout()
-        fig.savefig("pantheon_contours.png", dpi=150)
+        fig.savefig(output_path('png', 'pantheon_contours.png'), dpi=150)
         print("Contour plot saved: pantheon_contours.png")
 
     except Exception as e:

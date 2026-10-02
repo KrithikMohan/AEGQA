@@ -8,7 +8,7 @@ Usage
 1. Clone the data repo:
        git clone https://github.com/CobayaSampler/sn_data
 2. Run:
-       python test_pantheon_aeqga.py --data sn_data/Pantheon
+       python -m tests.test_pantheon_aeqga --data sn_data/Pantheon
 
 The script runs four groups of tests in increasing depth:
   T1  Unit tests on the distance-modulus code (no data needed)
@@ -27,7 +27,7 @@ import numpy as np
 # ── T1: offline unit tests (no data, no Qiskit) ─────────────────────────────
 
 def test_distance_modulus():
-    from pantheon_problem import luminosity_distance_flat_lcdm, distance_modulus
+    from aeqga.likelihoods.pantheon_problem import luminosity_distance_flat_lcdm, distance_modulus
 
     d_L = luminosity_distance_flat_lcdm(0.5, 0.5, 70.0, 0.3, n_steps=5000)
     assert 2700 < d_L < 2950, f"d_L out of range: {d_L:.1f} Mpc"
@@ -56,7 +56,7 @@ def test_distance_modulus():
 
 
 def test_chi2_diag():
-    from pantheon_problem import _chi2_diag
+    from aeqga.likelihoods.pantheon_problem import _chi2_diag
     delta = np.full(10, 3.0)
     sigma = np.ones(10)
     chi2  = _chi2_diag(delta, sigma)
@@ -75,7 +75,7 @@ def test_chi2_diag():
 
 def test_amplitude_encoding():
     """T4a: Verify amplitude encoding via initialize."""
-    from amplitude_encoding import (
+    from aeqga.steps.encoding.amplitude_encoding import (
         build_amplitude_circuit, n_qubits_for_population, _normalise
     )
     from qiskit import QuantumCircuit
@@ -122,7 +122,7 @@ def test_amplitude_encoding():
 
 def test_quantum_gates():
     """T4f: Verify CRy(π/2) bidirectional = U_cross (Eq.14) and Rx(π/2) = U_mut (Eq.15)."""
-    from quantum_gates import verify_u_cross, verify_rx_pi2
+    from aeqga.steps.genetic_operators.quantum_gates import verify_u_cross, verify_rx_pi2
     from qiskit.quantum_info import Operator
     import numpy as np
 
@@ -144,7 +144,7 @@ def test_quantum_gates():
 
 def test_decoding():
     """T4h: Verify decoding functions."""
-    from amplitude_encoding import decode_random_subset, decode_elite_subset
+    from aeqga.steps.decoding.measurement_decoding import decode_random_subset, decode_elite_subset
     import numpy as np
 
     # decode_random_subset: all counts equal → uniform spread
@@ -168,7 +168,7 @@ def test_decoding():
 
 def test_zero_norm_normalize():
     """T4j: Zero-norm edge case in _normalise."""
-    from amplitude_encoding import _normalise
+    from aeqga.steps.encoding.amplitude_encoding import _normalise
     x = np.zeros(4)
     norm = _normalise(x)
     assert np.allclose(norm, 1/np.sqrt(4) * np.ones(4)), \
@@ -181,7 +181,7 @@ def test_zero_norm_normalize():
 # ── T2: data loading validation ──────────────────────────────────────────────
 
 def test_data_loading(data_dir: str):
-    from pantheon_problem import load_pantheon
+    from aeqga.likelihoods.pantheon_problem import load_pantheon
     print(f"T2: Loading data from {data_dir}")
     d = load_pantheon(data_dir)
 
@@ -223,7 +223,7 @@ def test_data_loading(data_dir: str):
 # ── T3: chi2 at known best-fit values ────────────────────────────────────
 
 def test_chi2_bestfit(data_dir: str):
-    from pantheon_problem import PantheonProblem
+    from aeqga.likelihoods.pantheon_problem import PantheonProblem
     print("T3: Chi2 at known best-fit values")
     prob = PantheonProblem(data_dir, use_full_cov=True)
 
@@ -254,7 +254,7 @@ def test_aeqga_optimisation(prob):
     print("    (This requires qiskit + qiskit-aer; skip if not installed)")
 
     try:
-        from aeqga_algorithm import AEQGAParameters, run_aeqga_dual
+        from aeqga.steps.evolution.aeqga_algorithm import AEQGAParameters, run_aeqga_dual
     except ImportError:
         print("    qiskit/aeqga_algorithm not available – skipping T5")
         return
@@ -294,7 +294,7 @@ def test_aeqga_optimisation(prob):
 
     # Optional plot
     try:
-        from aeqga_algorithm import plot_convergence
+        from aeqga.steps.evolution.aeqga_algorithm import plot_convergence
         plot_convergence(bests_log, "AEQGA on Pantheon SNe Ia")
     except Exception:
         pass
@@ -326,7 +326,7 @@ if __name__ == "__main__":
 
     if args.data is None:
         print("No --data path provided. Skipping T2/T3/T5.")
-        print("Provide with:  python test_pantheon_aeqga.py --data sn_data/Pantheon")
+        print("Provide with:  python -m tests.test_pantheon_aeqga --data sn_data/Pantheon")
         sys.exit(0)
 
     if not os.path.isdir(args.data):
