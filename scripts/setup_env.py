@@ -3,7 +3,7 @@
 setup_env.py — Set up the AEQGA Python virtual environment.
 
 Usage:
-    python3 setup_env.py
+    python3 -m scripts.setup_env
 
 This creates a venv at AEGQA-main/venv, installs all dependencies,
 and verifies the installation by importing all modules.
@@ -18,7 +18,7 @@ import os
 import subprocess
 import platform
 
-PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 VENV_DIR = os.path.join(PROJECT_DIR, "venv")
 
 def run(cmd, cwd=None):
@@ -71,6 +71,7 @@ def main():
     req_file = os.path.join(PROJECT_DIR, "requirements.txt")
     print(f"\nInstalling dependencies from {req_file} ...")
     run([pip, "install", "-r", req_file])
+    run([python, "-m", "pip", "install", "--no-deps", "-e", PROJECT_DIR])
 
     # Verify installation
     print("\nVerifying installation ...")
@@ -111,11 +112,11 @@ To activate the virtual environment, run:
 
 Then run the notebook:
 
-    jupyter notebook AEQGA.ipynb
+    jupyter notebook notebooks/AEQGA.ipynb
 
 Or run the full pipeline:
 
-    python run_pantheon_aeqga.py --data sn_data/Pantheon
+    python -m scripts.run_pantheon_aeqga --data sn_data/Pantheon
 
 To deactivate, simply run:
 

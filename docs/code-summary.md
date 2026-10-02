@@ -189,7 +189,7 @@ T4j _normalise zero-norm edge:  PASS
 
 **Usage**:
 ```python
-from pantheon_problem import chi2_pantheon_fixed_M
+from aeqga.likelihoods.pantheon_problem import chi2_pantheon_fixed_M
 chi2 = chi2_pantheon_fixed_M(H0=72.82, Omega_m=0.363, data=pantheon_data)
 ```
 
@@ -209,7 +209,7 @@ chi2 = chi2_pantheon_fixed_M(H0=72.82, Omega_m=0.363, data=pantheon_data)
 
 **Usage**:
 ```python
-from pantheon_problem import compute_kde_contours
+from aeqga.likelihoods.pantheon_problem import compute_kde_contours
 kde = compute_kde_contours(all_best_fits, grid_size=100)
 # Plot with: ax.contour(kde['H0_grid'], kde['Om_grid'], kde['P_grid'], levels=[...])
 ```

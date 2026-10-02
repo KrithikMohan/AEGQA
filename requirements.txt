@@ -27,6 +27,7 @@ pylatexenc>=2.10  # Required for qiskit.draw(output='mpl')
 # Scientific Python (numpy >= 2.0; scipy >= 1.10)
 numpy>=2.0.0
 scipy>=1.10.0
+camb==2.0.4  # Explicit CMB reference backend and PICO background parameters
 
 # Progress bar (tqdm >= 4.60)
 tqdm>=4.60.0

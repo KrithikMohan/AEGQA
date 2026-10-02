@@ -1,48 +1,69 @@
-# AEQGA — Amplitude-Encoded Quantum Genetic Algorithm
-### Applied to Pantheon SNe Ia Cosmological Parameter Estimation
+# AEQGA cosmological parameter estimation
 
-Implementation of the AEQGA described in:
-> Sarracino et al., *"A Quantum Genetic Algorithm with application to
-> Cosmological Parameters Estimation"*, arXiv:2602.15459 (2026)
+Implementation of Sarracino et al.'s [AEQGA paper](https://arxiv.org/html/2602.15459v1), adapted from [HQGA](https://github.com/Quasar-UniNA/HQGA).
 
-Adapted from the Quasar-UniNA HQGA repository:
-https://github.com/Quasar-UniNA/HQGA
-
-## Architecture
+## Project layout
 
 ```
-amplitude_encoding.py   — Amplitude encoding via qiskit.initialize()
-                          (§3.1, Eq.11) + basis-state count decoding (Eq.16/17-18)
-quantum_gates.py        — CRy(π/2) crossover (Eq.12-14) + Rx(π/2) mutation (Eq.15)
-aeqga_algorithm.py      — Main AEQGA loop (Alg.1)
-pantheon_problem.py     — SNe Ia χ² likelihood + BAO/CMB stubs (§2)
-run_pantheon_aeqga.py   — End-to-end runner
-test_pantheon_aeqga.py  — Integration + quantum-correctness tests
-code-summary.md         — Full diagnosis and replication plan
+aeqga/
+  steps/
+    selection/          # Classical elites, duplicates, fresh random individuals
+    encoding/           # L2 normalization and amplitude state preparation
+    genetic_operators/  # Bidirectional CRY crossover and RX mutation
+    decoding/           # Measured counts to classical parameters
+    evolution/          # Fitness evaluation, generation loop, history and best fit
+  likelihoods/          # Pantheon+, legacy Pantheon, BAO, Planck TT, distances
+  emulators/            # Checksum-pinned PICO runtime
+  visualization/        # Publication-style circuit drawing
+  paths.py              # Working-directory-independent data/output locations
+scripts/                # Experiment runners, data fetch, benchmark, environment setup
+tests/                  # Offline, layout and real-data regression tests
+notebooks/              # Legacy walkthrough with its historical outputs
+docs/                   # Replication specification, methodology report, original diagnosis
+outputs/
+  png/                  # Circuit, convergence and contour raster figures
+  svg/                  # Vector circuit diagrams
+  pdf/                  # Printable circuit diagrams
+  json/                 # Numerical results and benchmark reports
+sn_data/                # External SNe data repository (ignored)
+data/                   # External CMB/model and BAO reference downloads (ignored)
 ```
 
-## Key Points
+The generation cycle is fitness evaluation → selection/duplication → amplitude encoding → genetic gates → measurement/decoding → recombination. Each parameter and subset has its own circuit; 25% of individuals bypass the circuit as unchanged elites.
 
-- **Amplitude encoding** uses `qiskit.initialize()` on normalized vectors (not RY angle encoding).
-- **Population size must be a power of two** (`n_p = 2^k`), required for `log₂(n_p)` qubit allocation.
-- **Dual-circuit structure**: 25% elite (bypass), 25% duplicate (circuit A), 50% random (circuit B).
-- **Search ranges** per paper §3: `Ω_M ∈ [0.0, 0.5]`, `H0 ∈ [60, 80]`.
-- **Optimal gate probabilities**: `p_cross = p_mut = 0.5` (paper §4.1).
+## Setup and execution
 
-## Requirements
-
-```
-pip install qiskit qiskit-aer tqdm numpy matplotlib
-```
-
-## Usage
+From the repository root:
 
 ```bash
-python run_pantheon_aeqga.py --data sn_data/Pantheon
-python run_pantheon_aeqga.py --fast
-python test_pantheon_aeqga.py --data sn_data/Pantheon
+python3 -m venv venv
+source venv/bin/activate
+python -m pip install -e .
+git clone https://github.com/CobayaSampler/sn_data.git sn_data
+python -m scripts.fetch_cmb_data
+python -m scripts.run_pantheon_aeqga --pop 8 --gen 2 --shots 512 --no-contour
+python -m scripts.run_bao_cmb_aeqga --backend camb --classical-only
+python -m scripts.benchmark_replication
+python -m aeqga.visualization.circuit_diagram
 ```
 
-## Note
+Use module commands (`python -m …`), not the former root-level script paths. Alternatively, `python -m scripts.setup_env` prepares the root virtual environment. Editable installation lets the package and notebook imports work outside the repository root. Default data/output paths always resolve relative to the repository.
 
-This implementation covers the **SNe Ia** component only (paper §2.1). BAO (§2.2) and CMB (§2.3) paths are stubbed for future extension. See `code-summary.md` for details.
+## Tests
+
+```bash
+OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 python -m unittest discover -s tests -v
+python -m tests.test_pantheon_aeqga
+```
+
+Real-data regression tests are explicitly skipped if their downloads are absent. Fetch both datasets/model before a full integration run. The legacy test module's optional `--data sn_data/Pantheon` exercise is separate from the calibrated Pantheon+ regression suite.
+
+## Scientific scope and limitations
+
+Default SNe estimation uses calibrated Pantheon+ distance moduli and the total covariance; H0 is identifiable. CMB+BAO runs separately and never includes SNe. The legacy Pantheon notebook retains its original M-marginalized demonstration, which cannot constrain H0; its saved figures/results are historical, not new replication evidence.
+
+Strict `--backend pico` rejects points outside the public model's training domain. `camb` and `hybrid` are explicit reference alternatives, not claims of an exact match to the paper's unidentified emulator. Production ensembles and polished optimizer-scatter contours remain future tasks.
+
+See the [replication specification](docs/REPLICATION_SPEC.md) and [tasks 1–7 methodology/report](docs/TASKS_1_TO_7_REPORT.md). The [original diagnosis](docs/code-summary.md) is historical and may describe deficiencies that have since been fixed.
+
+Generated PNG/JSON results and downloaded datasets/models stay local; the previously tracked SVG/PDF circuit examples are preserved in their new output folders.

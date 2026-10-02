@@ -40,6 +40,7 @@ Algorithm loop (per generation, Alg.1 §3 p.7)
 """
 
 import math
+import copy
 import random
 import numpy as np
 from tqdm import tqdm
@@ -49,14 +50,14 @@ from qiskit import QuantumCircuit, transpile
 from qiskit_aer import AerSimulator
 
 # Local helpers
-from amplitude_encoding import (
+from aeqga.steps.encoding.amplitude_encoding import (
     build_amplitude_circuit,
-    build_amplitude_circuit_with_measure,
-    decode_random_subset,
-    decode_elite_subset,
     n_qubits_for_population,
 )
-from quantum_gates import apply_crossover_and_mutation
+from aeqga.steps.decoding.measurement_decoding import decode_random_subset, decode_elite_subset
+from aeqga.steps.genetic_operators.quantum_gates import apply_crossover_and_mutation
+from aeqga.paths import output_path
+from aeqga.steps.selection.population import split_population
 
 
 # ---------------------------------------------------------------------------
@@ -80,14 +81,15 @@ class AEQGAParameters:
 
     def __init__(
         self,
-        pop_size: int = 8,
-        max_gen: int = 100,
+        pop_size: int = 32,
+        max_gen: int = 50,
         n_iterations: int = 1,
         p_cross: float = 0.5,
         p_mut: float = 0.5,
         num_shots: int = 4096,
         verbose: bool = False,
         progress_bar: bool = True,
+        elite_margin: float = 0.0,
     ):
         self.pop_size = pop_size
         self.max_gen = max_gen
@@ -97,12 +99,21 @@ class AEQGAParameters:
         self.num_shots = num_shots
         self.verbose = verbose
         self.progress_bar = progress_bar
+        self.elite_margin = elite_margin
 
     def _validate(self):
-        assert (self.pop_size & (self.pop_size - 1)) == 0, \
-            f"pop_size {self.pop_size} must be a power of two"
-        assert self.pop_size >= 4, \
-            f"pop_size must be ≥ 4 (need n_p/4 ≥ 1 elites)"
+        for name, minimum in [("pop_size", 8), ("max_gen", 0),
+                              ("n_iterations", 1), ("num_shots", 0)]:
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, (int, np.integer)) or value < minimum:
+                raise ValueError(f"{name} must be an integer >= {minimum}")
+        if self.pop_size & (self.pop_size - 1):
+            raise ValueError("pop_size must be a power of two")
+        for name in ["p_cross", "p_mut"]:
+            if not np.isfinite(getattr(self, name)) or not 0 <= getattr(self, name) <= 1:
+                raise ValueError(f"{name} must lie in [0, 1]")
+        if not np.isfinite(self.elite_margin) or self.elite_margin < 0:
+            raise ValueError("elite_margin must be finite and nonnegative")
 
 
 class GlobalBest:
@@ -112,6 +123,7 @@ class GlobalBest:
         self.x: np.ndarray | None = None
         self.fitness: float = float("inf")
         self.gen: int = 0
+        self.evaluations: int = 0
 
     def display(self):
         print(f"\n[GlobalBest] gen={self.gen}  fitness={self.fitness:.6g}  x={self.x}")
@@ -148,10 +160,9 @@ def build_dimension_circuit(
     n_p = len(values)
     n_qubits = n_qubits_for_population(n_p)
 
-    if mode == "measure":
-        qc = build_amplitude_circuit_with_measure(values, num_shots)
-    else:
-        qc = build_amplitude_circuit(values)
+    if mode not in {"measure", "statevector"}:
+        raise ValueError("mode must be 'measure' or 'statevector'")
+    qc = build_amplitude_circuit(values)
 
     # Block 2 – Crossover + Mutation (§3.2, Alg.1 L9-L11)
     qc.barrier(label="crossover_mutation")
@@ -159,6 +170,7 @@ def build_dimension_circuit(
 
     if mode == "measure":
         qc.barrier(label="measure")
+        qc.measure_all()
 
     return qc
 
@@ -166,35 +178,6 @@ def build_dimension_circuit(
 # ---------------------------------------------------------------------------
 # Population splitting (Alg.1 L5-L7)
 # ---------------------------------------------------------------------------
-
-def split_population(
-    population: np.ndarray,
-    fitnesses: np.ndarray,
-    minimise: bool,
-    lower: np.ndarray,
-    upper: np.ndarray,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Split population into elites (25%), elite-copies (25%), random (50%).
-
-    Paper §3 p.7: keep top 25% as P_elite (bypass circuits), duplicate
-    to P_elite_copy (enters circuit), draw fresh P_rand uniform (enters
-    circuit).  75% total enters quantum circuits.
-
-    Returns
-    -------
-    P_elite, P_elite_copy, P_rand
-    """
-    order = np.argsort(fitnesses) if minimise else np.argsort(-fitnesses)
-    n_p = len(population)
-    n_elite = n_p // 4
-
-    P_elite = population[order[:n_elite]].copy()
-    P_elite_copy = P_elite.copy()  # duplicate (Alg.1 L6)
-    n_random = n_p // 2
-    P_rand = np.random.uniform(lower, upper, size=(n_random, population.shape[1]))
-
-    return P_elite, P_elite_copy, P_rand
-
 
 # ---------------------------------------------------------------------------
 # Main algorithm: single-circuit (legacy shim, deprecated)
@@ -262,6 +245,10 @@ def run_aeqga_dual(
     def is_better(a: float, b: float) -> bool:
         return (a < b) if minimise else (a > b)
 
+    if (lower.shape != (n_dim,) or upper.shape != (n_dim,)
+            or not np.all(np.isfinite([lower, upper])) or np.any(lower >= upper)):
+        raise ValueError("Problem bounds must be finite ordered vectors of length n_dim")
+
     # Initialise population in [lower, upper]
     population = np.random.uniform(lower, upper, size=(n_p, n_dim))
 
@@ -269,10 +256,15 @@ def run_aeqga_dual(
     fitnesses = np.array([problem.compute_fitness(population[i]) for i in range(n_p)])
 
     g_best = GlobalBest()
-    population_evol: list = []
-    bests_log: list = []
+    initial_best = int(np.argmin(fitnesses) if minimise else np.argmax(fitnesses))
+    g_best.x = population[initial_best].copy()
+    g_best.fitness = float(fitnesses[initial_best])
+    g_best.evaluations = n_p
+    # History index 0 is the initial population, followed by exactly max_gen updates.
+    population_evol = [population.copy()]
+    bests_log = [[g_best.x.tolist(), g_best.fitness]]
 
-    gen_range = range(params.max_gen + 1)
+    gen_range = range(1, params.max_gen + 1)
     if params.progress_bar:
         gen_range = tqdm(gen_range, desc="AEQGA generations")
 
@@ -343,9 +335,9 @@ def run_aeqga_dual(
                 counts_elite = result.get_counts()
                 n_min_e = float(np.min(P_elite[:, d]))
                 n_max_e = float(np.max(P_elite[:, d]))
-                margin = 0.05 * (n_max_e - n_min_e) if n_max_e > n_min_e else 0.05
-                n_min_e -= margin
-                n_max_e += margin
+                margin = params.elite_margin * (n_max_e - n_min_e)
+                n_min_e = max(float(lower[d]), n_min_e - margin)
+                n_max_e = min(float(upper[d]), n_max_e + margin)
                 decoded_elite[:, d] = decode_elite_subset(
                     counts_elite, n_q_elite,
                     n_min_e, n_max_e, n_elite,
@@ -364,9 +356,9 @@ def run_aeqga_dual(
                     counts_elite[bitstr] = probs[s]
                 n_min_e = float(np.min(P_elite[:, d]))
                 n_max_e = float(np.max(P_elite[:, d]))
-                margin = 0.05 * (n_max_e - n_min_e) if n_max_e > n_min_e else 0.05
-                n_min_e -= margin
-                n_max_e += margin
+                margin = params.elite_margin * (n_max_e - n_min_e)
+                n_min_e = max(float(lower[d]), n_min_e - margin)
+                n_max_e = min(float(upper[d]), n_max_e + margin)
                 decoded_elite[:, d] = decode_elite_subset(
                     counts_elite, n_q_elite,
                     n_min_e, n_max_e, n_elite,
@@ -374,12 +366,17 @@ def run_aeqga_dual(
 
         # ── Step 3: Combine P_elite ∪ P_decoded (Alg.1 L14) ──
         new_population = np.vstack([P_elite, decoded_random, decoded_elite])
+        if (not np.all(np.isfinite(new_population))
+                or np.any(new_population < lower) or np.any(new_population > upper)):
+            raise RuntimeError("Decoded population violates problem bounds")
 
         # ── Step 4: Evaluate fitness on new population ───────
         fitnesses = np.array([
             problem.compute_fitness(new_population[i])
             for i in range(n_p)
         ])
+
+        g_best.evaluations += n_p
 
         # ── Step 5: Update global best ───────────────────────
         best_idx = int(np.argmin(fitnesses) if minimise else np.argmax(fitnesses))
@@ -397,7 +394,7 @@ def run_aeqga_dual(
         population = new_population
 
     g_best.display()
-    print(f"Total merit-function evaluations: {params.pop_size * (params.max_gen + 1)}")
+    print(f"Total merit-function evaluations: {g_best.evaluations}")
     return g_best, population_evol, bests_log
 
 
@@ -417,102 +414,11 @@ def run_aeqga_sv(
 
     Parameters / return values are identical to run_aeqga_dual().
     """
-    params._validate()
-
+    sv_params = copy.copy(params)
+    sv_params.num_shots = 0
     if simulator is None:
         simulator = AerSimulator(method="statevector")
-
-    lower = np.asarray(problem.lower_bounds, dtype=float)
-    upper = np.asarray(problem.upper_bounds, dtype=float)
-    n_dim = int(problem.n_dim)
-    n_p = params.pop_size
-    minimise = not (hasattr(problem, "is_max_problem") and problem.is_max_problem())
-
-    def is_better(a: float, b: float) -> bool:
-        return (a < b) if minimise else (a > b)
-
-    population = np.random.uniform(lower, upper, size=(n_p, n_dim))
-    fitnesses = np.array([problem.compute_fitness(population[i]) for i in range(n_p)])
-
-    g_best = GlobalBest()
-    population_evol: list = []
-    bests_log: list = []
-
-    gen_range = range(params.max_gen + 1)
-    if params.progress_bar:
-        gen_range = tqdm(gen_range, desc="AEQGA-SV generations")
-
-    for gen in gen_range:
-        P_elite, P_elite_copy, P_rand = split_population(
-            population, fitnesses, minimise, lower, upper
-        )
-        n_elite = len(P_elite)
-        n_random = n_p // 2
-
-        decoded_elite = np.empty((n_elite, n_dim))
-        decoded_random = np.empty((n_random, n_dim))
-
-        for d in range(n_dim):
-            n_q_random = n_qubits_for_population(n_p) - 1
-            n_q_elite = n_qubits_for_population(n_p) - 2
-
-            # Random subset (statevector)
-            qc_rand = build_dimension_circuit(
-                P_rand[:, d], params.p_cross, params.p_mut, 0, mode="statevector"
-            )
-            qc_rand.save_statevector()
-            t = transpile(qc_rand, simulator)
-            sv = np.asarray(simulator.run(t).result().get_statevector(t), dtype=complex)
-            probs = np.abs(sv) ** 2
-            n_states = 2 ** n_q_random
-            counts_rand = {}
-            for s in range(n_states):
-                bitstr = format(s, f'0{n_q_random}b')
-                counts_rand[bitstr] = probs[s]
-            decoded_random[:, d] = decode_random_subset(
-                counts_rand, n_q_random, float(lower[d]), float(upper[d]), n_random
-            )
-
-            # Elite-copy subset (statevector)
-            qc_elite = build_dimension_circuit(
-                P_elite_copy[:, d], params.p_cross, params.p_mut, 0, mode="statevector"
-            )
-            qc_elite.save_statevector()
-            t = transpile(qc_elite, simulator)
-            sv = np.asarray(simulator.run(t).result().get_statevector(t), dtype=complex)
-            probs = np.abs(sv) ** 2
-            n_states = 2 ** n_q_elite
-            counts_elite = {}
-            for s in range(n_states):
-                bitstr = format(s, f'0{n_q_elite}b')
-                counts_elite[bitstr] = probs[s]
-            n_min_e = float(np.min(P_elite[:, d]))
-            n_max_e = float(np.max(P_elite[:, d]))
-            margin = 0.05 * (n_max_e - n_min_e) if n_max_e > n_min_e else 0.05
-            n_min_e -= margin
-            n_max_e += margin
-            decoded_elite[:, d] = decode_elite_subset(
-                counts_elite, n_q_elite, n_min_e, n_max_e, n_elite
-            )
-
-        new_population = np.vstack([P_elite, decoded_random, decoded_elite])
-        fitnesses = np.array([problem.compute_fitness(new_population[i]) for i in range(n_p)])
-
-        best_idx = int(np.argmin(fitnesses) if minimise else np.argmax(fitnesses))
-        best_fitness_gen = fitnesses[best_idx]
-
-        if g_best.x is None or is_better(best_fitness_gen, g_best.fitness):
-            g_best.x = new_population[best_idx].copy()
-            g_best.fitness = float(best_fitness_gen)
-            g_best.gen = gen
-
-        bests_log.append([g_best.x.tolist(), g_best.fitness])
-        population_evol.append(new_population.copy())
-        population = new_population
-
-    g_best.display()
-    print(f"Total merit-function evaluations: {params.pop_size * (params.max_gen + 1)}")
-    return g_best, population_evol, bests_log
+    return run_aeqga_dual(problem, sv_params, simulator)
 
 
 # ---------------------------------------------------------------------------
@@ -619,6 +525,6 @@ def plot_convergence(bests_log: list, title: str = "AEQGA Convergence") -> None:
     plt.title(title)
     plt.grid(True, alpha=0.4)
     plt.tight_layout()
-    plt.savefig("aeqga_convergence.png", dpi=150)
+    plt.savefig(output_path('png', 'aeqga_convergence.png'), dpi=150)
     plt.show()
     print("Convergence plot saved to aeqga_convergence.png")
