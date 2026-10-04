@@ -15,7 +15,7 @@
 #
 # To run the notebook:
 #   pip install nbformat jupyter
-#   jupyter notebook AEQGA.ipynb
+#   jupyter notebook notebooks/AEQGA.ipynb
 #
 # =============================================================================
 

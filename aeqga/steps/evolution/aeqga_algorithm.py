@@ -39,9 +39,7 @@ Algorithm loop (per generation, Alg.1 §3 p.7)
 8.  Repeat until max_gen reached; return global best
 """
 
-import math
 import copy
-import random
 import numpy as np
 from tqdm import tqdm
 
@@ -56,7 +54,6 @@ from aeqga.steps.encoding.amplitude_encoding import (
 )
 from aeqga.steps.decoding.measurement_decoding import decode_random_subset, decode_elite_subset
 from aeqga.steps.genetic_operators.quantum_gates import apply_crossover_and_mutation
-from aeqga.paths import output_path
 from aeqga.steps.selection.population import split_population
 
 
@@ -71,7 +68,6 @@ class AEQGAParameters:
     ----------
     pop_size   : int   – number of individuals (must be power of two)
     max_gen    : int   – number of generations
-    n_iterations : int – outer runs for statistics (paper: 300)
     p_cross    : float – probability of CRy(π/2) crossover per dimension
     p_mut      : float – probability of Rx(π/2) mutation per dimension
     num_shots  : int   – shots for sampling (0 → statevector mode)
@@ -83,7 +79,6 @@ class AEQGAParameters:
         self,
         pop_size: int = 32,
         max_gen: int = 50,
-        n_iterations: int = 1,
         p_cross: float = 0.5,
         p_mut: float = 0.5,
         num_shots: int = 4096,
@@ -93,7 +88,6 @@ class AEQGAParameters:
     ):
         self.pop_size = pop_size
         self.max_gen = max_gen
-        self.n_iterations = n_iterations
         self.p_cross = p_cross
         self.p_mut = p_mut
         self.num_shots = num_shots
@@ -102,8 +96,7 @@ class AEQGAParameters:
         self.elite_margin = elite_margin
 
     def _validate(self):
-        for name, minimum in [("pop_size", 8), ("max_gen", 0),
-                              ("n_iterations", 1), ("num_shots", 0)]:
+        for name, minimum in [("pop_size", 8), ("max_gen", 0), ("num_shots", 0)]:
             value = getattr(self, name)
             if isinstance(value, bool) or not isinstance(value, (int, np.integer)) or value < minimum:
                 raise ValueError(f"{name} must be an integer >= {minimum}")
@@ -175,30 +168,8 @@ def build_dimension_circuit(
     return qc
 
 
-# ---------------------------------------------------------------------------
-# Population splitting (Alg.1 L5-L7)
-# ---------------------------------------------------------------------------
-
-# ---------------------------------------------------------------------------
-# Main algorithm: single-circuit (legacy shim, deprecated)
-# ---------------------------------------------------------------------------
-
-def run_aeqga(
-    problem,
-    params: AEQGAParameters,
-    simulator=None,
-) -> tuple[GlobalBest, list, list]:
-    """Run the AEQGA (single-circuit legacy wrapper around dual mode).
-
-    For backwards compatibility; delegates to run_aeqga_dual.
-    """
-    return run_aeqga_dual(problem, params, simulator=simulator)
-
-
-# ---------------------------------------------------------------------------
-# Core algorithm: dual-circuit per paper Alg.1
-# ---------------------------------------------------------------------------
-
+# Deprecated single-run/HQGA adapters are summarized in docs/DEPRECATED_CODE.md.
+# Main algorithm: current independent-parameter, dual-subset circuits.
 def run_aeqga_dual(
     problem,
     params: AEQGAParameters,
@@ -419,112 +390,3 @@ def run_aeqga_sv(
     if simulator is None:
         simulator = AerSimulator(method="statevector")
     return run_aeqga_dual(problem, sv_params, simulator)
-
-
-# ---------------------------------------------------------------------------
-# Outer-iteration loop (paper §3.4 n_i=300)
-# ---------------------------------------------------------------------------
-
-def run_aeqga_iterations(
-    problem,
-    params: AEQGAParameters,
-    simulator=None,
-) -> tuple[np.ndarray, np.ndarray, list]:
-    """Run AEQGA for n_iterations independent runs (paper §3.4).
-
-    Returns mean ± std of best-fit (H0, Ω_M) across iterations,
-    plus the list of bests_log entries from the last run.
-
-    Paper Fig.4 values for SNe Ia: Ω_M = 0.362±0.016, H0 = 72.81±0.22
-    """
-    params._validate()
-    means = []
-    last_bests_log = []
-
-    for it in range(params.n_iterations):
-        if params.verbose:
-            print(f"\n{'='*40}")
-            print(f"  Iteration {it+1}/{params.n_iterations}")
-            print(f"{'='*40}")
-        g_best, _, bests_log = run_aeqga_dual(problem, params, simulator=simulator)
-        means.append(g_best.x.copy())
-        last_bests_log = bests_log
-
-    means = np.array(means)  # shape (n_iterations, n_dim)
-    stds = means.std(axis=0)
-    means = means.mean(axis=0)
-
-    print(f"\n[AEQGA iterations] mean ± std:")
-    for i, name in enumerate(["H0", "Omega_m"]):
-        print(f"  {name}: {means[i]:.4f} ± {stds[i]:.4f}")
-    return means, stds, last_bests_log
-
-
-# ---------------------------------------------------------------------------
-# Convenience: drop-in replacement shim for the original HQGA interface
-# ---------------------------------------------------------------------------
-
-def run_qga_aeqga(problem_hqga, params_hqga, simulator=None):
-    """Thin wrapper so existing code calling hqga_algorithm.runQGA() can
-    switch to AEQGA with minimal changes.
-
-    Wraps a legacy HQGA-style problem object (which exposes
-    `.lower_bounds`, `.upper_bounds`, `.dim`, `.num_bit_code`,
-    `.computeFitness`, `.isMaxProblem`) into the interface expected
-    by run_aeqga_dual().
-    """
-
-    class _ProblemAdapter:
-        def __init__(self, p):
-            self._p = p
-            self.lower_bounds = np.asarray(p.lower_bounds, dtype=float)
-            self.upper_bounds = np.asarray(p.upper_bounds, dtype=float)
-            self.n_dim = int(p.dim)
-
-        def compute_fitness(self, x):
-            return self._p.computeFitness(x)
-
-        def is_max_problem(self):
-            return self._p.isMaxProblem()
-
-    adapted_problem = _ProblemAdapter(problem_hqga)
-
-    aeqga_params = AEQGAParameters(
-        pop_size = params_hqga.pop_size,
-        max_gen = params_hqga.max_gen,
-        n_iterations = getattr(params_hqga, "n_iterations", 1),
-        p_cross = getattr(params_hqga, "p_cross", 0.5),
-        p_mut = getattr(params_hqga, "p_mut", 0.5),
-        num_shots = getattr(params_hqga, "num_shots", 4096),
-        verbose = getattr(params_hqga, "verbose", False),
-        progress_bar = getattr(params_hqga, "progressBar", True),
-    )
-
-    return run_aeqga_dual(adapted_problem, aeqga_params, simulator=simulator)
-
-
-# ---------------------------------------------------------------------------
-# Utility: convergence plotting
-# ---------------------------------------------------------------------------
-
-def plot_convergence(bests_log: list, title: str = "AEQGA Convergence") -> None:
-    """Plot best fitness vs generation from the bests_log returned by run_aeqga*."""
-    try:
-        import matplotlib.pyplot as plt
-    except ImportError:
-        print("matplotlib not available – skipping convergence plot.")
-        return
-
-    gens = list(range(len(bests_log)))
-    fitvals = [entry[1] for entry in bests_log]
-
-    plt.figure(figsize=(8, 4))
-    plt.plot(gens, fitvals, linewidth=1.8, color="steelblue")
-    plt.xlabel("Generation")
-    plt.ylabel("Best fitness")
-    plt.title(title)
-    plt.grid(True, alpha=0.4)
-    plt.tight_layout()
-    plt.savefig(output_path('png', 'aeqga_convergence.png'), dpi=150)
-    plt.show()
-    print("Convergence plot saved to aeqga_convergence.png")

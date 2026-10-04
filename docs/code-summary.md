@@ -1,5 +1,10 @@
 # Code Summary — Diagnosis & Replication Plan: AEQGA vs Sarracino et al. (arXiv:2602.15459)
 
+> Historical diagnosis: this predates the calibrated Pantheon+ implementation
+> and cleanup. Old methods and proposed tasks are context, not current APIs.
+> See [DEPRECATED_CODE.md](DEPRECATED_CODE.md) and the root README for current
+> replacements and future feature decisions.
+
 > **Paper:** Sarracino et al., *"A Quantum Genetic Algorithm with application to Cosmological Parameters Estimation"*, Astron. Comput. 55:101078 (2026), arXiv:2602.15459v1
 > **Workspace:** `AEGQA-main/` — adapted from Quasar-UniNA HQGA (`github.com/Quasar-UniNA/HQGA`)
 > **Diagnosis date:** 2026-04-05

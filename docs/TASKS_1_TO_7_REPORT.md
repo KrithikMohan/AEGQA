@@ -1,5 +1,10 @@
 # Tasks 1–7: implementation and validation
 
+Historical implementation report. The subsequent notebook/repository audit
+retired the legacy APIs that this report originally described as retained.
+For current replacements and future feature decisions, see
+[DEPRECATED_CODE.md](DEPRECATED_CODE.md); use the calibrated notebook/README.
+
 Tasks were handled in the requested order. Tasks 1–6 are implemented and
 validated. Task 7 has functioning BAO, PICO and CAMB paths, with a documented
 exact-reproduction limitation: the authors' PICO training file and exact TT

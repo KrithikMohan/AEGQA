@@ -80,14 +80,17 @@ def main():
         "qiskit_aer",
         "numpy",
         "scipy",
+        "camb",
         "tqdm",
         "matplotlib",
         "nbformat",
         "jupyter",
-        "amplitude_encoding",
-        "quantum_gates",
-        "aeqga_algorithm",
-        "pantheon_problem",
+        "aeqga.steps.encoding.amplitude_encoding",
+        "aeqga.steps.genetic_operators.quantum_gates",
+        "aeqga.steps.decoding.measurement_decoding",
+        "aeqga.steps.evolution.aeqga_algorithm",
+        "aeqga.likelihoods.pantheon_problem",
+        "aeqga.likelihoods.bao_cmb_problem",
     ]
     all_ok = True
     for mod in modules:
@@ -116,7 +119,7 @@ Then run the notebook:
 
 Or run the full pipeline:
 
-    python -m scripts.run_pantheon_aeqga --data sn_data/Pantheon
+    python -m scripts.run_pantheon_aeqga --data sn_data/PantheonPlus
 
 To deactivate, simply run:
 

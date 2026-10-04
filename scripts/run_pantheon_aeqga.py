@@ -1,12 +1,12 @@
 """
 run_pantheon_aeqga.py
 =====================
-END-TO-END runner: AEQGA on Pantheon SNe Ia data (arXiv:2602.15459).
+END-TO-END runner: AEQGA on calibrated Pantheon+ SNe Ia data (arXiv:2602.15459).
 
 Steps performed
 ---------------
 1. Clone the data (if not already present)
-2. Load Pantheon: 1048 SNe Ia, redshifts + standardised magnitudes + covariance
+2. Load calibrated Pantheon+: moduli, redshifts and full total covariance
 3. Run the AEQGA to minimise chi^2(H0, Omega_m) in flat ΛCDM
 4. Print the best-fit cosmological parameters
 5. Plot convergence curve  →  pantheon_convergence.png
@@ -14,7 +14,7 @@ Steps performed
 
 Usage
 -----
-    python -m scripts.run_pantheon_aeqga --data /path/to/sn_data/Pantheon
+    python -m scripts.run_pantheon_aeqga --data /path/to/sn_data/PantheonPlus
     python -m scripts.run_pantheon_aeqga --fast
 
 Note: pop_size must be a power of two (paper §3.1) for amplitude encoding.
@@ -39,7 +39,6 @@ from aeqga.paths import PROJECT_ROOT, output_path
 parser = argparse.ArgumentParser()
 parser.add_argument("--data", default=None,
                     help="Path to the selected dataset sub-folder")
-parser.add_argument("--dataset", choices=["pantheon-plus", "pantheon"], default="pantheon-plus")
 parser.add_argument("--selection", choices=["all", "hubble_flow"], default="all")
 parser.add_argument("--redshift", choices=["cmb", "hd_hel"], default="hd_hel")
 parser.add_argument("--distance-grid", type=int, choices=[0,100,300], default=300,
@@ -76,8 +75,7 @@ def get_data_dir():
     if args.data:
         d = args.data
     else:
-        subset = "PantheonPlus" if args.dataset == "pantheon-plus" else "Pantheon"
-        d = str(PROJECT_ROOT / "sn_data" / subset)
+        d = str(PROJECT_ROOT / "sn_data" / "PantheonPlus")
 
     if not os.path.isdir(d):
         parent = os.path.dirname(d)
@@ -92,7 +90,7 @@ def get_data_dir():
             sys.exit(
                 f"\nERROR: git clone failed.\n"
                 f"Clone manually:\n  git clone {DATA_REPO}\n"
-                f"Then re-run with:  python -m scripts.run_pantheon_aeqga --data sn_data/Pantheon"
+                f"Then re-run with:  python -m scripts.run_pantheon_aeqga --data sn_data/PantheonPlus"
             )
     if not os.path.isdir(d):
         sys.exit(f"ERROR: Data directory not found: {d}")
@@ -113,21 +111,18 @@ except ImportError:
         "Install with:  pip install qiskit qiskit-aer tqdm numpy matplotlib"
     )
 
-from aeqga.likelihoods.pantheon_problem import PantheonProblem, PantheonPlusProblem
-from aeqga.steps.evolution.aeqga_algorithm import AEQGAParameters, run_aeqga_dual, plot_convergence
+from aeqga.likelihoods.pantheon_problem import PantheonPlusProblem
+from aeqga.steps.evolution.aeqga_algorithm import AEQGAParameters, run_aeqga_dual
 
 # ---------------------------------------------------------------------------
 # Step 3 — Build problem
 # ---------------------------------------------------------------------------
 
-print(f"\n=== Loading {args.dataset} data ===")
-if args.dataset == "pantheon-plus":
-    problem = PantheonPlusProblem(data_dir, selection=args.selection,
-                                 redshift=args.redshift, grid_size=args.distance_grid)
-    print("Classical minimum:", problem.classical_minimum())
-else:
-    problem = PantheonProblem(data_dir, use_full_cov=True, verbose=False)
-    print("Legacy uncalibrated Pantheon: H0 is degenerate with marginalized M.")
+print("\n=== Loading calibrated Pantheon+ data ===")
+problem = PantheonPlusProblem(data_dir, selection=args.selection,
+                             redshift=args.redshift, grid_size=args.distance_grid)
+classical_reference = problem.classical_minimum()
+print("Classical minimum:", classical_reference)
 
 # Quick sanity check: chi2 at paper's SNe Ia best-fit
 x_paper = np.array([72.82, 0.363])
@@ -184,7 +179,7 @@ try:
                label=f"Paper best-fit chi2={chi2_paper:.0f}")
     ax.set_xlabel("Generation", fontsize=12)
     ax.set_ylabel(r"Best $\chi^2$", fontsize=12)
-    ax.set_title("AEQGA convergence — Pantheon SNe Ia", fontsize=13)
+    ax.set_title("AEQGA convergence — calibrated Pantheon+", fontsize=13)
     ax.legend()
     ax.grid(True, alpha=0.35)
     fig.tight_layout()
@@ -201,23 +196,16 @@ except Exception as e:
 if not args.no_contour:
     print("\n=== Computing 2-D chi^2 grid for contour plot ===")
     print("    (using the identical likelihood as the optimizer)")
-    print("    (this evaluates chi2 on a 30x30 grid — takes ~1 min)")
-
-    data = problem._data
-    n_H0 = 30
-    n_Om = 30
-    H0_arr = np.linspace(62.0, 78.0, n_H0)
-    Om_arr = np.linspace(0.20, 0.50, n_Om)
-    chi2_grid = np.empty((n_Om, n_H0))
-
-    for i, Om in enumerate(Om_arr):
-        for j, H0 in enumerate(H0_arr):
-            chi2_grid[i, j] = problem.compute_fitness([H0, Om])
-        if (i + 1) % 5 == 0:
-            print(f"  {i+1}/{n_Om} rows done")
-
-    chi2_min_grid = chi2_grid.min()
-    delta_chi2    = chi2_grid - chi2_min_grid
+    print("    (likelihood contours are not optimizer-outcome scatter)")
+    H0_arr = np.linspace(max(60., classical_reference['H0']-1.4),
+                         min(80., classical_reference['H0']+1.4), 160)
+    om_low = max(0., classical_reference['Omega_m']-.085)
+    om_high = min(.5, classical_reference['Omega_m']+.085)
+    Om_arr = (problem.omega_grid[(problem.omega_grid >= om_low) &
+                                (problem.omega_grid <= om_high)]
+              if problem.grid_size else np.linspace(om_low, om_high, 100))
+    chi2_grid = problem.objective_grid(H0_arr, Om_arr)
+    delta_chi2 = chi2_grid - classical_reference['chi2']
 
     try:
         import matplotlib.pyplot as plt
@@ -232,14 +220,16 @@ if not args.no_contour:
                         colors=["white"], linewidths=1.2)
         ax.clabel(cs, fmt={2.30: "1σ", 6.18: "2σ", 11.83: "3σ"}, fontsize=9)
 
-        ax.plot(H0_best, Om_best, "r*", markersize=14, label="AEQGA best-fit",
-                zorder=5)
-        ax.plot(72.82, 0.363, "gD", markersize=10, label="Paper best-fit",
-                zorder=5)
+        if H0_arr[0] <= H0_best <= H0_arr[-1] and Om_arr[0] <= Om_best <= Om_arr[-1]:
+            ax.plot(H0_best, Om_best, "r*", markersize=14, label="AEQGA best-fit", zorder=5)
+        else:
+            print("AEQGA smoke point is outside the likelihood zoom; no convergence claim.")
+        ax.plot(classical_reference['H0'], classical_reference['Omega_m'],
+                "k*", markersize=12, label="Classical reference", zorder=5)
 
         ax.set_xlabel(r"$H_0$ [km/s/Mpc]", fontsize=12)
         ax.set_ylabel(r"$\Omega_m$", fontsize=12)
-        ax.set_title("Objective function — same likelihood as AEQGA", fontsize=13)
+        ax.set_title("Calibrated likelihood — not optimizer scatter", fontsize=13)
         ax.legend(fontsize=10)
         fig.tight_layout()
         fig.savefig(output_path('png', 'pantheon_contours.png'), dpi=150)
