@@ -8,8 +8,9 @@ For current replacements and future feature decisions, see
 Tasks were handled in the requested order. Tasks 1–6 are implemented and
 validated. Task 7 has functioning BAO, PICO and CAMB paths, with a documented
 exact-reproduction limitation: the authors' PICO training file and exact TT
-configuration remain unidentified. No production 300-run ensemble or new
-optimizer-distribution contour workflow (tasks 8 onward) was run.
+configuration remain unidentified. At the time of this original report no
+production ensemble had been run; the subsequent [tasks 8–12 report](TASKS_8_TO_12_REPORT.md)
+documents the now-completed 300-run SNe ensemble and scientific plotting workflow.
 
 ## 1. Freeze the replication specification
 

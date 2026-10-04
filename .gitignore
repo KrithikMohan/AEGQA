@@ -29,6 +29,10 @@ vendor/
 replication_outputs/
 outputs/png/*
 outputs/json/*
+outputs/svg/*
+outputs/pdf/*
+!outputs/svg/.gitkeep
+!outputs/pdf/.gitkeep
 !outputs/png/.gitkeep
 !outputs/json/.gitkeep
 *.egg-info/

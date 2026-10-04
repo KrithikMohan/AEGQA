@@ -14,6 +14,7 @@ aeqga/
     evolution/          # Fitness evaluation, generation loop, history and best fit
   likelihoods/          # Calibrated Pantheon+, BAO, Planck TT, distances
   emulators/            # Checksum-pinned PICO runtime
+  experiments/          # Seeded independent runs and strict atomic checkpoints
   integrations/         # Bidirectional HQGA objective and Gray-code adapters
   visualization/        # Publication-style circuit drawing
   paths.py              # Working-directory-independent data/output locations
@@ -45,6 +46,7 @@ python -m scripts.fetch_cmb_data
 python -m scripts.run_pantheon_aeqga --pop 8 --gen 2 --shots 512 --no-contour
 python -m scripts.run_bao_cmb_aeqga --backend camb --classical-only
 python -m scripts.benchmark_replication
+python -m scripts.run_sne_ensemble --runs 300 --name sne_production
 python -m aeqga.visualization.circuit_diagram
 ```
 
@@ -61,14 +63,18 @@ Real-data regression tests are explicitly skipped if their downloads are absent.
 
 ## Scientific scope and limitations
 
-Default SNe estimation uses calibrated Pantheon+ distance moduli and the total covariance; H0 is identifiable. CMB+BAO runs separately and never includes SNe. The notebook now uses these same modules, checks real inputs without mock fallback, and records current configuration/data provenance. Its default is a short demonstration; paper-sized ensembles and CMB runs require explicit opt-in.
+Default SNe estimation uses calibrated Pantheon+ distance moduli and the total covariance; H0 is identifiable. CMB+BAO runs separately and never includes SNe. The notebook checks real inputs without mock fallback and now defaults to 32 individuals, 50 updates and a resumable 300-run SNe ensemble. CMB, exact-probability and native HQGA runs remain opt-in. MODE="demo" explicitly selects the shorter exploratory workflow.
 
-Strict `--backend pico` rejects points outside the public model's training domain. `camb` and `hybrid` are explicit reference alternatives, not claims of an exact match to the paper's unidentified emulator. The notebook can run independent ensembles but displays optimizer scatter without claiming posterior uncertainty; calibrated density-contour tooling remains future work.
+Strict `--backend pico` rejects points outside the public model's training domain. `camb` and `hybrid` are explicit reference alternatives, not claims of an exact match to the paper's unidentified emulator. Likelihood contours, descriptive covariance ellipses and mass-integrated KDE regions are now separately labeled. Optimizer scatter is never claimed as posterior uncertainty.
 
-Start with `jupyter notebook notebooks/AEQGA.ipynb`, then Run All for the configured demonstration. The notebook saves `notebook_`-prefixed PNG/JSON artifacts and never loads the old legacy output files. Deprecated APIs and the old `--dataset pantheon` path were retired; see the [feature audit and future implementation decisions](docs/DEPRECATED_CODE.md).
+Start with `jupyter notebook notebooks/AEQGA.ipynb`, then Run All for the configured paper-sized SNe workflow. The notebook saves `notebook_`-prefixed figures and current JSON records and never loads the old legacy output files. Deprecated APIs and the old `--dataset pantheon` path were retired; see the [feature audit and future implementation decisions](docs/DEPRECATED_CODE.md).
+
+The notebook and ensemble CLI use provenance-checked atomic checkpoints. The explicit fast CPU quantum simulation evaluates post-gate states and samples finite-shot counts; `--engine aer` selects native Aer instead. Choose a new experiment name if changing data, settings, engine or scientific source. Every run's populations, best-pair/chi-squared histories and seed remain available. Shared figures export PNG/SVG/PDF.
+
+Raw SNe chi-squared near 1753 is expected for the configured 1701-row objective. Convergence is assessed by the excess above the verified minimum near 1752.904, not by forcing the raw value toward zero. See the [tasks 8–12 report](docs/TASKS_8_TO_12_REPORT.md) for actual 300-run results, exact plot-data checks, residual optimizer bias and remaining CMB limitations.
 
 See the [replication specification](docs/REPLICATION_SPEC.md) and [tasks 1–7 methodology/report](docs/TASKS_1_TO_7_REPORT.md). The [original diagnosis](docs/code-summary.md) is historical and may describe deficiencies that have since been fixed.
 
 HQGA interoperability is retained in a separate tested bridge. See [connection examples and comparison methodology](docs/HQGA_INTEGRATION.md) for using existing HQGA objectives in AEQGA or the same calibrated cosmology objective in HQGA's native runner. The notebook includes a Gray-code contract check and an opt-in HQGA run; legacy HQGA runtime compatibility requires a separate compatible environment or an explicit execution-layer port.
 
-Generated PNG/JSON results and downloaded datasets/models stay local; the previously tracked SVG/PDF circuit examples are preserved in their new output folders.
+Generated scientific PNG/SVG/PDF/JSON results and downloaded datasets/models stay local; previously tracked SVG/PDF circuit examples remain preserved.
