@@ -104,5 +104,8 @@ hard-coded center or obtaining identical stochastic outputs is not validation.
   on PICO domain rejection. Neither is claimed to exactly reproduce the
   unidentified PICO training file used by the authors.
 
-Tasks 8 onward (production ensembles, optimizer-scatter contours and polished
-multi-run reporting) are intentionally outside this implementation request.
+Tasks 8–12 are now implemented and a full 300-run SNe ensemble has been executed.
+See [methodology and measured results](TASKS_8_TO_12_REPORT.md) for provenance,
+convergence accuracy, optimizer-distribution contours and remaining deviations.
+The CMB+BAO production replication is still limited by the unidentified author
+emulator/TT settings; the resumable reference runner does not certify it.

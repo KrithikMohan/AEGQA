@@ -13,6 +13,12 @@ script entry points and numerical verification helpers were audited separately.
 The following summaries replace executable deprecated alternatives rather
 than leaving inactive code paths that can be mistaken for the paper workflow.
 
+Subsequent tasks 8–12 now supply a provenance-checked independent-run API and
+mass-integrated optimizer KDE tooling in separate experiment/visualization
+modules. The old lossy aggregator and peak-fraction KDE helper remain retired;
+their replacements and measured results are documented in
+[TASKS_8_TO_12_REPORT.md](TASKS_8_TO_12_REPORT.md).
+
 ## Retired features
 
 | Removed code | Features it provided | Future implementation decision | Current replacement |

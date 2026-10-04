@@ -40,6 +40,7 @@ Algorithm loop (per generation, Alg.1 §3 p.7)
 """
 
 import copy
+import random
 import numpy as np
 from tqdm import tqdm
 
@@ -168,12 +169,14 @@ def build_dimension_circuit(
     return qc
 
 
-# Deprecated single-run/HQGA adapters are summarized in docs/DEPRECATED_CODE.md.
+# Deprecated single-run aliases are summarized in docs/DEPRECATED_CODE.md;
+# retained HQGA objective adapters live in aeqga.integrations.hqga.
 # Main algorithm: current independent-parameter, dual-subset circuits.
 def run_aeqga_dual(
     problem,
     params: AEQGAParameters,
     simulator=None,
+    *, seed=None, execution_mode="aer", quiet=False,
 ) -> tuple[GlobalBest, list, list]:
     """Two-circuit AEQGA following the paper's dual-circuit structure (Alg.1).
 
@@ -195,6 +198,11 @@ def run_aeqga_dual(
         - is_max_problem() -> bool  (optional, defaults to False)
     params : AEQGAParameters
     simulator : Qiskit backend (optional). Defaults to AerSimulator().
+    seed : optional integer; seeds population/gates and independent readout stream.
+    execution_mode : "aer" or explicit "statevector_shots" CPU simulation.
+        The latter evaluates the post-gate Qiskit state and samples multinomial
+        shot counts. It does not remove shot noise when num_shots > 0.
+    quiet : suppress final run summary (useful for independent ensembles).
 
     Returns
     -------
@@ -203,6 +211,36 @@ def run_aeqga_dual(
     bests_log        : list of [x, fitness] per generation
     """
     params._validate()
+    if execution_mode not in {"aer", "statevector_shots"}:
+        raise ValueError("execution_mode must be aer or statevector_shots")
+    if seed is not None:
+        random.seed(seed)
+        np.random.seed(seed)
+    shot_rng = np.random.default_rng(seed)
+
+    def circuit_counts(circuit):
+        # The fast CPU path still simulates the actual post-gate quantum state
+        # and finite-shot multinomial readout; it is NOT exact-probability decoding.
+        if execution_mode == "statevector_shots":
+            from qiskit.quantum_info import Statevector
+            clean = circuit.remove_final_measurements(inplace=False)
+            probabilities = Statevector.from_instruction(clean).probabilities()
+            probabilities = probabilities / probabilities.sum()
+            values = (shot_rng.multinomial(params.num_shots, probabilities)
+                      if params.num_shots else probabilities)
+        else:
+            circuit_seed = int(shot_rng.integers(0, 2**31-1))
+            if not params.num_shots:
+                circuit.save_statevector()
+            compiled = transpile(circuit, simulator, seed_transpiler=circuit_seed,
+                                 optimization_level=0)
+            result = simulator.run(compiled, shots=params.num_shots or 1,
+                                   seed_simulator=circuit_seed).result()
+            if params.num_shots:
+                return result.get_counts()
+            values = np.abs(np.asarray(result.get_statevector(compiled)))**2
+        return {format(i, f"0{circuit.num_qubits}b"): float(v)
+                for i, v in enumerate(values)}
 
     if simulator is None:
         simulator = AerSimulator()
@@ -268,25 +306,13 @@ def run_aeqga_dual(
                 mode="measure" if use_measure else "statevector",
             )
             if use_measure:
-                transpiled = transpile(qc_rand, simulator)
-                result = simulator.run(transpiled, shots=params.num_shots).result()
-                counts_rand = result.get_counts()
+                counts_rand = circuit_counts(qc_rand)
                 decoded_random[:, d] = decode_random_subset(
                     counts_rand, n_q_random,
                     float(lower[d]), float(upper[d]), n_random,
                 )
             else:
-                qc_rand.save_statevector()
-                t = transpile(qc_rand, simulator)
-                sv = np.asarray(
-                    simulator.run(t).result().get_statevector(t), dtype=complex
-                )
-                probs = np.abs(sv) ** 2
-                n_states = 2 ** n_q_random
-                counts_rand = {}
-                for s in range(n_states):
-                    bitstr = format(s, f'0{n_q_random}b')
-                    counts_rand[bitstr] = probs[s]
+                counts_rand = circuit_counts(qc_rand)
                 decoded_random[:, d] = decode_random_subset(
                     counts_rand, n_q_random,
                     float(lower[d]), float(upper[d]), n_random,
@@ -301,9 +327,7 @@ def run_aeqga_dual(
                 mode="measure" if use_measure else "statevector",
             )
             if use_measure:
-                transpiled = transpile(qc_elite, simulator)
-                result = simulator.run(transpiled, shots=params.num_shots).result()
-                counts_elite = result.get_counts()
+                counts_elite = circuit_counts(qc_elite)
                 n_min_e = float(np.min(P_elite[:, d]))
                 n_max_e = float(np.max(P_elite[:, d]))
                 margin = params.elite_margin * (n_max_e - n_min_e)
@@ -314,17 +338,7 @@ def run_aeqga_dual(
                     n_min_e, n_max_e, n_elite,
                 )
             else:
-                qc_elite.save_statevector()
-                t = transpile(qc_elite, simulator)
-                sv = np.asarray(
-                    simulator.run(t).result().get_statevector(t), dtype=complex
-                )
-                probs = np.abs(sv) ** 2
-                n_states = 2 ** n_q_elite
-                counts_elite = {}
-                for s in range(n_states):
-                    bitstr = format(s, f'0{n_q_elite}b')
-                    counts_elite[bitstr] = probs[s]
+                counts_elite = circuit_counts(qc_elite)
                 n_min_e = float(np.min(P_elite[:, d]))
                 n_max_e = float(np.max(P_elite[:, d]))
                 margin = params.elite_margin * (n_max_e - n_min_e)
@@ -364,8 +378,9 @@ def run_aeqga_dual(
         # ── Step 6: Prepare next generation ──────────────────
         population = new_population
 
-    g_best.display()
-    print(f"Total merit-function evaluations: {g_best.evaluations}")
+    if not quiet:
+        g_best.display()
+        print(f"Total merit-function evaluations: {g_best.evaluations}")
     return g_best, population_evol, bests_log
 
 

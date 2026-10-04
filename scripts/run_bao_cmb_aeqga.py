@@ -2,10 +2,13 @@
 import argparse
 import json
 from pathlib import Path
+from importlib.metadata import version
+import numpy as np
 from scipy.optimize import minimize
-from aeqga.steps.evolution.aeqga_algorithm import AEQGAParameters, run_aeqga_dual
+from aeqga.steps.evolution.aeqga_algorithm import AEQGAParameters
 from aeqga.likelihoods.bao_cmb_problem import BAOCMBProblem
 from aeqga.paths import PROJECT_ROOT, output_path
+from aeqga.experiments.runner import run_ensemble, file_digest
 
 
 def main():
@@ -17,9 +20,13 @@ def main():
     parser.add_argument('--pop',type=int,default=32)
     parser.add_argument('--gen',type=int,default=50)
     parser.add_argument('--shots',type=int,default=4096)
+    parser.add_argument('--runs',type=int,default=1)
+    parser.add_argument('--seed',type=int,default=23)
+    parser.add_argument('--engine',choices=['aer','statevector_shots'],default='statevector_shots')
     parser.add_argument('--classical-only',action='store_true')
     parser.add_argument('--output',default=str(output_path('json','bao_cmb.json')))
     args = parser.parse_args()
+    if args.runs < 1: parser.error('runs must be positive')
     problem = BAOCMBProblem(data_dir=args.data,backend=args.backend,
                             ell_min=args.ell_min,error_mode=args.error_mode)
     # Local independent baseline, not a claim of a proven global minimum.
@@ -30,11 +37,22 @@ def main():
                   baseline=baseline.x.tolist(),chi2=float(baseline.fun),
                   baseline_success=bool(baseline.success))
     if not args.classical_only:
-        best, _, _ = run_aeqga_dual(problem,AEQGAParameters(pop_size=args.pop,
-                    max_gen=args.gen,num_shots=args.shots))
-        # Core returns a GlobalBest object (history includes generation zero).
-        result['aeqga'] = dict(parameters=best.x.tolist(),fitness=float(best.fitness),
-                               evaluations=best.evaluations)
+        inputs = [Path(args.data)/'COM_PowerSpect_CMB-TT-full_R3.01.txt']
+        if args.backend != 'camb': inputs.append(Path(args.data)/'pico4_tailmonty_v35_py3.dat')
+        provenance = dict(objective='CMB+BAO only / diagonal TT reference',
+                          backend=args.backend,ell_min=args.ell_min,error_mode=args.error_mode,
+                          camb_version=version('camb'),
+                          datasets={p.name:file_digest(p) for p in inputs})
+        seeds = [int(s.generate_state(1)[0]) for s in np.random.SeedSequence(args.seed).spawn(args.runs)]
+        experiment = run_ensemble(problem,AEQGAParameters(pop_size=args.pop,max_gen=args.gen,
+                                  num_shots=args.shots,progress_bar=False),seeds,
+                                  Path(args.output).with_suffix('.checkpoint.json'),
+                                  provenance=provenance,execution_mode=args.engine)
+        result['ensemble'] = {k:v for k,v in experiment.items() if k != 'runs'}
+        result['aeqga_runs'] = [dict(seed=r['seed'],parameters=r['best_x'],fitness=r['best_chi2'],
+                                   evaluations=r['evaluations'],best_history=r['best_history'],
+                                   best_parameter_history=r['best_parameter_history']) for r in experiment['runs']]
+        result['exact_paper_reproduction'] = False
     result['camb_fallback_evaluations'] = problem.cmb.fallback_evaluations
     destination=Path(args.output)
     destination.parent.mkdir(parents=True,exist_ok=True)

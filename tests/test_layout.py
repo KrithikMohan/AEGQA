@@ -35,10 +35,10 @@ class LayoutTests(unittest.TestCase):
             self.assertNotIn(obsolete,code)
         self.assertIn('PantheonPlusProblem(',code)
         self.assertIn('BAOCMBProblem(',code)
-        self.assertIn('sne_problem.objective_grid(',code)
+        self.assertIn('objective_contours(sne_problem,',code)
         config=next(c for c in notebook['cells'] if c['id']=='configuration')
         source=''.join(config['source'])
-        for toggle in ['RUN_ENSEMBLE = False','RUN_CMB_BAO = False','RUN_STATEVECTOR = False',
+        for toggle in ['RUN_ENSEMBLE = True','RUN_CMB_BAO = False','RUN_STATEVECTOR = False',
                        'RUN_HQGA_COMPARISON = False']:
             self.assertIn(toggle,source)
         self.assertIn('from aeqga.integrations.hqga import', code)
