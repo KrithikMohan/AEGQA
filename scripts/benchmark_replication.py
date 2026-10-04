@@ -1,6 +1,5 @@
 """Reproduce task 5/6 accuracy and speed checks; excludes grid construction."""
 import json
-from pathlib import Path
 from time import perf_counter
 import numpy as np
 from aeqga.likelihoods.pantheon_problem import PantheonPlusProblem

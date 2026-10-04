@@ -52,8 +52,5 @@ def build_amplitude_circuit(values: np.ndarray) -> QuantumCircuit:
     return qc
 
 
-def build_amplitude_circuit_with_measure(values: np.ndarray, shots: int) -> QuantumCircuit:
-    """Same as build_amplitude_circuit but appends measurement register."""
-    qc = build_amplitude_circuit(values)
-    qc.measure_all()
-    return qc
+# The premature measurement convenience wrapper was retired.
+# Summary: docs/DEPRECATED_CODE.md. Readout belongs after the genetic gates.

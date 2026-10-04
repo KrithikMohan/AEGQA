@@ -5,7 +5,6 @@ showing this project's 32-individual setup and crossover-before-mutation
 sequence. The selected qubits are one illustrative random realization.
 Run with the project virtual environment to export PNG, SVG, and PDF.
 """
-from pathlib import Path
 from aeqga.paths import output_path
 
 import matplotlib

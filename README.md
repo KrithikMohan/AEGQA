@@ -12,13 +12,14 @@ aeqga/
     genetic_operators/  # Bidirectional CRY crossover and RX mutation
     decoding/           # Measured counts to classical parameters
     evolution/          # Fitness evaluation, generation loop, history and best fit
-  likelihoods/          # Pantheon+, legacy Pantheon, BAO, Planck TT, distances
+  likelihoods/          # Calibrated Pantheon+, BAO, Planck TT, distances
   emulators/            # Checksum-pinned PICO runtime
+  integrations/         # Bidirectional HQGA objective and Gray-code adapters
   visualization/        # Publication-style circuit drawing
   paths.py              # Working-directory-independent data/output locations
 scripts/                # Experiment runners, data fetch, benchmark, environment setup
 tests/                  # Offline, layout and real-data regression tests
-notebooks/              # Legacy walkthrough with its historical outputs
+notebooks/              # Current calibrated workflow; costly branches are opt-in
 docs/                   # Replication specification, methodology report, original diagnosis
 outputs/
   png/                  # Circuit, convergence and contour raster figures
@@ -53,17 +54,21 @@ Use module commands (`python -m …`), not the former root-level script paths. A
 
 ```bash
 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 python -m unittest discover -s tests -v
-python -m tests.test_pantheon_aeqga
+python -m tests.test_quantum_primitives
 ```
 
-Real-data regression tests are explicitly skipped if their downloads are absent. Fetch both datasets/model before a full integration run. The legacy test module's optional `--data sn_data/Pantheon` exercise is separate from the calibrated Pantheon+ regression suite.
+Real-data regression tests are explicitly skipped if their downloads are absent. Fetch both datasets/model before a full integration run. Offline distance, gate, encoding and decoding checks are included in unittest discovery.
 
 ## Scientific scope and limitations
 
-Default SNe estimation uses calibrated Pantheon+ distance moduli and the total covariance; H0 is identifiable. CMB+BAO runs separately and never includes SNe. The legacy Pantheon notebook retains its original M-marginalized demonstration, which cannot constrain H0; its saved figures/results are historical, not new replication evidence.
+Default SNe estimation uses calibrated Pantheon+ distance moduli and the total covariance; H0 is identifiable. CMB+BAO runs separately and never includes SNe. The notebook now uses these same modules, checks real inputs without mock fallback, and records current configuration/data provenance. Its default is a short demonstration; paper-sized ensembles and CMB runs require explicit opt-in.
 
-Strict `--backend pico` rejects points outside the public model's training domain. `camb` and `hybrid` are explicit reference alternatives, not claims of an exact match to the paper's unidentified emulator. Production ensembles and polished optimizer-scatter contours remain future tasks.
+Strict `--backend pico` rejects points outside the public model's training domain. `camb` and `hybrid` are explicit reference alternatives, not claims of an exact match to the paper's unidentified emulator. The notebook can run independent ensembles but displays optimizer scatter without claiming posterior uncertainty; calibrated density-contour tooling remains future work.
+
+Start with `jupyter notebook notebooks/AEQGA.ipynb`, then Run All for the configured demonstration. The notebook saves `notebook_`-prefixed PNG/JSON artifacts and never loads the old legacy output files. Deprecated APIs and the old `--dataset pantheon` path were retired; see the [feature audit and future implementation decisions](docs/DEPRECATED_CODE.md).
 
 See the [replication specification](docs/REPLICATION_SPEC.md) and [tasks 1–7 methodology/report](docs/TASKS_1_TO_7_REPORT.md). The [original diagnosis](docs/code-summary.md) is historical and may describe deficiencies that have since been fixed.
+
+HQGA interoperability is retained in a separate tested bridge. See [connection examples and comparison methodology](docs/HQGA_INTEGRATION.md) for using existing HQGA objectives in AEQGA or the same calibrated cosmology objective in HQGA's native runner. The notebook includes a Gray-code contract check and an opt-in HQGA run; legacy HQGA runtime compatibility requires a separate compatible environment or an explicit execution-layer port.
 
 Generated PNG/JSON results and downloaded datasets/models stay local; the previously tracked SVG/PDF circuit examples are preserved in their new output folders.

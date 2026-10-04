@@ -152,10 +152,10 @@ class PantheonPlusLoaderTests(unittest.TestCase):
                 self.assertEqual(grid.shape,(3,3))
                 self.assertEqual(grid[1,2],problem.compute_fitness([75.,.36]))
 
-    def test_cache_does_not_quantize_hubble_constant(self):
-        from aeqga.likelihoods.pantheon_problem import luminosity_distance_flat_lcdm
-        a=luminosity_distance_flat_lcdm(.3,.3,70.001,.3)
-        b=luminosity_distance_flat_lcdm(.3,.3,70.002,.3)
+    def test_distances_do_not_quantize_hubble_constant(self):
+        from aeqga.likelihoods.cosmology import distance_moduli
+        a=10**((distance_moduli(.3,.3,70.001,.3)-25)/5)
+        b=10**((distance_moduli(.3,.3,70.002,.3)-25)/5)
         self.assertAlmostEqual(a/b,70.002/70.001,places=12)
 
 
@@ -170,9 +170,11 @@ class BAOCMBTests(unittest.TestCase):
         self.assertTrue(np.isinf(bao.chi2(65,0)))
 
     def test_missing_probes_raise(self):
-        from aeqga.likelihoods.pantheon_problem import chi2_bao,chi2_cmb
-        for objective in [chi2_bao,chi2_cmb]:
-            with self.assertRaises(ValueError): objective(70,.3,{})
+        from tempfile import TemporaryDirectory
+        from aeqga.likelihoods.bao_cmb_problem import PlanckTTLikelihood
+        with TemporaryDirectory() as directory:
+            with self.assertRaises(FileNotFoundError):
+                PlanckTTLikelihood(data_dir=directory, backend='camb')
 
     @unittest.skipUnless((PROJECT_ROOT/'data/cmb/COM_PowerSpect_CMB-TT-full_R3.01.txt').exists(),
                          'Run python -m scripts.fetch_cmb_data for TT integration tests')

@@ -1,7 +1,6 @@
 """Download the pinned primary-source TT table and executable PICO model."""
 import hashlib
 import urllib.request
-from pathlib import Path
 from aeqga.emulators.pico_runtime import MODEL_SHA256
 from aeqga.paths import PROJECT_ROOT
 
