@@ -177,6 +177,7 @@ def run_aeqga_dual(
     params: AEQGAParameters,
     simulator=None,
     *, seed=None, execution_mode="aer", quiet=False,
+    hardware_executor=None,
 ) -> tuple[GlobalBest, list, list]:
     """Two-circuit AEQGA following the paper's dual-circuit structure (Alg.1).
 
@@ -199,10 +200,11 @@ def run_aeqga_dual(
     params : AEQGAParameters
     simulator : Qiskit backend (optional). Defaults to AerSimulator().
     seed : optional integer; seeds population/gates and independent readout stream.
-    execution_mode : "aer" or explicit "statevector_shots" CPU simulation.
+    execution_mode : "aer", "statevector_shots", "statevector", or "ibm"/"hardware".
         The latter evaluates the post-gate Qiskit state and samples multinomial
         shot counts. It does not remove shot noise when num_shots > 0.
     quiet : suppress final run summary (useful for independent ensembles).
+    hardware_executor : BaseExecutor (optional). Injected quantum hardware executor.
 
     Returns
     -------
@@ -211,12 +213,17 @@ def run_aeqga_dual(
     bests_log        : list of [x, fitness] per generation
     """
     params._validate()
-    if execution_mode not in {"aer", "statevector_shots"}:
-        raise ValueError("execution_mode must be aer or statevector_shots")
+    if execution_mode not in {"aer", "statevector_shots", "statevector", "ibm", "hardware"}:
+        raise ValueError("execution_mode must be aer, statevector, statevector_shots, or ibm")
     if seed is not None:
         random.seed(seed)
         np.random.seed(seed)
     shot_rng = np.random.default_rng(seed)
+
+    use_hardware = (hardware_executor is not None) or (execution_mode in ("ibm", "hardware"))
+    if use_hardware and hardware_executor is None:
+        from aeqga.execution.ibm_sampler import IBMSamplerExecutor
+        hardware_executor = IBMSamplerExecutor(shots=params.num_shots)
 
     def circuit_counts(circuit):
         # The fast CPU path still simulates the actual post-gate quantum state
@@ -290,44 +297,53 @@ def run_aeqga_dual(
 
         use_measure = params.num_shots > 0
 
-        for d in range(n_dim):
-            # Qubit counts per paper §3.1 p.9:
-            #   random: log2(n_p) - 1
-            #   elite_copy: log2(n_p) - 2
-            n_q_random = n_qubits_for_population(n_p) - 1
-            n_q_elite = n_qubits_for_population(n_p) - 2
+        if use_hardware:
+            circuits = []
+            for d in range(n_dim):
+                qc_rand = build_dimension_circuit(
+                    P_rand[:, d],
+                    p_cross=params.p_cross,
+                    p_mut=params.p_mut,
+                    num_shots=params.num_shots,
+                    mode="measure",
+                )
+                qc_elite = build_dimension_circuit(
+                    P_elite_copy[:, d],
+                    p_cross=params.p_cross,
+                    p_mut=params.p_mut,
+                    num_shots=params.num_shots,
+                    mode="measure",
+                )
+                circuits.append(qc_rand)
+                circuits.append(qc_elite)
 
-            # ── Circuit for random subset ──────────────────────
-            qc_rand = build_dimension_circuit(
-                P_rand[:, d],
-                p_cross=params.p_cross,
-                p_mut=params.p_mut,
-                num_shots=params.num_shots,
-                mode="measure" if use_measure else "statevector",
-            )
-            if use_measure:
-                counts_rand = circuit_counts(qc_rand)
+            opt_state = {
+                "generation": gen,
+                "current_population": population.tolist(),
+                "current_fitnesses": fitnesses.tolist(),
+                "global_best": {
+                    "x": g_best.x.tolist() if g_best.x is not None else None,
+                    "fitness": float(g_best.fitness),
+                    "gen": int(g_best.gen),
+                },
+            }
+            counts_list = hardware_executor.run(circuits, generation=gen, optimizer_state=opt_state)
+            if len(counts_list) != len(circuits):
+                raise ValueError(
+                    f"Hardware executor returned {len(counts_list)} counts, expected {len(circuits)}"
+                )
+
+            for d in range(n_dim):
+                n_q_random = n_qubits_for_population(n_p) - 1
+                n_q_elite = n_qubits_for_population(n_p) - 2
+                counts_rand = counts_list[2 * d]
+                counts_elite = counts_list[2 * d + 1]
+
                 decoded_random[:, d] = decode_random_subset(
                     counts_rand, n_q_random,
                     float(lower[d]), float(upper[d]), n_random,
                 )
-            else:
-                counts_rand = circuit_counts(qc_rand)
-                decoded_random[:, d] = decode_random_subset(
-                    counts_rand, n_q_random,
-                    float(lower[d]), float(upper[d]), n_random,
-                )
 
-            # ── Circuit for elite-copy subset ──────────────────
-            qc_elite = build_dimension_circuit(
-                P_elite_copy[:, d],
-                p_cross=params.p_cross,
-                p_mut=params.p_mut,
-                num_shots=params.num_shots,
-                mode="measure" if use_measure else "statevector",
-            )
-            if use_measure:
-                counts_elite = circuit_counts(qc_elite)
                 n_min_e = float(np.min(P_elite[:, d]))
                 n_max_e = float(np.max(P_elite[:, d]))
                 margin = params.elite_margin * (n_max_e - n_min_e)
@@ -337,17 +353,65 @@ def run_aeqga_dual(
                     counts_elite, n_q_elite,
                     n_min_e, n_max_e, n_elite,
                 )
-            else:
-                counts_elite = circuit_counts(qc_elite)
-                n_min_e = float(np.min(P_elite[:, d]))
-                n_max_e = float(np.max(P_elite[:, d]))
-                margin = params.elite_margin * (n_max_e - n_min_e)
-                n_min_e = max(float(lower[d]), n_min_e - margin)
-                n_max_e = min(float(upper[d]), n_max_e + margin)
-                decoded_elite[:, d] = decode_elite_subset(
-                    counts_elite, n_q_elite,
-                    n_min_e, n_max_e, n_elite,
+        else:
+            for d in range(n_dim):
+                # Qubit counts per paper §3.1 p.9:
+                #   random: log2(n_p) - 1
+                #   elite_copy: log2(n_p) - 2
+                n_q_random = n_qubits_for_population(n_p) - 1
+                n_q_elite = n_qubits_for_population(n_p) - 2
+
+                # ── Circuit for random subset ──────────────────────
+                qc_rand = build_dimension_circuit(
+                    P_rand[:, d],
+                    p_cross=params.p_cross,
+                    p_mut=params.p_mut,
+                    num_shots=params.num_shots,
+                    mode="measure" if use_measure else "statevector",
                 )
+                if use_measure:
+                    counts_rand = circuit_counts(qc_rand)
+                    decoded_random[:, d] = decode_random_subset(
+                        counts_rand, n_q_random,
+                        float(lower[d]), float(upper[d]), n_random,
+                    )
+                else:
+                    counts_rand = circuit_counts(qc_rand)
+                    decoded_random[:, d] = decode_random_subset(
+                        counts_rand, n_q_random,
+                        float(lower[d]), float(upper[d]), n_random,
+                    )
+
+                # ── Circuit for elite-copy subset ──────────────────
+                qc_elite = build_dimension_circuit(
+                    P_elite_copy[:, d],
+                    p_cross=params.p_cross,
+                    p_mut=params.p_mut,
+                    num_shots=params.num_shots,
+                    mode="measure" if use_measure else "statevector",
+                )
+                if use_measure:
+                    counts_elite = circuit_counts(qc_elite)
+                    n_min_e = float(np.min(P_elite[:, d]))
+                    n_max_e = float(np.max(P_elite[:, d]))
+                    margin = params.elite_margin * (n_max_e - n_min_e)
+                    n_min_e = max(float(lower[d]), n_min_e - margin)
+                    n_max_e = min(float(upper[d]), n_max_e + margin)
+                    decoded_elite[:, d] = decode_elite_subset(
+                        counts_elite, n_q_elite,
+                        n_min_e, n_max_e, n_elite,
+                    )
+                else:
+                    counts_elite = circuit_counts(qc_elite)
+                    n_min_e = float(np.min(P_elite[:, d]))
+                    n_max_e = float(np.max(P_elite[:, d]))
+                    margin = params.elite_margin * (n_max_e - n_min_e)
+                    n_min_e = max(float(lower[d]), n_min_e - margin)
+                    n_max_e = min(float(upper[d]), n_max_e + margin)
+                    decoded_elite[:, d] = decode_elite_subset(
+                        counts_elite, n_q_elite,
+                        n_min_e, n_max_e, n_elite,
+                    )
 
         # ── Step 3: Combine P_elite ∪ P_decoded (Alg.1 L14) ──
         new_population = np.vstack([P_elite, decoded_random, decoded_elite])

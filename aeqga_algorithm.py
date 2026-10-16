@@ -49,14 +49,25 @@ from qiskit import QuantumCircuit, transpile
 from qiskit_aer import AerSimulator
 
 # Local helpers
-from amplitude_encoding import (
-    build_amplitude_circuit,
-    build_amplitude_circuit_with_measure,
-    decode_random_subset,
-    decode_elite_subset,
-    n_qubits_for_population,
-)
-from quantum_gates import apply_crossover_and_mutation
+try:
+    from aeqga.steps.encoding.amplitude_encoding import (
+        build_amplitude_circuit,
+        n_qubits_for_population,
+    )
+    from aeqga.steps.decoding.measurement_decoding import (
+        decode_random_subset,
+        decode_elite_subset,
+    )
+    from aeqga.steps.genetic_operators.quantum_gates import apply_crossover_and_mutation
+    from aeqga.steps.selection.population import split_population
+except ImportError:
+    from amplitude_encoding import (  # type: ignore
+        build_amplitude_circuit,
+        decode_random_subset,
+        decode_elite_subset,
+        n_qubits_for_population,
+    )
+    from quantum_gates import apply_crossover_and_mutation  # type: ignore
 
 
 # ---------------------------------------------------------------------------
@@ -148,10 +159,7 @@ def build_dimension_circuit(
     n_p = len(values)
     n_qubits = n_qubits_for_population(n_p)
 
-    if mode == "measure":
-        qc = build_amplitude_circuit_with_measure(values, num_shots)
-    else:
-        qc = build_amplitude_circuit(values)
+    qc = build_amplitude_circuit(values)
 
     # Block 2 – Crossover + Mutation (§3.2, Alg.1 L9-L11)
     qc.barrier(label="crossover_mutation")
@@ -159,6 +167,7 @@ def build_dimension_circuit(
 
     if mode == "measure":
         qc.barrier(label="measure")
+        qc.measure_all()
 
     return qc
 
