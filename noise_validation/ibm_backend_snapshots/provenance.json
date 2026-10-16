@@ -1,0 +1,37 @@
+{
+  "source_distribution": "qiskit-ibm-runtime==0.50.0",
+  "downloaded_from": "https://pypi.org/project/qiskit-ibm-runtime/0.50.0/",
+  "files": {
+    "kingston/conf_kingston.json": {
+      "sha256": "9947a3cf6902267afae47341b101029945d731b342ca88a1411c9ad11bfe8361",
+      "wheel_record": "sha256=mUejz2kCJnr65HNBsQECmUXXMbNCyoihQRya0Rv-g2E",
+      "verified_unchanged": true
+    },
+    "kingston/props_kingston.json": {
+      "sha256": "0ab157926fb5002a58ef1f5a240ffbe1adaf7facbebfb0f184f86d289785efa5",
+      "wheel_record": "sha256=CrFXkm-1ACpY7x9aJA_74a2vf6y-v7DxhPhtKJeF76U",
+      "verified_unchanged": true
+    },
+    "fez/conf_fez.json": {
+      "sha256": "74e356537d86a2d6ca057a954556e5d140f2aeeca6c447a71a5710af6d45093f",
+      "wheel_record": "sha256=dONWU32GotbKBXqVRVbl0UDyruymxEenGlcQr21FCT8",
+      "verified_unchanged": true
+    },
+    "fez/props_fez.json": {
+      "sha256": "7657d388bba0530c0c3cb7ebbb55d4f66c7cf5d21f81e55b4f97aaaf804b8693",
+      "wheel_record": "sha256=dlfTiLugUwwMPLfru1XU9mx89dIfgeVbT5eqr4BLhpM",
+      "verified_unchanged": true
+    },
+    "marrakesh/conf_marrakesh.json": {
+      "sha256": "5a9a7c14a0187a9ec8109e4e396f96f73cbb1e0c263a6d9d5912a9691ee24e5d",
+      "wheel_record": "sha256=Wpp8FKAYep7IEJ5OOW-W9zy7HgwmOm2dWRKpaR7iTl0",
+      "verified_unchanged": true
+    },
+    "marrakesh/props_marrakesh.json": {
+      "sha256": "d49d7ae07deb95947ea10e5b9b9c5cbab6df21f98610543817f35ade2b1aece6",
+      "wheel_record": "sha256=1J164H3rlZR-oQ5bm5xcurbfIfmGEFQ4F_Na3isa7OY",
+      "verified_unchanged": true
+    }
+  },
+  "method": "Unmodified bundled public calibration JSON; SHA-256 checked against installed wheel RECORD; no authenticated refresh."
+}

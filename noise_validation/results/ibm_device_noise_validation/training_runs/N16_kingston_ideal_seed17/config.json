@@ -1,0 +1,55 @@
+{
+  "run_id": "N16_kingston_ideal_seed17",
+  "population": 16,
+  "population_bits": 4,
+  "local_qubits": 2,
+  "global_qubits": 3,
+  "device": "kingston",
+  "mode": "ideal",
+  "seed": 17,
+  "generations": 100,
+  "shots": 1024,
+  "bounds": [
+    [
+      60.0,
+      80.0
+    ],
+    [
+      0.1,
+      0.5
+    ],
+    [
+      -19.6,
+      -19.0
+    ]
+  ],
+  "initial_p": [
+    70.0,
+    0.3,
+    -19.3
+  ],
+  "elite_local_global_counts": [
+    4,
+    4,
+    8
+  ],
+  "crossover_probability": 0.5,
+  "mutation_probability": 0.5,
+  "local_padding": 0.5,
+  "min_local_width": 0.01,
+  "implementation_sha256": {
+    "aeqga.py": "4969958e306a5084b2004b99e7743023dd52551a34600147e5a84c565ae44b4f",
+    "aeqga_ibm_noise.py": "84c1b4f897f80daf36c6728c5d3a1d301dc092a8030521fea30083ea24dae33a",
+    "run_pantheon_aeqga.py": "7bb81105fe8039f52fa5f09fe0938cadd4b397d6d67a5265f4cf626d9b291c29"
+  },
+  "snapshot_sha256": {
+    "conf": "9947a3cf6902267afae47341b101029945d731b342ca88a1411c9ad11bfe8361",
+    "props": "0ab157926fb5002a58ef1f5a240ffbe1adaf7facbebfb0f184f86d289785efa5"
+  },
+  "numerical_versions": {
+    "qiskit": "2.3.0",
+    "qiskit-aer": "0.17.2",
+    "numpy": "2.0.1",
+    "scipy": "1.17.1"
+  }
+}

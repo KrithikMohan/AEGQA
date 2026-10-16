@@ -1,0 +1,63 @@
+{
+  "run_id": "N8_marrakesh_noisy_seed7",
+  "population": 8,
+  "population_bits": 3,
+  "local_qubits": 2,
+  "global_qubits": 2,
+  "device": "marrakesh",
+  "mode": "noisy",
+  "seed": 7,
+  "generations": 100,
+  "shots": 1024,
+  "bounds": [
+    [
+      60.0,
+      80.0
+    ],
+    [
+      0.1,
+      0.5
+    ],
+    [
+      -19.6,
+      -19.0
+    ]
+  ],
+  "initial_p": [
+    70.0,
+    0.3,
+    -19.3
+  ],
+  "elite_local_global_counts": [
+    2,
+    2,
+    4
+  ],
+  "crossover_probability": 0.5,
+  "mutation_probability": 0.5,
+  "local_padding": 0.5,
+  "min_local_width": 0.01,
+  "implementation_sha256": {
+    "aeqga.py": "4969958e306a5084b2004b99e7743023dd52551a34600147e5a84c565ae44b4f",
+    "aeqga_ibm_noise.py": "84c1b4f897f80daf36c6728c5d3a1d301dc092a8030521fea30083ea24dae33a",
+    "run_pantheon_aeqga.py": "7bb81105fe8039f52fa5f09fe0938cadd4b397d6d67a5265f4cf626d9b291c29"
+  },
+  "snapshot_sha256": {
+    "conf": "5a9a7c14a0187a9ec8109e4e396f96f73cbb1e0c263a6d9d5912a9691ee24e5d",
+    "props": "d49d7ae07deb95947ea10e5b9b9c5cbab6df21f98610543817f35ade2b1aece6"
+  },
+  "numerical_versions": {
+    "qiskit": "2.3.0",
+    "qiskit-aer": "0.17.2",
+    "numpy": "2.0.1",
+    "scipy": "1.17.1"
+  },
+  "H0_km_s_Mpc": 71.4001230459097,
+  "Omega_m": 0.33649480337831006,
+  "M_mag": -19.308175541413174,
+  "chi2": 1457.079848275564,
+  "independent_chi2": 1457.0798482755645,
+  "fitness_evaluations": 608,
+  "quantum_circuits": 600,
+  "elapsed_seconds": 17.99766300000192
+}

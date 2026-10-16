@@ -1,0 +1,154 @@
+FIXED kingston: 288 circuits
+C:\Users\Sihan Chen\.conda\envs\qml\Lib\site-packages\qiskit\circuit\quantumcircuit.py:4704: UserWarning: Trying to add QuantumRegister to a QuantumCircuit having a layout
+  circ.add_register(qreg)
+FIXED fez: 288 circuits
+C:\Users\Sihan Chen\.conda\envs\qml\Lib\site-packages\qiskit\circuit\quantumcircuit.py:4704: UserWarning: Trying to add QuantumRegister to a QuantumCircuit having a layout
+  circ.add_register(qreg)
+FIXED marrakesh: 288 circuits
+C:\Users\Sihan Chen\.conda\envs\qml\Lib\site-packages\qiskit\circuit\quantumcircuit.py:4704: UserWarning: Trying to add QuantumRegister to a QuantumCircuit having a layout
+  circ.add_register(qreg)
+TRAIN N8_kingston_ideal_seed7
+TRAIN N8_kingston_noisy_seed7
+TRAIN N8_fez_ideal_seed7
+DONE N8_kingston_ideal_seed7 chi2=1455.115240318 seconds=5.4
+TRAIN N8_fez_noisy_seed7
+DONE N8_fez_ideal_seed7 chi2=1455.115240318 seconds=5.5
+TRAIN N8_marrakesh_ideal_seed7
+DONE N8_marrakesh_ideal_seed7 chi2=1455.115240318 seconds=5.9
+TRAIN N8_marrakesh_noisy_seed7
+DONE N8_kingston_noisy_seed7 chi2=1456.687674750 seconds=16.2
+TRAIN N8_kingston_ideal_seed17
+DONE N8_kingston_ideal_seed17 chi2=1471.489259214 seconds=6.2
+TRAIN N8_kingston_noisy_seed17
+DONE N8_fez_noisy_seed7 chi2=1463.005152031 seconds=20.8
+TRAIN N8_fez_ideal_seed17
+DONE N8_marrakesh_noisy_seed7 chi2=1457.079848276 seconds=18.0
+TRAIN N8_fez_noisy_seed17
+DONE N8_fez_ideal_seed17 chi2=1471.489259214 seconds=6.2
+TRAIN N8_marrakesh_ideal_seed17
+DONE N8_marrakesh_ideal_seed17 chi2=1471.489259214 seconds=5.6
+TRAIN N8_marrakesh_noisy_seed17
+DONE N8_kingston_noisy_seed17 chi2=1484.973977509 seconds=16.7
+TRAIN N8_kingston_ideal_seed27
+DONE N8_kingston_ideal_seed27 chi2=1455.999160597 seconds=5.7
+TRAIN N8_kingston_noisy_seed27
+DONE N8_fez_noisy_seed17 chi2=1459.381754907 seconds=19.7
+TRAIN N8_fez_ideal_seed27
+DONE N8_marrakesh_noisy_seed17 chi2=1458.471255014 seconds=15.8
+TRAIN N8_fez_noisy_seed27
+DONE N8_fez_ideal_seed27 chi2=1455.999160597 seconds=5.6
+TRAIN N8_marrakesh_ideal_seed27
+DONE N8_marrakesh_ideal_seed27 chi2=1455.999160597 seconds=5.5
+TRAIN N8_marrakesh_noisy_seed27
+DONE N8_kingston_noisy_seed27 chi2=1454.722332156 seconds=16.5
+TRAIN N16_kingston_ideal_seed7
+DONE N16_kingston_ideal_seed7 chi2=1460.218220437 seconds=8.3
+TRAIN N16_kingston_noisy_seed7
+DONE N8_fez_noisy_seed27 chi2=1460.443686858 seconds=19.7
+TRAIN N16_fez_ideal_seed7
+DONE N8_marrakesh_noisy_seed27 chi2=1466.805789872 seconds=15.9
+TRAIN N16_fez_noisy_seed7
+DONE N16_fez_ideal_seed7 chi2=1460.218220437 seconds=8.2
+TRAIN N16_marrakesh_ideal_seed7
+DONE N16_kingston_noisy_seed7 chi2=1452.046700052 seconds=19.8
+TRAIN N16_marrakesh_noisy_seed7
+DONE N16_marrakesh_ideal_seed7 chi2=1460.218220437 seconds=7.9
+TRAIN N16_kingston_ideal_seed17
+DONE N16_kingston_ideal_seed17 chi2=1464.028994004 seconds=8.0
+TRAIN N16_kingston_noisy_seed17
+DONE N16_fez_noisy_seed7 chi2=1452.025096681 seconds=23.0
+TRAIN N16_fez_ideal_seed17
+DONE N16_fez_ideal_seed17 chi2=1464.028994004 seconds=8.0
+TRAIN N16_fez_noisy_seed17
+DONE N16_marrakesh_noisy_seed7 chi2=1460.299697780 seconds=20.4
+TRAIN N16_marrakesh_ideal_seed17
+DONE N16_marrakesh_ideal_seed17 chi2=1464.028994004 seconds=8.0
+TRAIN N16_marrakesh_noisy_seed17
+DONE N16_kingston_noisy_seed17 chi2=1457.524725592 seconds=20.4
+TRAIN N16_kingston_ideal_seed27
+DONE N16_kingston_ideal_seed27 chi2=1452.021626584 seconds=7.9
+TRAIN N16_kingston_noisy_seed27
+DONE N16_fez_noisy_seed17 chi2=1475.183997766 seconds=22.0
+TRAIN N16_fez_ideal_seed27
+DONE N16_fez_ideal_seed27 chi2=1452.021626584 seconds=7.8
+TRAIN N16_fez_noisy_seed27
+DONE N16_marrakesh_noisy_seed17 chi2=1452.346160112 seconds=20.0
+TRAIN N16_marrakesh_ideal_seed27
+DONE N16_kingston_noisy_seed27 chi2=1452.016277812 seconds=19.6
+TRAIN N16_marrakesh_noisy_seed27
+DONE N16_marrakesh_ideal_seed27 chi2=1452.021626584 seconds=7.9
+TRAIN N32_kingston_ideal_seed7
+DONE N32_kingston_ideal_seed7 chi2=1455.571346233 seconds=13.0
+TRAIN N32_kingston_noisy_seed7
+DONE N16_fez_noisy_seed27 chi2=1452.581269623 seconds=22.4
+TRAIN N32_fez_ideal_seed7
+DONE N16_marrakesh_noisy_seed27 chi2=1453.006228588 seconds=19.9
+TRAIN N32_fez_noisy_seed7
+DONE N32_fez_ideal_seed7 chi2=1455.571346233 seconds=13.2
+TRAIN N32_marrakesh_ideal_seed7
+DONE N32_marrakesh_ideal_seed7 chi2=1455.571346233 seconds=13.2
+TRAIN N32_marrakesh_noisy_seed7
+DONE N32_kingston_noisy_seed7 chi2=1459.699675422 seconds=29.9
+TRAIN N32_kingston_ideal_seed17
+DONE N32_fez_noisy_seed7 chi2=1464.478693861 seconds=32.4
+TRAIN N32_kingston_noisy_seed17
+DONE N32_kingston_ideal_seed17 chi2=1462.072807515 seconds=12.7
+TRAIN N32_fez_ideal_seed17
+DONE N32_fez_ideal_seed17 chi2=1462.072807515 seconds=13.7
+TRAIN N32_fez_noisy_seed17
+DONE N32_marrakesh_noisy_seed7 chi2=1454.535842842 seconds=30.3
+TRAIN N32_marrakesh_ideal_seed17
+DONE N32_kingston_noisy_seed17 chi2=1457.258839870 seconds=29.2
+TRAIN N32_marrakesh_noisy_seed17
+DONE N32_marrakesh_ideal_seed17 chi2=1462.072807515 seconds=13.3
+TRAIN N32_kingston_ideal_seed27
+DONE N32_kingston_ideal_seed27 chi2=1453.017709229 seconds=13.1
+TRAIN N32_kingston_noisy_seed27
+DONE N32_fez_noisy_seed17 chi2=1460.430716291 seconds=32.2
+TRAIN N32_fez_ideal_seed27
+DONE N32_marrakesh_noisy_seed17 chi2=1461.031660736 seconds=30.5
+TRAIN N32_fez_noisy_seed27
+DONE N32_fez_ideal_seed27 chi2=1453.017709229 seconds=13.1
+TRAIN N32_marrakesh_ideal_seed27
+DONE N32_kingston_noisy_seed27 chi2=1456.578009091 seconds=28.9
+TRAIN N32_marrakesh_noisy_seed27
+DONE N32_marrakesh_ideal_seed27 chi2=1453.017709229 seconds=12.2
+TRAIN N64_kingston_ideal_seed7
+DONE N32_fez_noisy_seed27 chi2=1456.041331638 seconds=28.3
+TRAIN N64_kingston_noisy_seed7
+DONE N64_kingston_ideal_seed7 chi2=1453.921595155 seconds=19.8
+TRAIN N64_fez_ideal_seed7
+DONE N32_marrakesh_noisy_seed27 chi2=1452.068853909 seconds=24.9
+TRAIN N64_fez_noisy_seed7
+DONE N64_fez_ideal_seed7 chi2=1453.921595155 seconds=21.4
+TRAIN N64_marrakesh_ideal_seed7
+DONE N64_kingston_noisy_seed7 chi2=1456.751067520 seconds=45.2
+TRAIN N64_marrakesh_noisy_seed7
+DONE N64_marrakesh_ideal_seed7 chi2=1453.921595155 seconds=20.8
+TRAIN N64_kingston_ideal_seed17
+DONE N64_fez_noisy_seed7 chi2=1455.113890742 seconds=46.4
+TRAIN N64_kingston_noisy_seed17
+DONE N64_kingston_ideal_seed17 chi2=1456.214687409 seconds=19.8
+TRAIN N64_fez_ideal_seed17
+DONE N64_fez_ideal_seed17 chi2=1456.214687409 seconds=19.7
+TRAIN N64_fez_noisy_seed17
+DONE N64_marrakesh_noisy_seed7 chi2=1454.535169895 seconds=43.3
+TRAIN N64_marrakesh_ideal_seed17
+DONE N64_kingston_noisy_seed17 chi2=1456.110507196 seconds=42.8
+TRAIN N64_marrakesh_noisy_seed17
+DONE N64_marrakesh_ideal_seed17 chi2=1456.214687409 seconds=19.9
+TRAIN N64_kingston_ideal_seed27
+DONE N64_kingston_ideal_seed27 chi2=1462.732861444 seconds=20.3
+TRAIN N64_kingston_noisy_seed27
+DONE N64_fez_noisy_seed17 chi2=1454.113067922 seconds=44.5
+TRAIN N64_fez_ideal_seed27
+DONE N64_marrakesh_noisy_seed17 chi2=1455.966202730 seconds=43.5
+TRAIN N64_fez_noisy_seed27
+DONE N64_fez_ideal_seed27 chi2=1462.732861444 seconds=19.9
+TRAIN N64_marrakesh_ideal_seed27
+DONE N64_kingston_noisy_seed27 chi2=1455.780027906 seconds=42.4
+TRAIN N64_marrakesh_noisy_seed27
+DONE N64_marrakesh_ideal_seed27 chi2=1462.732861444 seconds=19.9
+DONE N64_fez_noisy_seed27 chi2=1452.219013911 seconds=43.1
+DONE N64_marrakesh_noisy_seed27 chi2=1455.575328630 seconds=38.0
+COMPLETE C:\Users\Sihan Chen\Desktop\QML\output\ibm_device_noise_validation.zip bytes=24864310

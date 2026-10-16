@@ -1,0 +1,100 @@
+AEQGA QUBIT NOISE VALIDATION
+
+METHOD
+Synthetic models; no quantum hardware was used.
+Basis gates: u and cx; all-to-all connectivity; optimization_level=0.
+State preparation is decomposed and receives the same gate noise as genetic operations.
+Noise parameters below are depolarizing channel strengths, not average gate infidelities.
+Depolarizing channel: E(rho) = (1-p)*rho + p*I/(2**n).
+Readout: independent symmetric bit flip per measured qubit.
+Reset is ideal; no thermal relaxation, idle noise, crosstalk, leakage, or device routing is modeled.
+
+ideal: 1Q p=0.0; 2Q p=0.0; readout flip=0.0
+low: 1Q p=0.0001; 2Q p=0.001; readout flip=0.005
+medium: 1Q p=0.001; 2Q p=0.01; readout flip=0.02
+high: 1Q p=0.005; 2Q p=0.05; readout flip=0.05
+medium_gate_only: 1Q p=0.001; 2Q p=0.01; readout flip=0.0
+medium_readout_only: 1Q p=0.0; 2Q p=0.0; readout flip=0.02
+
+FIXED CIRCUITS
+{
+  "fixed_circuits": 288,
+  "noise_profiles": 6,
+  "input_variants": 3,
+  "gate_patterns": [
+    "none",
+    "cross",
+    "mutation",
+    "both"
+  ],
+  "shots": 1024,
+  "sampling_repeats": 5,
+  "max_compile_probability_error": 2.025823953033523e-12,
+  "max_sampling_bound_ratio": 0.6351211491174602,
+  "sampling_check": "Every aggregate frequency within 6*binomial_SE + 6/(shots*repeats).",
+  "elapsed_seconds": 13.746670300000005
+}
+Candidate values use the same parameter bounds as the Pantheon experiment.
+Local inputs lie within 2% of the global parameter widths around [73.53,0.332,-19.244].
+Global inputs are uniformly drawn inside the full bounds.
+For every case, input amplitudes and selected gate positions are identical across profiles.
+TVD = 0.5*sum(abs(p_noisy-p_ideal)); range [0,1].
+Decode RMSE is over candidate values, divided by that circuit's decoding interval width.
+Decode uses the production random replacement of lower-bound values with the same decoder seed.
+That replacement, discrete counts, and min/max normalization can make decode error nonmonotonic.
+Exact noisy probabilities: density matrix gate simulation followed by analytic readout convolution.
+The compiled ideal probability vector is the common decode reference; ideal exact decode error is zero.
+Measured results: actual Aer gate+readout simulations, 1024 shots, 5 repetitions.
+The ideal measured baseline includes finite-shot noise.
+
+MEAN EXACT TVD BY ACTUAL QUBIT COUNT
+profile     high    ideal      low   medium  medium_gate_only  medium_readout_only
+qubits                                                                            
+2       0.069686 0.000000 0.004325 0.022175          0.009286             0.013525
+3       0.098139 0.000000 0.005546 0.030852          0.016869             0.015250
+4       0.125981 0.000000 0.006774 0.040523          0.026708             0.015888
+5       0.195970 0.000000 0.011076 0.069675          0.052950             0.021483
+
+CIRCUIT WIDTHS
+N=8: local=2 padded, global=2; N=16: local=2, global=3;
+N=32: local=3, global=4; N=64: local=4, global=5.
+Width groups also differ in state preparation, gate count, parameter inputs and branch composition.
+This experiment does not isolate qubit count as the sole causal variable.
+
+SHORT TRAINING EXPERIMENT
+100 generations; seeds=[7, 17, 27]; 1024 shots; profiles ideal/medium/high.
+Population sizes 8/16/32/64; elite/local/global ratio 1:1:2.
+For each population/seed, all profiles have identical generation-zero candidates and chi-square values.
+Data: 1657 selected Pantheon+SH0ES rows; full STAT+SYS covariance.
+Every final chi-square was independently checked with 64-node quadrature.
+All per-generation candidates and chi-square values are exported under training_runs/.
+Classical reference chi2=1452.015949980180; computed after all searches.
+The classical reference does not seed or correct any AEQGA run.
+Results use short runs; they are not the earlier 1000-generation results.
+Standard deviations describe optimization variability, not cosmological confidence intervals.
+
+                         H0_km_s_Mpc  Omega_m      M_mag  delta_chi2
+population_size profile                                             
+8               high       74.400766 0.339319 -19.216250    1.084841
+                ideal      72.837111 0.374729 -19.251567    8.851937
+                medium     75.008869 0.343314 -19.197848    4.018763
+16              high       72.432814 0.324280 -19.279469    3.900416
+                ideal      72.467809 0.330722 -19.275763    2.953510
+                medium     72.967560 0.334212 -19.260259    1.040429
+32              high       72.729560 0.317659 -19.272621    2.080895
+                ideal      72.183006 0.327682 -19.286010    2.204354
+                medium     71.837747 0.319462 -19.298821    4.309133
+64              high       72.767677 0.324862 -19.265714    2.339286
+                ideal      73.648328 0.334593 -19.244384    5.262416
+                medium     72.615524 0.316804 -19.276044    4.149660
+
+SCOPE
+No pass/fail noise tolerance or acceptable final-chi-square threshold was prespecified.
+The tests verify implementation consistency and quantify sensitivity under the stated models.
+They do not validate a specific device or demonstrate a speed advantage.
+
+METHOD REFERENCES
+https://qiskit.github.io/qiskit-aer/apidocs/aer_noise.html
+https://qiskit.github.io/qiskit-aer/tutorials/3_building_noise_models.html
+
+END OF REPORT

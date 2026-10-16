@@ -78,3 +78,7 @@ See the [replication specification](docs/REPLICATION_SPEC.md) and [tasks 1–7 m
 HQGA interoperability is retained in a separate tested bridge. See [connection examples and comparison methodology](docs/HQGA_INTEGRATION.md) for using existing HQGA objectives in AEQGA or the same calibrated cosmology objective in HQGA's native runner. The notebook includes a Gray-code contract check and an opt-in HQGA run; legacy HQGA runtime compatibility requires a separate compatible environment or an explicit execution-layer port.
 
 Generated scientific PNG/SVG/PDF/JSON results and downloaded datasets/models stay local; previously tracked SVG/PDF circuit examples remain preserved.
+
+## Standalone noise validation
+
+The [noise-validation workflow](noise_validation/README.md) includes synthetic noise and IBM Kingston/Fez/Marrakesh calibration-snapshot simulations, complete archived training records, figures, input data, pinned dependencies and runnable reproduction sources. Its separate three-parameter Pantheon+SH0ES objective and run commands are documented in that directory. [Download the complete bundle](noise_validation_bundle.zip).

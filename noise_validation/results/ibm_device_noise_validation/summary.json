@@ -1,0 +1,183 @@
+{
+  "created_utc": "2026-10-12T20:42:48.154384+00:00",
+  "snapshots": {
+    "kingston": {
+      "snapshot_date": "2026-04-15T09:15:15+02:00",
+      "device_qubits": 156,
+      "physical_qubits": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "dt_seconds": 4e-09,
+      "basis_gates": [
+        "cz",
+        "id",
+        "rz",
+        "sx",
+        "x"
+      ],
+      "source_distribution": "qiskit-ibm-runtime==0.50.0",
+      "sha256": {
+        "conf": "9947a3cf6902267afae47341b101029945d731b342ca88a1411c9ad11bfe8361",
+        "props": "0ab157926fb5002a58ef1f5a240ffbe1adaf7facbebfb0f184f86d289785efa5"
+      }
+    },
+    "fez": {
+      "snapshot_date": "2025-02-26T15:16:25-05:00",
+      "device_qubits": 156,
+      "physical_qubits": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "dt_seconds": 4e-09,
+      "basis_gates": [
+        "cz",
+        "id",
+        "rz",
+        "sx",
+        "x"
+      ],
+      "source_distribution": "qiskit-ibm-runtime==0.50.0",
+      "sha256": {
+        "conf": "74e356537d86a2d6ca057a954556e5d140f2aeeca6c447a71a5710af6d45093f",
+        "props": "7657d388bba0530c0c3cb7ebbb55d4f66c7cf5d21f81e55b4f97aaaf804b8693"
+      }
+    },
+    "marrakesh": {
+      "snapshot_date": "2025-02-26T14:52:45-05:00",
+      "device_qubits": 156,
+      "physical_qubits": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "dt_seconds": 4e-09,
+      "basis_gates": [
+        "cz",
+        "id",
+        "rz",
+        "sx",
+        "x"
+      ],
+      "source_distribution": "qiskit-ibm-runtime==0.50.0",
+      "sha256": {
+        "conf": "5a9a7c14a0187a9ec8109e4e396f96f73cbb1e0c263a6d9d5912a9691ee24e5d",
+        "props": "d49d7ae07deb95947ea10e5b9b9c5cbab6df21f98610543817f35ade2b1aece6"
+      }
+    }
+  },
+  "fixed_circuit_checks": {
+    "logical_circuits": 288,
+    "device_circuits": 864,
+    "shots": 1024,
+    "sample_repeats": 5,
+    "max_ideal_compile_probability_error": 2.025768441882292e-12,
+    "max_noisy_probability_normalization_correction": 6.673779928689783e-08,
+    "max_sampling_bound_ratio": 0.6328404420918622,
+    "sampling_bound": "6*sqrt(p*(1-p)/total_shots) + 6/total_shots"
+  },
+  "training": {
+    "runs": 72,
+    "generations": 100,
+    "shots": 1024,
+    "seeds": [
+      7,
+      17,
+      27
+    ],
+    "parallel_workers": 3,
+    "source_rows": 1701,
+    "selected_rows": 1657,
+    "calibrator_rows": 77,
+    "reference": {
+      "p": [
+        73.53278385986329,
+        0.3318120912404871,
+        -19.24405748751743
+      ],
+      "chi2": 1452.0159499801798,
+      "success": true,
+      "method": "GLS profile in M and -5log10(H0/70); golden-section Omega_m search"
+    },
+    "quadrature_max_error_mag": 7.105427357601002e-15,
+    "covariance_validation": {
+      "max_source_asymmetry": 3.0000000000038676e-08,
+      "relative_source_asymmetry": 1.4853575301770363e-07,
+      "treatment": "(C + C.T) / 2 before Cholesky; all correlations retained"
+    },
+    "record_validation": {
+      "verified_runs": 72,
+      "candidate_rows": 218160,
+      "quantum_histograms": 43200,
+      "matched_initial_population_groups": 12,
+      "independent_rescore_max_abs_error": 3.2378011383116245e-10,
+      "scope": "Every row checked for shape, finiteness and bounds; every generation checked for optimum; 12 spread candidates and final optimum independently rescored per run."
+    }
+  },
+  "versions": {
+    "qiskit": "2.3.0",
+    "qiskit-aer": "0.17.2",
+    "numpy": "2.0.1",
+    "scipy": "1.17.1",
+    "pandas": "3.0.2",
+    "matplotlib": "3.10.8",
+    "threadpoolctl": "3.5.0"
+  },
+  "python": "3.11.14",
+  "sources": [
+    "https://pypi.org/project/qiskit-ibm-runtime/0.50.0/",
+    "https://github.com/Qiskit/qiskit-ibm-runtime",
+    "https://quantum.cloud.ibm.com/docs/en/api/qiskit-ibm-runtime/fake-provider-fake-kingston",
+    "https://quantum.cloud.ibm.com/docs/en/api/qiskit-ibm-runtime/fake-provider-fake-fez",
+    "https://quantum.cloud.ibm.com/docs/en/api/qiskit-ibm-runtime/fake-provider-fake-marrakesh",
+    "https://qiskit.github.io/qiskit-aer/stubs/qiskit_aer.noise.NoiseModel.html"
+  ],
+  "elapsed_seconds_this_invocation": 584.2998023,
+  "source_hashes": {
+    "aeqga.py": "4969958e306a5084b2004b99e7743023dd52551a34600147e5a84c565ae44b4f",
+    "aeqga_ibm_noise.py": "84c1b4f897f80daf36c6728c5d3a1d301dc092a8030521fea30083ea24dae33a",
+    "run_ibm_noise_validation.py": "6f5e5eeebe60159c7ee11d5d1dc2161127348ca10a6b1b172457c18904477912",
+    "run_pantheon_aeqga.py": "7bb81105fe8039f52fa5f09fe0938cadd4b397d6d67a5265f4cf626d9b291c29"
+  },
+  "data_hashes": {
+    "Pantheon+SH0ES.dat": "1cb0fc379ef066afdc2ffd1857681cc478024570d8a3eba284fb645775198cf8",
+    "Pantheon+SH0ES_STAT+SYS.cov": "abf806d966485e64afdb359c87bffc0ecc00d05eff0a31ced66f247385df0fdc"
+  },
+  "artifact_verification": {
+    "unit_tests_passed": 32,
+    "csv_vs_original_json_checked_runs": 72,
+    "candidate_rows_checked": 218160,
+    "measurement_histograms_checked": 43200,
+    "max_csv_roundtrip_absolute_error": 7.275957614183426e-12,
+    "snapshot_files_matched_release_RECORD": 6,
+    "qpy_roundtrip_checks": {
+      "native_circuits_reloaded": 864,
+      "ideal_circuits_resimulated": 12
+    }
+  },
+  "figure_error_bars": "Observed minimum-to-maximum across seeds; central point is mean.",
+  "observed_comparison": {
+    "smallest_mean_tvd_by_width": {
+      "2": "marrakesh",
+      "3": "marrakesh",
+      "4": "marrakesh",
+      "5": "marrakesh"
+    },
+    "five_qubit_mean_tvd": {
+      "fez": 0.12915175883250246,
+      "kingston": 0.10471508466422992,
+      "marrakesh": 0.0926640614429774
+    },
+    "paired_final_chi2_higher_under_noise": 17,
+    "paired_final_chi2_lower_under_noise": 19,
+    "paired_final_chi2_equal_within_1e_9": 0
+  }
+}

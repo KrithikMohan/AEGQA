@@ -1,0 +1,11 @@
+# Preserve this explicitly requested dataset and archived results.
+!*.json
+!*.png
+!**/*.json
+!**/*.png
+# New runs and local environments are not part of the archive.
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+output/

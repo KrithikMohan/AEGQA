@@ -1,0 +1,58 @@
+FIXED kingston: 96 circuits
+C:\Users\Sihan Chen\.conda\envs\qml\Lib\site-packages\qiskit\circuit\quantumcircuit.py:4704: UserWarning: Trying to add QuantumRegister to a QuantumCircuit having a layout
+  circ.add_register(qreg)
+FIXED fez: 96 circuits
+C:\Users\Sihan Chen\.conda\envs\qml\Lib\site-packages\qiskit\circuit\quantumcircuit.py:4704: UserWarning: Trying to add QuantumRegister to a QuantumCircuit having a layout
+  circ.add_register(qreg)
+FIXED marrakesh: 96 circuits
+C:\Users\Sihan Chen\.conda\envs\qml\Lib\site-packages\qiskit\circuit\quantumcircuit.py:4704: UserWarning: Trying to add QuantumRegister to a QuantumCircuit having a layout
+  circ.add_register(qreg)
+TRAIN N8_kingston_ideal_seed7
+DONE N8_kingston_ideal_seed7 chi2=1548.612890497 seconds=0.3
+TRAIN N8_kingston_noisy_seed7
+DONE N8_kingston_noisy_seed7 chi2=1501.860075814 seconds=0.3
+TRAIN N8_fez_ideal_seed7
+DONE N8_fez_ideal_seed7 chi2=1548.612890497 seconds=0.2
+TRAIN N8_fez_noisy_seed7
+DONE N8_fez_noisy_seed7 chi2=1475.500818160 seconds=0.4
+TRAIN N8_marrakesh_ideal_seed7
+DONE N8_marrakesh_ideal_seed7 chi2=1548.612890497 seconds=0.2
+TRAIN N8_marrakesh_noisy_seed7
+DONE N8_marrakesh_noisy_seed7 chi2=1548.612890497 seconds=0.4
+TRAIN N16_kingston_ideal_seed7
+DONE N16_kingston_ideal_seed7 chi2=1509.411095748 seconds=0.4
+TRAIN N16_kingston_noisy_seed7
+DONE N16_kingston_noisy_seed7 chi2=1477.484133697 seconds=0.4
+TRAIN N16_fez_ideal_seed7
+DONE N16_fez_ideal_seed7 chi2=1509.411095748 seconds=0.3
+TRAIN N16_fez_noisy_seed7
+DONE N16_fez_noisy_seed7 chi2=1462.595708212 seconds=0.5
+TRAIN N16_marrakesh_ideal_seed7
+DONE N16_marrakesh_ideal_seed7 chi2=1509.411095748 seconds=0.3
+TRAIN N16_marrakesh_noisy_seed7
+DONE N16_marrakesh_noisy_seed7 chi2=1462.595708212 seconds=0.4
+TRAIN N32_kingston_ideal_seed7
+DONE N32_kingston_ideal_seed7 chi2=1481.721459857 seconds=0.4
+TRAIN N32_kingston_noisy_seed7
+DONE N32_kingston_noisy_seed7 chi2=1476.450133248 seconds=0.6
+TRAIN N32_fez_ideal_seed7
+DONE N32_fez_ideal_seed7 chi2=1481.721459857 seconds=0.5
+TRAIN N32_fez_noisy_seed7
+DONE N32_fez_noisy_seed7 chi2=1517.860704447 seconds=0.6
+TRAIN N32_marrakesh_ideal_seed7
+DONE N32_marrakesh_ideal_seed7 chi2=1481.721459857 seconds=0.5
+TRAIN N32_marrakesh_noisy_seed7
+DONE N32_marrakesh_noisy_seed7 chi2=1486.253105203 seconds=0.8
+TRAIN N64_kingston_ideal_seed7
+DONE N64_kingston_ideal_seed7 chi2=1504.357447678 seconds=0.6
+TRAIN N64_kingston_noisy_seed7
+DONE N64_kingston_noisy_seed7 chi2=1496.626295394 seconds=0.9
+TRAIN N64_fez_ideal_seed7
+DONE N64_fez_ideal_seed7 chi2=1504.357447678 seconds=0.7
+TRAIN N64_fez_noisy_seed7
+DONE N64_fez_noisy_seed7 chi2=1480.555024578 seconds=1.0
+TRAIN N64_marrakesh_ideal_seed7
+DONE N64_marrakesh_ideal_seed7 chi2=1504.357447678 seconds=0.6
+TRAIN N64_marrakesh_noisy_seed7
+DONE N64_marrakesh_noisy_seed7 chi2=1480.555024578 seconds=0.9
+COMPLETE C:\Users\Sihan Chen\Desktop\QML\tmp\noise_upload_checks\current_ibm_smoke.zip bytes=11662845

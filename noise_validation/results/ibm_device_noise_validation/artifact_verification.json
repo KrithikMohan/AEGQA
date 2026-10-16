@@ -1,0 +1,12 @@
+{
+  "unit_tests_passed": 32,
+  "csv_vs_original_json_checked_runs": 72,
+  "candidate_rows_checked": 218160,
+  "measurement_histograms_checked": 43200,
+  "max_csv_roundtrip_absolute_error": 7.275957614183426e-12,
+  "snapshot_files_matched_release_RECORD": 6,
+  "qpy_roundtrip_checks": {
+    "native_circuits_reloaded": 864,
+    "ideal_circuits_resimulated": 12
+  }
+}

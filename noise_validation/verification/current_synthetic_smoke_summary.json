@@ -1,0 +1,45 @@
+{
+  "fixed": {
+    "fixed_circuits": 96,
+    "noise_profiles": 6,
+    "input_variants": 1,
+    "gate_patterns": [
+      "none",
+      "cross",
+      "mutation",
+      "both"
+    ],
+    "shots": 32,
+    "sampling_repeats": 1,
+    "max_compile_probability_error": 1.435102037206093e-12,
+    "max_sampling_bound_ratio": 0.4353097910979843,
+    "sampling_check": "Every aggregate frequency within 6*binomial_SE + 6/(shots*repeats).",
+    "elapsed_seconds": 1.1063049999993382
+  },
+  "training": {
+    "source_rows": 1701,
+    "selected_rows": 1657,
+    "calibrator_rows": 77,
+    "covariance": "full STAT+SYS",
+    "covariance_validation": {
+      "max_source_asymmetry": 3.0000000000038676e-08,
+      "relative_source_asymmetry": 1.485357530177029e-07,
+      "treatment": "(C + C.T) / 2 before Cholesky; all correlations retained"
+    },
+    "quadrature_error_mag": 7.105427357601002e-15,
+    "generations": 1,
+    "seeds": [
+      7
+    ],
+    "classical_reference_only": {
+      "p": [
+        73.53278385986329,
+        0.3318120912404871,
+        -19.24405748751743
+      ],
+      "chi2": 1452.0159499801798,
+      "success": true,
+      "method": "GLS profile in M and -5log10(H0/70); golden-section Omega_m search"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "logical_circuits": 288,
+  "device_circuits": 864,
+  "shots": 1024,
+  "sample_repeats": 5,
+  "max_ideal_compile_probability_error": 2.025768441882292e-12,
+  "max_noisy_probability_normalization_correction": 6.673779928689783e-08,
+  "max_sampling_bound_ratio": 0.6328404420918622,
+  "sampling_bound": "6*sqrt(p*(1-p)/total_shots) + 6/total_shots"
+}

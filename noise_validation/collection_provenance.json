@@ -1,0 +1,47 @@
+{
+  "delivery_date": "2026-10-16",
+  "target_repository": "https://github.com/KrithikMohan/AEGQA",
+  "branch": "noise-validation",
+  "base_commit": "79b70023ecdedb5ff643c2a5eee98a29f37c7f36",
+  "runtime_sources_sha256": {
+    "aeqga.py": "41a8052f27a2e1c6d26b40cc3a875a57a26b681b1880b53aee417ad36f91b7da",
+    "aeqga_parallel.py": "e4d481dd4e4f4e30ca2677eeeeda2980dc57b5eb8844650ecd1330edba933638",
+    "aeqga_noise.py": "8134e245298f7f358bf18fc5e071efd57fa960338117acc15844dcf48cf8f2ff",
+    "aeqga_ibm_noise.py": "583c524e458556c59376f77973df822b5e83fe9a50a2ef3e99cd1efbdbd2d5fd",
+    "run_pantheon_aeqga.py": "ae420165b55650f7dd230fc6a2135dc7f0f218257db3cbbd3fe317e6f8ae4e75",
+    "run_noise_validation.py": "14153391c6d4c325005241d901ad8cec323c223b8cde133a607df848a8acce5f",
+    "run_ibm_noise_validation.py": "7e49f5f2ebd40dd05915422d3dd772bb83e24dbb5b592e258c9606408c66e66f",
+    "test_aeqga.py": "a05833d5536bcc3b503996ddbaed6cfe8816ebaf4b6f2b9331e7f64feaceca1c",
+    "test_history_plot.py": "f64b68e1e4da05557d684f5a1a435062f7143e9b5d8ee24f65cc6d52fca4511a",
+    "test_noise_validation.py": "66808a7c7c08c34e3084d86756edc4f88e018331f7f3e07fd9025d9a485272e5",
+    "test_ibm_noise_validation.py": "adfaa8307a8a8e800a88a199fb3be26693377b9c7fe812d94e96de40fd9012d0",
+    "test_parallel_circuits.py": "aec57ffdce0b33be97acc2b744e51d37af1cfe23ac3b24f7ab6f3b1afeb86a39",
+    "AEQGA_USAGE.md": "38abad61051aff62d30f630eee21c5bec64fed350f8f5008ab9fa862a9c04cff"
+  },
+  "historical_results": {
+    "ibm_device_noise_validation": {
+      "original_files_copied_without_modification": true,
+      "original_reproduction_snapshot_preserved": true,
+      "original_sha256_manifest_preserved": true
+    },
+    "qubit_noise_validation": {
+      "original_files_copied_without_modification": true,
+      "added_reproduction_directory": true,
+      "recorded_python_and_input_hashes_matched": 5,
+      "source_recovery": "Matching aeqga.py and aeqga_noise.py from archived IBM reproduction; unchanged run_noise_validation.py from current workspace."
+    }
+  },
+  "scope": "Local Aer simulations, archived published calibration snapshots, no actual QPU jobs.",
+  "historical_training_rerun_for_upload": false,
+  "python_version": "3.11.14",
+  "dependencies": {
+    "qiskit": "2.3.0",
+    "qiskit-aer": "0.17.2",
+    "numpy": "2.0.1",
+    "scipy": "1.17.1",
+    "pandas": "3.0.2",
+    "matplotlib": "3.10.8",
+    "threadpoolctl": "3.5.0",
+    "pillow": "11.1.0"
+  }
+}

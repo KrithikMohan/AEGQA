@@ -1,0 +1,162 @@
+IBM PUBLIC-SNAPSHOT NOISE VALIDATION: KINGSTON, FEZ, MARRAKESH
+Generated UTC: 2026-10-12T20:43:44.901751+00:00
+
+EXPERIMENT AND SCOPE
+These are local Qiskit Aer simulations using the public calibration/configuration
+JSON shipped in qiskit-ibm-runtime 0.50.0. No hardware jobs were submitted.
+Original JSON is archived unchanged with hashes and its license. The snapshots
+have different calibration dates. They do not describe simultaneous measurements
+or necessarily present-day device performance.
+
+kingston: 156 device qubits; snapshot 2026-04-15T09:15:15+02:00
+fez: 156 device qubits; snapshot 2025-02-26T15:16:25-05:00
+marrakesh: 156 device qubits; snapshot 2025-02-26T14:52:45-05:00
+
+The experiment uses the predeclared chain [0,1,2,3,4] on each device, with prefixes
+of exactly 2, 3, 4 or 5 qubits. All selected CZ links are calibrated in both
+directions. This placement is fixed by physical index, not selected by low error.
+The other device qubits are inactive and not simulated. This is not a simulation
+of an arbitrary 156-qubit entangled state or a whole-device performance ranking.
+Kingston q1 has average readout error 0.168212890625 in this snapshot; this is
+retained. Selected-qubit and selected-gate calibration tables are included.
+
+NOISE AND COMPILATION
+Calibration units are converted to SI in a Qiskit BackendV2 Target restricted
+to the selected subgraph. Gates use the official NoiseModel.from_backend with
+gate_error=True, thermal_relaxation=True, temperature=0 mK. Aer constructs
+depolarization plus T1/T2 relaxation using each gate's reported error and duration;
+reported gate infidelity is not treated as a depolarizing strength directly.
+Readout is independent per qubit and preserves both calibrated probabilities
+P(measured 1 | prepared 0) and P(measured 0 | prepared 1), instead of replacing
+them by their mean. The Target scalar readout channel is disabled before these
+asymmetric channels are added. Measurement duration is not separately added as
+relaxation to measured qubits; its assignment errors use the calibration matrix.
+
+Initialization, CRy and Rx are decomposed into rz/sx/x/id/cz, with fixed initial
+layout, basic routing, optimization level 1 and ALAP scheduling. The official
+Aer relaxation pass adds T1/T2 noise to explicit idle delays. dt = 4 ns on all
+three snapshots. Reset uses its reported duration and ideal reset followed by
+thermal relaxation; no calibrated reset-assignment error is supplied. Virtual Rz has zero
+duration/error. No error mitigation or dynamical decoupling is applied.
+The model omits leakage, crosstalk, coherent calibration errors, drift, correlated
+readout, temperature-dependent excitation and state-preparation/reset errors.
+T2 is bounded by 2*T1 inside Aer when needed. Missing frequency is irrelevant
+at the chosen zero-temperature setting. The model is an approximation to hardware.
+
+FIXED-CIRCUIT VALIDATION
+The same candidates, gate choices and logical circuits are reused across devices.
+There are 288 logical circuits: four populations, two branches, three
+parameters, four crossover/mutation patterns and independent input variants.
+Each native ideal probability vector is checked against its original circuit,
+including the physical-to-classical permutation after routing. Exact noisy
+probabilities use density matrices followed by analytic asymmetric readout.
+Actual sampled Aer counts (ideal/noisy) are checked against these probabilities.
+Numerical probability trace drift up to 1e-6 is normalized; larger drift fails.
+The maximum correction actually observed is recorded in fixed_checks.json.
+All circuits are saved in QPY; every fixed-circuit probability and histogram is
+included in NPZ (only the first 2**qubits columns are used).
+
+Mean exact TVD = 0.5*sum(abs(p_noisy-p_ideal)); columns are actual qubits:
+qubits             2          3          4          5
+device                                               
+fez       0.02257600 0.03704281 0.06427525 0.12915176
+kingston  0.11347679 0.08549865 0.08846997 0.10471508
+marrakesh 0.00911758 0.01738130 0.03641676 0.09266406
+
+The width groups also differ in input/state preparation, routing depth and gate
+counts. Their differences cannot be attributed to qubit count alone. Decoder
+RMSE additionally depends on min/max ties and exact-lower-bound replacement.
+
+TRAINING VALIDATION
+72 optimizer executions in a paired design: 3 device targets x 4 populations x
+3 seeds x 2 noise modes. Seeds: [7, 17, 27].
+Each run has 100 updates plus generation 0, 1024 shots per
+quantum circuit, initial parameters [70.0, 0.3, -19.3], and bounds [(60.0, 80.0), (0.1, 0.5), (-19.6, -19.0)].
+Elite/local/global ratio is 1:1:2. Actual local/global widths for populations
+8,16,32,64 are 2/2, 2/3, 3/4, 4/5. Population bits log2(N) are 3,4,5,6;
+they are not the actual width of either branch. Final results are the best
+candidate retained at the fixed training budget, not a convergence guarantee.
+
+Each device has its own equally compiled/scheduled ideal control. All devices
+and both modes share identical generation-0 candidates and scores for a given
+population/seed. Subsequent trajectories may diverge. The production optimizer,
+parameter decoding, candidate selection and chi-square remain unchanged.
+Different populations use different numbers of fitness evaluations per update.
+
+Dataset: 1657 selected Pantheon+SH0ES rows, including
+77 calibrator rows; selection zHD > 0.01 OR IS_CALIBRATOR=1.
+Full STAT+SYS covariance is retained, symmetrized for decimal-rounding asymmetry.
+Three fitted parameters are H0, Omega_m and M in flat Lambda-CDM. Training uses
+32-point Gauss-Legendre integration; independent final/sample checks use 64 points.
+The classical reference is calculated separately and does not alter training:
+p_ref = [73.53278385986329, 0.3318120912404871, -19.24405748751743]
+chi2_ref = 1452.015949980180
+
+Paired final chi2(noisy) - chi2(ideal), mean and sample SD across seeds:
+                            mean         std
+device    population                        
+fez       8           0.07564456 10.69062708
+          16          1.17384102  9.68867581
+          32          3.42962627  5.28642548
+          64         -3.80772381  6.03668292
+kingston  8           4.59344143  7.83075207
+          16         -4.89371252  4.31474303
+          32          0.95822047  5.00692331
+          64         -1.40918046  5.02002454
+marrakesh 8          -0.08225566 12.04348488
+          16         -3.53891818  7.06727889
+          32         -1.00850183  0.05173240
+          64         -2.26414758  4.25965971
+
+Positive paired differences indicate worse final chi-square in those runs;
+negative differences indicate better final chi-square. These short runs and
+three seeds do not establish a universal device ranking or a noise benefit.
+Reported standard deviations describe optimizer variation, not posterior
+uncertainty of cosmological parameters. No hardware-readiness threshold was set.
+The overview figure shows mean final values with the observed minimum-to-maximum
+range across seeds. Standard deviations are provided separately in the tables.
+
+RECORDS
+Each training_runs/N... directory contains:
+  all_candidates.csv: all N candidates for every generation 0..G, H0/Omega_m/M/chi2.
+  best_history.csv: every generation's optimum and within-generation best index.
+  population_history.json.gz: complete population history in original structure.
+  quantum_measurements.jsonl.gz: all six histograms per generation, simulator and
+    transpiler seeds, native gate counts, depth, duration and measurement mapping.
+  config.json, result.json: settings and final checked result.
+The individual index is a row within a generation, not an ancestry/lineage ID.
+Duplicate elites remain included. Every final-generation offspring is evaluated.
+
+Record verification: {
+  "verified_runs": 72,
+  "candidate_rows": 218160,
+  "quantum_histograms": 43200,
+  "matched_initial_population_groups": 12,
+  "independent_rescore_max_abs_error": 3.2378011383116245e-10,
+  "scope": "Every row checked for shape, finiteness and bounds; every generation checked for optimum; 12 spread candidates and final optimum independently rescored per run."
+}
+
+REPRODUCTION
+Source code, pinned numerical dependencies, raw snapshot JSON, selected input
+data and covariance are included. Install requirements.txt, then run
+python run_ibm_noise_validation.py --output output/reproduced
+from the reproduction directory. IBM account credentials are not required.
+Existing completed runs are reused only when their settings match; use a new
+output directory to repeat the stochastic simulation from scratch.
+
+SOURCE REFERENCES
+https://pypi.org/project/qiskit-ibm-runtime/0.50.0/
+https://github.com/Qiskit/qiskit-ibm-runtime
+https://quantum.cloud.ibm.com/docs/en/api/qiskit-ibm-runtime/fake-provider-fake-kingston
+https://quantum.cloud.ibm.com/docs/en/api/qiskit-ibm-runtime/fake-provider-fake-fez
+https://quantum.cloud.ibm.com/docs/en/api/qiskit-ibm-runtime/fake-provider-fake-marrakesh
+https://qiskit.github.io/qiskit-aer/stubs/qiskit_aer.noise.NoiseModel.html
+
+OBSERVED COMPARISON FOR THIS EXPERIMENT
+The lowest mean exact TVD at every tested width (2, 3, 4, 5) is Marrakesh,
+on the specified physical-chain prefixes and fixed input circuit pool.
+Five-qubit mean TVD: fez 12.915%; kingston 10.472%; marrakesh 9.266%.
+Across the 36 matched training pairs, noise gives higher final chi-square in 17 pairs,
+lower final chi-square in 19 pairs, and equality within 1e-9 in 0 pairs.
+This count describes these seeds and 100-generation runs; it is not a significance test.
+Validated complete records: 218160 candidate rows, 43200 quantum histograms; 32 unit tests passed.

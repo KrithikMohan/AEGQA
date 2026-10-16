@@ -1,0 +1,39 @@
+test_amplitude_encoding_matches_normalized_vector (test_aeqga.AEQGATests.test_amplitude_encoding_matches_normalized_vector) ... ok
+test_custom_population_counts_with_padding_and_disabled_branches (test_aeqga.AEQGATests.test_custom_population_counts_with_padding_and_disabled_branches) ... ok
+test_full_population_history_scores_and_export (test_aeqga.AEQGATests.test_full_population_history_scores_and_export) ... ok
+test_genetic_gates_are_bidirectional_cry_and_rx (test_aeqga.AEQGATests.test_genetic_gates_are_bidirectional_cry_and_rx) ... ok
+test_getters_do_not_expose_mutable_parameters (test_aeqga.AEQGATests.test_getters_do_not_expose_mutable_parameters) ... ok
+test_list_input_multiple_features (test_aeqga.AEQGATests.test_list_input_multiple_features) ... ok
+test_missing_counts_and_degenerate_decoding (test_aeqga.AEQGATests.test_missing_counts_and_degenerate_decoding) ... ok
+test_noisy_line_does_not_prematurely_collapse (test_aeqga.AEQGATests.test_noisy_line_does_not_prematurely_collapse) ... ok
+test_nonfinite_candidates_are_rejected (test_aeqga.AEQGATests.test_nonfinite_candidates_are_rejected) ... ok
+test_nonlinear_vectorized_fit_against_known_parameters (test_aeqga.AEQGATests.test_nonlinear_vectorized_fit_against_known_parameters) ... ok
+test_population_count_defaults_and_explicit_defaults_match (test_aeqga.AEQGATests.test_population_count_defaults_and_explicit_defaults_match) ... ok
+test_population_count_validation (test_aeqga.AEQGATests.test_population_count_validation) ... ok
+test_population_eight_padded_encoding_and_training (test_aeqga.AEQGATests.test_population_eight_padded_encoding_and_training) ... ok
+test_population_export_validation (test_aeqga.AEQGATests.test_population_export_validation) ... ok
+test_population_history_reset_early_stop_and_invalid_candidate (test_aeqga.AEQGATests.test_population_history_reset_early_stop_and_invalid_candidate) ... ok
+test_real_aer_training_elitism_and_final_generation_evaluation (test_aeqga.AEQGATests.test_real_aer_training_elitism_and_final_generation_evaluation) ... ok
+test_same_seed_reproduces_shot_based_training (test_aeqga.AEQGATests.test_same_seed_reproduces_shot_based_training) ... ok
+test_validation_rejects_shapes_and_invalid_settings (test_aeqga.AEQGATests.test_validation_rejects_shapes_and_invalid_settings) ... ok
+test_weighted_losses_and_initial_target_stop (test_aeqga.AEQGATests.test_weighted_losses_and_initial_target_stop) ... ok
+test_cosmology_calibrator_and_analytic_distance (test_history_plot.HistoryPlotTests.test_cosmology_calibrator_and_analytic_distance) ... ok
+test_empty_history_and_bad_selection (test_history_plot.HistoryPlotTests.test_empty_history_and_bad_selection) ... ok
+test_saved_plot_uses_exact_generations_and_selected_best_parameter (test_history_plot.HistoryPlotTests.test_saved_plot_uses_exact_generations_and_selected_best_parameter) ... ok
+test_actual_aer_readout_matches_convolution (test_noise_validation.NoiseValidationTests.test_actual_aer_readout_matches_convolution) ... ok
+test_compilation_preserves_probabilities_and_decomposes_initialization (test_noise_validation.NoiseValidationTests.test_compilation_preserves_probabilities_and_decomposes_initialization) ... ok
+test_gate_noise_matches_analytic_depolarizing_channel (test_noise_validation.NoiseValidationTests.test_gate_noise_matches_analytic_depolarizing_channel) ... ok
+test_noise_training_history_and_objective_remain_aligned (test_noise_validation.NoiseValidationTests.test_noise_training_history_and_objective_remain_aligned) ... ok
+test_readout_bit_order_and_exact_convolution (test_noise_validation.NoiseValidationTests.test_readout_bit_order_and_exact_convolution) ... ok
+test_actual_asymmetric_readout_with_nontrivial_classical_order (test_ibm_noise_validation.IBMNoiseValidationTests.test_actual_asymmetric_readout_with_nontrivial_classical_order) ... ok
+test_full_population_chi2_and_raw_measurement_recording (test_ibm_noise_validation.IBMNoiseValidationTests.test_full_population_chi2_and_raw_measurement_recording) ... ok
+test_native_routing_and_measurement_permutation_preserve_logical_distribution (test_ibm_noise_validation.IBMNoiseValidationTests.test_native_routing_and_measurement_permutation_preserve_logical_distribution) ... C:\Users\Sihan Chen\.conda\envs\qml\Lib\site-packages\qiskit\circuit\quantumcircuit.py:4704: UserWarning: Trying to add QuantumRegister to a QuantumCircuit having a layout
+  circ.add_register(qreg)
+ok
+test_scheduled_idle_noise_matches_analytic_T1_decay (test_ibm_noise_validation.IBMNoiseValidationTests.test_scheduled_idle_noise_matches_analytic_T1_decay) ... ok
+test_selected_target_matches_raw_calibration_units_and_gate_fidelity (test_ibm_noise_validation.IBMNoiseValidationTests.test_selected_target_matches_raw_calibration_units_and_gate_fidelity) ... ok
+
+----------------------------------------------------------------------
+Ran 32 tests in 21.638s
+
+OK

@@ -1,0 +1,103 @@
+{
+  "noise_profiles": {
+    "ideal": {
+      "one_qubit_depolarizing": 0.0,
+      "two_qubit_depolarizing": 0.0,
+      "readout_flip": 0.0
+    },
+    "low": {
+      "one_qubit_depolarizing": 0.0001,
+      "two_qubit_depolarizing": 0.001,
+      "readout_flip": 0.005
+    },
+    "medium": {
+      "one_qubit_depolarizing": 0.001,
+      "two_qubit_depolarizing": 0.01,
+      "readout_flip": 0.02
+    },
+    "high": {
+      "one_qubit_depolarizing": 0.005,
+      "two_qubit_depolarizing": 0.05,
+      "readout_flip": 0.05
+    },
+    "medium_gate_only": {
+      "one_qubit_depolarizing": 0.001,
+      "two_qubit_depolarizing": 0.01,
+      "readout_flip": 0.0
+    },
+    "medium_readout_only": {
+      "one_qubit_depolarizing": 0.0,
+      "two_qubit_depolarizing": 0.0,
+      "readout_flip": 0.02
+    }
+  },
+  "basis_gates": [
+    "u",
+    "cx"
+  ],
+  "connectivity": "all-to-all synthetic",
+  "fixed_circuit_checks": {
+    "fixed_circuits": 288,
+    "noise_profiles": 6,
+    "input_variants": 3,
+    "gate_patterns": [
+      "none",
+      "cross",
+      "mutation",
+      "both"
+    ],
+    "shots": 1024,
+    "sampling_repeats": 5,
+    "max_compile_probability_error": 2.025823953033523e-12,
+    "max_sampling_bound_ratio": 0.6351211491174602,
+    "sampling_check": "Every aggregate frequency within 6*binomial_SE + 6/(shots*repeats).",
+    "elapsed_seconds": 13.746670300000005
+  },
+  "training": {
+    "source_rows": 1701,
+    "selected_rows": 1657,
+    "calibrator_rows": 77,
+    "covariance": "full STAT+SYS",
+    "covariance_validation": {
+      "max_source_asymmetry": 3.0000000000038676e-08,
+      "relative_source_asymmetry": 1.4853575301770363e-07,
+      "treatment": "(C + C.T) / 2 before Cholesky; all correlations retained"
+    },
+    "quadrature_error_mag": 7.105427357601002e-15,
+    "generations": 100,
+    "seeds": [
+      7,
+      17,
+      27
+    ],
+    "classical_reference_only": {
+      "p": [
+        73.53278385986329,
+        0.3318120912404871,
+        -19.24405748751743
+      ],
+      "chi2": 1452.0159499801798,
+      "success": true,
+      "method": "GLS profile in M and -5log10(H0/70); golden-section Omega_m search"
+    }
+  },
+  "elapsed_seconds": 255.1978607000001,
+  "versions": {
+    "numpy": "2.0.1",
+    "qiskit": "2.3.0",
+    "qiskit_aer": "0.17.2"
+  },
+  "sha256": {
+    "aeqga.py": "4969958e306a5084b2004b99e7743023dd52551a34600147e5a84c565ae44b4f",
+    "aeqga_noise.py": "8d6cb130ac456791624685d9082df56143ec2fe58881c6ad91a9ae8e55527005",
+    "run_noise_validation.py": "14153391c6d4c325005241d901ad8cec323c223b8cde133a607df848a8acce5f",
+    "Pantheon+_Data\\4_DISTANCES_AND_COVAR\\Pantheon+SH0ES.dat": "1cb0fc379ef066afdc2ffd1857681cc478024570d8a3eba284fb645775198cf8",
+    "Pantheon+_Data\\4_DISTANCES_AND_COVAR\\Pantheon+SH0ES_STAT+SYS.cov": "abf806d966485e64afdb359c87bffc0ecc00d05eff0a31ced66f247385df0fdc"
+  },
+  "checks_note": "Fixed-circuit metrics regenerated with one compiled ideal decode baseline; training results are unchanged.",
+  "verification": {
+    "unit_tests_passed": 27,
+    "training_export_checks_passed": 36,
+    "ideal_exact_decode_zero": true
+  }
+}

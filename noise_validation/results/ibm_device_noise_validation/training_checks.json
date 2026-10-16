@@ -1,0 +1,38 @@
+{
+  "runs": 72,
+  "generations": 100,
+  "shots": 1024,
+  "seeds": [
+    7,
+    17,
+    27
+  ],
+  "parallel_workers": 3,
+  "source_rows": 1701,
+  "selected_rows": 1657,
+  "calibrator_rows": 77,
+  "reference": {
+    "p": [
+      73.53278385986329,
+      0.3318120912404871,
+      -19.24405748751743
+    ],
+    "chi2": 1452.0159499801798,
+    "success": true,
+    "method": "GLS profile in M and -5log10(H0/70); golden-section Omega_m search"
+  },
+  "quadrature_max_error_mag": 7.105427357601002e-15,
+  "covariance_validation": {
+    "max_source_asymmetry": 3.0000000000038676e-08,
+    "relative_source_asymmetry": 1.4853575301770363e-07,
+    "treatment": "(C + C.T) / 2 before Cholesky; all correlations retained"
+  },
+  "record_validation": {
+    "verified_runs": 72,
+    "candidate_rows": 218160,
+    "quantum_histograms": 43200,
+    "matched_initial_population_groups": 12,
+    "independent_rescore_max_abs_error": 3.2378011383116245e-10,
+    "scope": "Every row checked for shape, finiteness and bounds; every generation checked for optimum; 12 spread candidates and final optimum independently rescored per run."
+  }
+}

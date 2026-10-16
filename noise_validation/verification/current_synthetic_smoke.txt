@@ -1,0 +1,31 @@
+FIXED circuits: ideal
+FIXED circuits: low
+FIXED circuits: medium
+FIXED circuits: high
+FIXED circuits: medium_gate_only
+FIXED circuits: medium_readout_only
+TRAIN population=8, seed=7, profile=ideal
+DONE {"population_size": 8, "population_bits": 3, "local_qubits": 2, "global_qubits": 2, "profile": "ideal", "seed": 7, "generations": 1, "shots": 32, "H0_km_s_Mpc": 69.35869905687443, "Omega_m": 0.2751185169149074, "M_mag": -19.41707066886768, "chi2": 1548.61289049714, "independent_chi2": 1548.612890497139, "fitness_evaluations": 14, "aer_circuits": 6, "elapsed_seconds": 0.18412329999955546}
+TRAIN population=8, seed=7, profile=medium
+DONE {"population_size": 8, "population_bits": 3, "local_qubits": 2, "global_qubits": 2, "profile": "medium", "seed": 7, "generations": 1, "shots": 32, "H0_km_s_Mpc": 69.41176470588235, "Omega_m": 0.31333333333333335, "M_mag": -19.372332297069814, "chi2": 1472.0963543647906, "independent_chi2": 1472.0963543647904, "fitness_evaluations": 14, "aer_circuits": 6, "elapsed_seconds": 0.2662289999989298}
+TRAIN population=8, seed=7, profile=high
+DONE {"population_size": 8, "population_bits": 3, "local_qubits": 2, "global_qubits": 2, "profile": "high", "seed": 7, "generations": 1, "shots": 32, "H0_km_s_Mpc": 68.26859465081318, "Omega_m": 0.2665279665683969, "M_mag": -19.42194966362329, "chi2": 1501.9717245427964, "independent_chi2": 1501.9717245427978, "fitness_evaluations": 14, "aer_circuits": 6, "elapsed_seconds": 0.17731890000140993}
+TRAIN population=16, seed=7, profile=ideal
+DONE {"population_size": 16, "population_bits": 4, "local_qubits": 2, "global_qubits": 3, "profile": "ideal", "seed": 7, "generations": 1, "shots": 32, "H0_km_s_Mpc": 72.24744871391589, "Omega_m": 0.33099038831004346, "M_mag": -19.309829258371156, "chi2": 1509.4110957483372, "independent_chi2": 1509.4110957483372, "fitness_evaluations": 28, "aer_circuits": 6, "elapsed_seconds": 0.2065549999988434}
+TRAIN population=16, seed=7, profile=medium
+DONE {"population_size": 16, "population_bits": 4, "local_qubits": 2, "global_qubits": 3, "profile": "medium", "seed": 7, "generations": 1, "shots": 32, "H0_km_s_Mpc": 72.24744871391589, "Omega_m": 0.3138555443517048, "M_mag": -19.297980716555685, "chi2": 1463.0178604905964, "independent_chi2": 1463.0178604905961, "fitness_evaluations": 28, "aer_circuits": 6, "elapsed_seconds": 0.23196159999861266}
+TRAIN population=16, seed=7, profile=high
+DONE {"population_size": 16, "population_bits": 4, "local_qubits": 2, "global_qubits": 3, "profile": "high", "seed": 7, "generations": 1, "shots": 32, "H0_km_s_Mpc": 72.74754878398196, "Omega_m": 0.32258790773713275, "M_mag": -19.297980716555685, "chi2": 1509.5857914036847, "independent_chi2": 1509.5857914036837, "fitness_evaluations": 28, "aer_circuits": 6, "elapsed_seconds": 0.22464310000032128}
+TRAIN population=32, seed=7, profile=ideal
+DONE {"population_size": 32, "population_bits": 5, "local_qubits": 3, "global_qubits": 4, "profile": "ideal", "seed": 7, "generations": 1, "shots": 32, "H0_km_s_Mpc": 71.72603939955857, "Omega_m": 0.3828427124746191, "M_mag": -19.26458980337503, "chi2": 1481.7214598566054, "independent_chi2": 1481.7214598566047, "fitness_evaluations": 56, "aer_circuits": 6, "elapsed_seconds": 0.303557199998977}
+TRAIN population=32, seed=7, profile=medium
+DONE {"population_size": 32, "population_bits": 5, "local_qubits": 3, "global_qubits": 4, "profile": "medium", "seed": 7, "generations": 1, "shots": 32, "H0_km_s_Mpc": 68.57142857142857, "Omega_m": 0.42000000000000004, "M_mag": -19.353089905901214, "chi2": 1505.5262649665924, "independent_chi2": 1505.5262649665935, "fitness_evaluations": 56, "aer_circuits": 6, "elapsed_seconds": 0.4489800000010291}
+TRAIN population=32, seed=7, profile=high
+DONE {"population_size": 32, "population_bits": 5, "local_qubits": 3, "global_qubits": 4, "profile": "high", "seed": 7, "generations": 1, "shots": 32, "H0_km_s_Mpc": 68.57142857142857, "Omega_m": 0.30000000000000004, "M_mag": -19.400000000000002, "chi2": 1484.7454800498695, "independent_chi2": 1484.7454800498695, "fitness_evaluations": 56, "aer_circuits": 6, "elapsed_seconds": 0.30531150000024354}
+TRAIN population=64, seed=7, profile=ideal
+DONE {"population_size": 64, "population_bits": 6, "local_qubits": 4, "global_qubits": 5, "profile": "ideal", "seed": 7, "generations": 1, "shots": 32, "H0_km_s_Mpc": 68.89598048853559, "Omega_m": 0.30000000000000004, "M_mag": -19.412661595494985, "chi2": 1506.9158220438335, "independent_chi2": 1506.9158220438335, "fitness_evaluations": 112, "aer_circuits": 6, "elapsed_seconds": 0.7269182000000001}
+TRAIN population=64, seed=7, profile=medium
+DONE {"population_size": 64, "population_bits": 6, "local_qubits": 4, "global_qubits": 5, "profile": "medium", "seed": 7, "generations": 1, "shots": 32, "H0_km_s_Mpc": 67.56360657581642, "Omega_m": 0.38507027042458597, "M_mag": -19.400000000000002, "chi2": 1498.5640383836321, "independent_chi2": 1498.564038383633, "fitness_evaluations": 112, "aer_circuits": 6, "elapsed_seconds": 0.6192135000001144}
+TRAIN population=64, seed=7, profile=high
+DONE {"population_size": 64, "population_bits": 6, "local_qubits": 4, "global_qubits": 5, "profile": "high", "seed": 7, "generations": 1, "shots": 32, "H0_km_s_Mpc": 78.2670972306209, "Omega_m": 0.4208146311989135, "M_mag": -19.07338518001028, "chi2": 1508.3235894151276, "independent_chi2": 1508.323589415128, "fitness_evaluations": 112, "aer_circuits": 6, "elapsed_seconds": 0.6628416999992623}
+COMPLETE C:\Users\Sihan Chen\Desktop\QML\tmp\noise_upload_checks\current_synthetic_smoke

@@ -1,0 +1,7 @@
+qiskit==2.3.0
+qiskit-aer==0.17.2
+numpy==2.0.1
+scipy==1.17.1
+pandas==3.0.2
+matplotlib==3.10.8
+threadpoolctl==3.5.0

@@ -1,0 +1,17 @@
+{
+  "fixed_circuits": 288,
+  "noise_profiles": 6,
+  "input_variants": 3,
+  "gate_patterns": [
+    "none",
+    "cross",
+    "mutation",
+    "both"
+  ],
+  "shots": 1024,
+  "sampling_repeats": 5,
+  "max_compile_probability_error": 2.025823953033523e-12,
+  "max_sampling_bound_ratio": 0.6351211491174602,
+  "sampling_check": "Every aggregate frequency within 6*binomial_SE + 6/(shots*repeats).",
+  "elapsed_seconds": 13.746670300000005
+}

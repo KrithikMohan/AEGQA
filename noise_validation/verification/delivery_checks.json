@@ -1,0 +1,18 @@
+{
+  "tests_passed": {
+    "current_tests": 41,
+    "historical_ibm_tests": 32,
+    "historical_synthetic_tests": 27
+  },
+  "smoke_configuration": {
+    "generations": 1,
+    "shots": 32,
+    "seeds": [
+      7
+    ],
+    "input_repeats": 1,
+    "sample_repeats": 1
+  },
+  "ibm_snapshot_integrity": "All files in the original IBM SHA256SUMS.txt checked by verify_bundle.py.",
+  "historical_experiment_outputs": "Copied without changes; smoke outputs are separate and do not replace them."
+}
