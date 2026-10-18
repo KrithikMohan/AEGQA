@@ -1,80 +1,91 @@
-# AEQGA cosmological parameter estimation
+# AEQGA — Amplitude-Encoded Quantum Genetic Algorithm
+### Applied to Pantheon SNe Ia Cosmological Parameter Estimation
 
-Implementation of Sarracino et al.'s [AEQGA paper](https://arxiv.org/html/2602.15459v1), adapted from [HQGA](https://github.com/Quasar-UniNA/HQGA).
+Implementation of the AEQGA described in:
+> Sarracino et al., *"A Quantum Genetic Algorithm with application to
+> Cosmological Parameters Estimation"*, arXiv:2602.15459 (2026)
 
-## Project layout
+Adapted from the Quasar-UniNA HQGA repository:
+https://github.com/Quasar-UniNA/HQGA
+
+## Architecture
 
 ```
+aeqga_algorithm.py                      — Main AEQGA loop (Alg.1) supporting simulation & QPU injection
+amplitude_encoding.py                   — Amplitude encoding via qiskit.initialize() (§3.1, Eq.11)
+                                          + basis-state count decoding (Eq.16/17-18)
+quantum_gates.py                        — CRy(π/2) crossover (Eq.12-14) + Rx(π/2) mutation (Eq.15)
+pantheon_problem.py                     — SNe Ia χ² likelihood + Pantheon+ support + BAO/CMB stubs (§2)
+run_pantheon_aeqga.py                   — End-to-end simulation runner
+test_pantheon_aeqga.py                  — Paper integration + quantum-correctness tests (T1-T4)
+code-summary.md                         — Full diagnosis, replication plan, and hardware documentation
+
 aeqga/
-  steps/
-    selection/          # Classical elites, duplicates, fresh random individuals
-    encoding/           # L2 normalization and amplitude state preparation
-    genetic_operators/  # Bidirectional CRY crossover and RX mutation
-    decoding/           # Measured counts to classical parameters
-    evolution/          # Fitness evaluation, generation loop, history and best fit
-  likelihoods/          # Calibrated Pantheon+, BAO, Planck TT, distances
-  emulators/            # Checksum-pinned PICO runtime
-  experiments/          # Seeded independent runs and strict atomic checkpoints
-  integrations/         # Bidirectional HQGA objective and Gray-code adapters
-  visualization/        # Publication-style circuit drawing
-  paths.py              # Working-directory-independent data/output locations
-scripts/                # Experiment runners, data fetch, benchmark, environment setup
-tests/                  # Offline, layout and real-data regression tests
-notebooks/              # Current calibrated workflow; costly branches are opt-in
-docs/                   # Replication specification, methodology report, original diagnosis
-outputs/
-  png/                  # Circuit, convergence and contour raster figures
-  svg/                  # Vector circuit diagrams
-  pdf/                  # Printable circuit diagrams
-  json/                 # Numerical results and benchmark reports
-sn_data/                # External SNe data repository (ignored)
-data/                   # External CMB/model and BAO reference downloads (ignored)
+  execution/ibm_sampler.py              — IBMSamplerExecutor, DryRunExecutor, CheckpointManager
+  steps/                                — Modular pipeline (encoding, operators, decoding, evolution)
+  likelihoods/pantheon_problem.py       — PantheonPlusProblem offline calibrated likelihood
+  analysis/circuit_comparison.py        — Controlled same-circuit MC ensemble & QPU comparison
+
+scripts/
+  test_hardware_compilation.py          — 156-qubit Heron transpilation & Aer MPS numerical check
+  test_full_generation.py               — Full offline 1-generation execution test
+  compare_generation_populations.py     — Finite-shot MC ensemble vs hardware comparison
+  recover_ibm_job.py                    — Idempotent job recovery & count parsing
+  ibm_preflight.py                      — Offline-safe credentials & backend inspector
+  run_ibm_generation.py                 — Guarded generation runner (defaults to dry-run)
+
+tests/test_ibm_adapter.py               — 13 automated unit & integration tests
+docs/IBM_HARDWARE.md                    — Comprehensive IBM Quantum hardware integration guide
 ```
 
-The generation cycle is fitness evaluation → selection/duplication → amplitude encoding → genetic gates → measurement/decoding → recombination. Each parameter and subset has its own circuit; 25% of individuals bypass the circuit as unchanged elites.
+## Key Points
 
-## Setup and execution
+- **Amplitude encoding** uses `qiskit.initialize()` on normalized vectors (not RY angle encoding).
+- **Population size must be a power of two** (`n_p = 2^k`), required for `log₂(n_p)` qubit allocation.
+- **Dual-circuit structure**: 25% elite (bypass), 25% duplicate (circuit A), 50% random (circuit B).
+- **Search ranges** per paper §3: `Ω_M ∈ [0.0, 0.5]`, `H0 ∈ [60, 80]`.
+- **Optimal gate probabilities**: `p_cross = p_mut = 0.5` (paper §4.1).
+- **Hybrid CPU/QPU execution**: Classical CPU performs population management, likelihood evaluations, elitism, and decoding; IBM QPU executes amplitude state preparation, crossover, mutation, and measurement.
+- **Four-circuit batching**: Each generation batches 4 circuits in width order `[4, 3, 4, 3]` into a single Sampler call. Generations remain strictly sequential.
+- **156-qubit device compatibility**: Classical register validation compares against logical circuit width (3 or 4 bits), ensuring compatibility with 156-qubit Heron processors.
+- **Zero-hardware-submission safety**: All tests, preflight scripts, and runners default to offline simulation (`DryRunExecutor`). Physical submission requires explicit confirmation flags.
 
-From the repository root:
+## Requirements
 
+Core simulation:
 ```bash
-python3 -m venv venv
-source venv/bin/activate
-python -m pip install -e .
-git clone https://github.com/CobayaSampler/sn_data.git sn_data
-python -m scripts.fetch_cmb_data
-python -m scripts.run_pantheon_aeqga --pop 8 --gen 2 --shots 512 --no-contour
-python -m scripts.run_bao_cmb_aeqga --backend camb --classical-only
-python -m scripts.benchmark_replication
-python -m scripts.run_sne_ensemble --runs 300 --name sne_production
-python -m aeqga.visualization.circuit_diagram
+pip install -r requirements.txt
 ```
 
-Use module commands (`python -m …`), not the former root-level script paths. Alternatively, `python -m scripts.setup_env` prepares the root virtual environment. Editable installation lets the package and notebook imports work outside the repository root. Default data/output paths always resolve relative to the repository.
-
-## Tests
-
+IBM Quantum hardware execution / Runtime:
 ```bash
-OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 python -m unittest discover -s tests -v
-python -m tests.test_quantum_primitives
+pip install -r requirements-ibm.txt
 ```
 
-Real-data regression tests are explicitly skipped if their downloads are absent. Fetch both datasets/model before a full integration run. Offline distance, gate, encoding and decoding checks are included in unittest discovery.
+## Usage
 
-## Scientific scope and limitations
+### Simulation & Paper Tests
+```bash
+python run_pantheon_aeqga.py --data sn_data/Pantheon
+python run_pantheon_aeqga.py --fast
+python test_pantheon_aeqga.py --data sn_data/Pantheon
+```
 
-Default SNe estimation uses calibrated Pantheon+ distance moduli and the total covariance; H0 is identifiable. CMB+BAO runs separately and never includes SNe. The notebook checks real inputs without mock fallback and now defaults to 32 individuals, 50 updates and a resumable 300-run SNe ensemble. CMB, exact-probability and native HQGA runs remain opt-in. MODE="demo" explicitly selects the shorter exploratory workflow.
+### IBM Hardware Integration & Offline Tests
+```bash
+# Run full automated test suite (13 tests)
+python -m unittest discover -s tests -p "test_*.py" -v
 
-Strict `--backend pico` rejects points outside the public model's training domain. `camb` and `hybrid` are explicit reference alternatives, not claims of an exact match to the paper's unidentified emulator. Likelihood contours, descriptive covariance ellipses and mass-integrated KDE regions are now separately labeled. Optimizer scatter is never claimed as posterior uncertainty.
+# Test 156-qubit compilation diagnostics and Aer MPS equivalence
+python scripts/test_hardware_compilation.py
 
-Start with `jupyter notebook notebooks/AEQGA.ipynb`, then Run All for the configured paper-sized SNe workflow. The notebook saves `notebook_`-prefixed figures and current JSON records and never loads the old legacy output files. Deprecated APIs and the old `--dataset pantheon` path were retired; see the [feature audit and future implementation decisions](docs/DEPRECATED_CODE.md).
+# Test full offline generation execution
+python scripts/test_full_generation.py
 
-The notebook and ensemble CLI use provenance-checked atomic checkpoints. The explicit fast CPU quantum simulation evaluates post-gate states and samples finite-shot counts; `--engine aer` selects native Aer instead. Choose a new experiment name if changing data, settings, engine or scientific source. Every run's populations, best-pair/chi-squared histories and seed remain available. Shared figures export PNG/SVG/PDF.
+# Run controlled same-circuit statistical comparison (MC ensemble vs QPU)
+python scripts/compare_generation_populations.py
+```
 
-Raw SNe chi-squared near 1753 is expected for the configured 1701-row objective. Convergence is assessed by the excess above the verified minimum near 1752.904, not by forcing the raw value toward zero. See the [tasks 8–12 report](docs/TASKS_8_TO_12_REPORT.md) for actual 300-run results, exact plot-data checks, residual optimizer bias and remaining CMB limitations.
+## Note
 
-See the [replication specification](docs/REPLICATION_SPEC.md) and [tasks 1–7 methodology/report](docs/TASKS_1_TO_7_REPORT.md). The [original diagnosis](docs/code-summary.md) is historical and may describe deficiencies that have since been fixed.
-
-HQGA interoperability is retained in a separate tested bridge. See [connection examples and comparison methodology](docs/HQGA_INTEGRATION.md) for using existing HQGA objectives in AEQGA or the same calibrated cosmology objective in HQGA's native runner. The notebook includes a Gray-code contract check and an opt-in HQGA run; legacy HQGA runtime compatibility requires a separate compatible environment or an explicit execution-layer port.
-
-Generated scientific PNG/SVG/PDF/JSON results and downloaded datasets/models stay local; previously tracked SVG/PDF circuit examples remain preserved.
+This implementation covers the **SNe Ia** component (paper §2.1) with both Pantheon and Pantheon+ likelihoods. BAO (§2.2) and CMB (§2.3) paths are stubbed for future extension. See `docs/IBM_HARDWARE.md` and `code-summary.md` for complete technical details.
