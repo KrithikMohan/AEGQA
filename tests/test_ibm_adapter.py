@@ -48,8 +48,8 @@ from aeqga.analysis import (
     generate_frozen_generation_circuits,
     compute_circuit_ideal_probabilities,
 )
-from pantheon_problem import PantheonPlusProblem
-from aeqga_algorithm import AEQGAParameters, run_aeqga_dual
+from aeqga.likelihoods.pantheon_problem import PantheonPlusProblem
+from aeqga.steps.evolution.aeqga_algorithm import AEQGAParameters, run_aeqga_dual
 
 
 class TestIBMAdapter(unittest.TestCase):
@@ -185,6 +185,12 @@ class TestIBMAdapter(unittest.TestCase):
         fps1 = [compute_circuit_fingerprint(c) for c in c1]
         fps2 = [compute_circuit_fingerprint(c) for c in c2]
         self.assertEqual(fps1, fps2)
+
+    def test_fingerprint_changes_with_encoded_amplitudes(self):
+        from aeqga.steps.encoding.amplitude_encoding import build_amplitude_circuit
+        first = build_amplitude_circuit(np.arange(1., 9.))
+        second = build_amplitude_circuit(np.arange(11., 19.))
+        self.assertNotEqual(compute_circuit_fingerprint(first), compute_circuit_fingerprint(second))
 
     def test_ideal_probability_equivalence_after_transpilation(self):
         """Test Aer MPS simulation verifies ideal output probability equivalence."""

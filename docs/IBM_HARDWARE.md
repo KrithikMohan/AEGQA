@@ -66,9 +66,9 @@ AEQGA is a hybrid classical-quantum optimizer. The division of responsibilities 
 The core evolution algorithm exposes a pluggable `hardware_executor` keyword argument in `run_aeqga_dual`:
 
 ```python
-from aeqga_algorithm import AEQGAParameters, run_aeqga_dual
+from aeqga.steps.evolution.aeqga_algorithm import AEQGAParameters, run_aeqga_dual
 from aeqga.execution.ibm_sampler import IBMSamplerExecutor, DryRunExecutor
-from pantheon_problem import PantheonPlusProblem
+from aeqga.likelihoods.pantheon_problem import PantheonPlusProblem
 
 problem = PantheonPlusProblem()
 params = AEQGAParameters(pop_size=32, max_gen=1, num_shots=1024)
@@ -226,3 +226,12 @@ Run full generation offline test:
 ```bash
 python scripts/test_full_generation.py
 ```
+
+## Consolidated notebook and environment
+
+Use `notebooks/AEQGA.ipynb`, Part 13, for offline rehearsal and opt-in physical
+execution on the calibrated Pantheon+ objective. The former root notebook has
+been removed. Install `requirements.txt` for both simulation and IBM execution;
+`requirements-ibm.txt` now delegates to it. Select the `Python (AEQGA venv)`
+kernel after registering it with `python -m ipykernel install --sys-prefix
+--name aeqga --display-name "Python (AEQGA venv)"`.

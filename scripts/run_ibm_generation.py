@@ -17,8 +17,8 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from pantheon_problem import PantheonPlusProblem
-from aeqga_algorithm import AEQGAParameters, run_aeqga_dual
+from aeqga.likelihoods.pantheon_problem import PantheonPlusProblem
+from aeqga.steps.evolution.aeqga_algorithm import AEQGAParameters, run_aeqga_dual
 from aeqga.execution.ibm_sampler import IBMSamplerExecutor, DryRunExecutor
 
 

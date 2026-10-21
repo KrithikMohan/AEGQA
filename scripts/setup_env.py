@@ -38,6 +38,8 @@ def main():
 
     # Detect Python version
     python_cmd = sys.executable
+    if sys.version_info < (3, 12):
+        raise SystemExit("The pinned AEQGA environment requires Python 3.12 or newer.")
     print(f"\nPython: {python_cmd} ({sys.version.split()[0]})")
 
     # Create virtual environment
@@ -49,11 +51,11 @@ def main():
             shutil.rmtree(VENV_DIR)
             print("Removed existing venv.")
         else:
-            print("Keeping existing venv.")
-            return
+            print("Updating dependencies in existing venv.")
 
     print(f"\nCreating virtual environment at {VENV_DIR} ...")
-    run([python_cmd, "-m", "venv", VENV_DIR])
+    if not os.path.exists(VENV_DIR):
+        run([python_cmd, "-m", "venv", VENV_DIR])
 
     # Determine pip path
     if platform.system() == "Windows":
@@ -72,12 +74,16 @@ def main():
     print(f"\nInstalling dependencies from {req_file} ...")
     run([pip, "install", "-r", req_file])
     run([python, "-m", "pip", "install", "--no-deps", "-e", PROJECT_DIR])
+    run([python, "-m", "ipykernel", "install", "--sys-prefix", "--name", "aeqga",
+         "--display-name", "Python (AEQGA venv)"])
+    run([python, "-m", "pip", "check"])
 
     # Verify installation
     print("\nVerifying installation ...")
     modules = [
         "qiskit",
         "qiskit_aer",
+        "qiskit_ibm_runtime",
         "numpy",
         "scipy",
         "camb",
@@ -85,6 +91,7 @@ def main():
         "matplotlib",
         "nbformat",
         "jupyter",
+        "ipykernel",
         "aeqga.steps.encoding.amplitude_encoding",
         "aeqga.steps.genetic_operators.quantum_gates",
         "aeqga.steps.decoding.measurement_decoding",

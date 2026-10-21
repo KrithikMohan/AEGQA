@@ -58,7 +58,9 @@ def compute_circuit_fingerprint(circuit: QuantumCircuit) -> str:
         op = instruction.operation
         q_indices = [circuit.find_bit(q).index for q in instruction.qubits]
         c_indices = [circuit.find_bit(c).index for c in instruction.clbits]
-        params_str = ",".join(f"{float(p):.8f}" for p in op.params if isinstance(p, (int, float, np.floating)))
+        # initialize() stores complex amplitudes even for real inputs. Include
+        # both components at full floating-point precision in checkpoint identity.
+        params_str = repr([(complex(p).real.hex(), complex(p).imag.hex()) for p in op.params])
         hasher.update(f"{op.name}:{q_indices}:{c_indices}:{params_str};".encode("utf-8"))
     return hasher.hexdigest()
 
@@ -253,7 +255,7 @@ class CheckpointManager:
         if int(saved_data.get("num_circuits", 0)) != expected_num_circuits:
             return False
         saved_fps = saved_data.get("circuit_fingerprints")
-        if saved_fps is not None and saved_fps != expected_fingerprints:
+        if saved_fps != expected_fingerprints:
             return False
         return True
 
