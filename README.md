@@ -25,9 +25,10 @@ an elite-copy quarter and a fresh random half pass through separate circuits.
   generation-level hardware recovery.
 
 **Use the `aeqga/` package.** Root-level `aeqga_algorithm.py`,
-`pantheon_problem.py` and `AEQGA.ipynb` are historical copies. In particular,
+`pantheon_problem.py` are historical copies. In particular,
 the root likelihood contains a synthetic fallback and is unsuitable for
-scientific hardware runs. The maintained notebook is `notebooks/AEQGA.ipynb`.
+scientific hardware runs. The maintained notebook is `notebooks/AEQGA.ipynb`;
+the obsolete root-level notebook has been removed.
 
 ## Layout
 
@@ -46,9 +47,10 @@ scientific hardware runs. The maintained notebook is `notebooks/AEQGA.ipynb`.
 ## Setup and simulation
 
 ```bash
-python -m pip install -e .
-# Additional pinned IBM environment requirements:
-python -m pip install -r requirements-ibm.txt
+# Python 3.12; simulation and IBM execution share the pinned environment.
+python -m pip install -r requirements.txt
+python -m pip install --no-deps -e .
+# requirements-ibm.txt is a compatibility alias for requirements.txt.
 
 # Obtain the real SNe inputs; no credentials are involved.
 git clone https://github.com/CobayaSampler/sn_data.git sn_data
