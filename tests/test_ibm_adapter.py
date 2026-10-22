@@ -186,6 +186,12 @@ class TestIBMAdapter(unittest.TestCase):
         fps2 = [compute_circuit_fingerprint(c) for c in c2]
         self.assertEqual(fps1, fps2)
 
+    def test_fingerprint_changes_with_encoded_amplitudes(self):
+        from aeqga.steps.encoding.amplitude_encoding import build_amplitude_circuit
+        first = build_amplitude_circuit(np.arange(1., 9.))
+        second = build_amplitude_circuit(np.arange(11., 19.))
+        self.assertNotEqual(compute_circuit_fingerprint(first), compute_circuit_fingerprint(second))
+
     def test_ideal_probability_equivalence_after_transpilation(self):
         """Test Aer MPS simulation verifies ideal output probability equivalence."""
         qc = QuantumCircuit(4)

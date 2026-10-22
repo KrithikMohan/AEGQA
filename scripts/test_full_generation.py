@@ -12,6 +12,7 @@ Validates:
 """
 
 import sys
+import numpy as np
 import shutil
 from pathlib import Path
 

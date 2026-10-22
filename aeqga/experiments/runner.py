@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import tempfile
+import warnings
 from time import perf_counter
 from importlib.metadata import version
 
@@ -42,6 +43,76 @@ def atomic_json(path, value):
         if os.path.exists(temporary): os.unlink(temporary)
 
 
+def _fingerprint(configuration):
+    return hashlib.sha256(json.dumps(configuration, sort_keys=True).encode()).hexdigest()
+
+
+def _configuration_changes(saved, current, prefix=""):
+    """Compact leaf-level diagnostics; no giant seed/data dumps in exceptions."""
+    changes = []
+    for key in sorted(set(saved) | set(current)):
+        field = f"{prefix}.{key}" if prefix else key
+        old, new = saved.get(key), current.get(key)
+        if isinstance(old, dict) and isinstance(new, dict):
+            changes.extend(_configuration_changes(old, new, field))
+        elif old != new:
+            def short(value):
+                text = repr(value)
+                return text if len(text) <= 100 else text[:97]+"..."
+            changes.append(f"{field}: saved={short(old)}, current={short(new)}")
+    return changes
+
+
+def _read_manifest(path):
+    try:
+        manifest = json.loads(path.read_text())
+    except (ValueError, OSError) as exc:
+        raise ValueError(f"Cannot read checkpoint {path}: {exc}") from exc
+    if (not isinstance(manifest, dict) or not isinstance(manifest.get("configuration"), dict)
+            or not isinstance(manifest.get("completed"), list)
+            or manifest.get("fingerprint") != _fingerprint(manifest["configuration"])):
+        raise ValueError(f"Checkpoint manifest is corrupt: {path}")
+    return manifest
+
+
+def _resolve_checkpoint(path, configuration, policy, resume):
+    """Keep strict callers strict; optionally isolate incompatible notebook runs."""
+    if policy not in {"strict", "namespace"}:
+        raise ValueError("checkpoint_policy must be strict or namespace")
+    fingerprint = _fingerprint(configuration)
+    manifest = None
+    if path.exists():
+        if not resume:
+            raise FileExistsError(f"Checkpoint exists: {path}; choose a new experiment name")
+        manifest = _read_manifest(path)
+        if manifest["fingerprint"] == fingerprint:
+            return path, manifest
+        changes = _configuration_changes(manifest["configuration"], configuration)
+        detail = "\n  - ".join(changes)
+        if policy == "strict":
+            raise ValueError(
+                f"Checkpoint configuration/data/source/version mismatch: {path}\n"
+                f"  - {detail}\nUse the original environment/configuration or set "
+                "checkpoint_policy='namespace' to create an isolated checkpoint; "
+                "old results will not be overwritten.")
+        warnings.warn(f"Checkpoint settings changed:\n  - {detail}\n"
+                      "Using a separate configuration-specific checkpoint; old results are preserved.",
+                      UserWarning, stacklevel=3)
+    if policy == "namespace":
+        # Full fingerprint prevents different settings/versions sharing a run directory.
+        # Keep an extension even if the caller omits one: with_suffix('.runs')
+        # must not mistake the fingerprint itself for a file extension.
+        path = path.with_name(f"{path.stem}.{fingerprint}{path.suffix or '.json'}")
+        manifest = None
+        if path.exists():
+            if not resume:
+                raise FileExistsError(f"Checkpoint exists: {path}; choose a new experiment name")
+            manifest = _read_manifest(path)
+            if manifest["fingerprint"] != fingerprint:
+                raise ValueError(f"Configuration-specific checkpoint identity mismatch: {path}")
+    return path, manifest
+
+
 def validate_history(problem, params, record):
     """Recompute every logged pair, check bounds, elitism and final consistency."""
     history = np.asarray(record["best_history"], dtype=float)
@@ -66,11 +137,14 @@ def validate_history(problem, params, record):
 
 
 def run_ensemble(problem, params, seeds, checkpoint, *, provenance,
-                 execution_mode="statevector_shots", resume=True, progress=None):
+                 execution_mode="statevector_shots", resume=True, progress=None,
+                 checkpoint_policy="strict"):
     """Return ALL samples/histories; never reuse mismatched or corrupt checkpoints.
 
     Each completed run is atomically saved before the manifest is advanced.
     A crash at that boundary reruns only the uncommitted run. Single-writer API.
+    With checkpoint_policy='namespace', changed configurations use a different
+    fingerprint-named checkpoint, preserving old runs. Strict remains default.
     """
     params._validate()
     seeds = list(seeds)
@@ -85,14 +159,14 @@ def run_ensemble(problem, params, seeds, checkpoint, *, provenance,
                          source_sha256=scientific_source_digest(),
                          versions={name: version(name) for name in
                                    ["numpy", "scipy", "qiskit", "qiskit-aer"]})
-    fingerprint = hashlib.sha256(json.dumps(configuration, sort_keys=True).encode()).hexdigest()
+    # Snapshot nested input dictionaries rather than retaining mutable aliases.
+    configuration = json.loads(json.dumps(configuration, sort_keys=True))
+    fingerprint = _fingerprint(configuration)
+    checkpoint, saved_manifest = _resolve_checkpoint(
+        checkpoint, configuration, checkpoint_policy, resume)
     manifest = dict(configuration=configuration, fingerprint=fingerprint, completed=[])
-    if checkpoint.exists():
-        if not resume:
-            raise FileExistsError("Checkpoint exists; choose a new experiment name")
-        manifest = json.loads(checkpoint.read_text())
-        if manifest.get("fingerprint") != fingerprint:
-            raise ValueError("Checkpoint configuration/data/source/version mismatch")
+    if saved_manifest is not None:
+        manifest = saved_manifest
     directory = checkpoint.with_suffix(".runs")
     completed = manifest["completed"]
     if completed != list(range(len(completed))) or len(completed) > len(seeds):
@@ -122,7 +196,7 @@ def run_ensemble(problem, params, seeds, checkpoint, *, provenance,
         records.append(record)
         if progress: progress(index+1, len(seeds))
     points = np.asarray([r["best_x"] for r in records])
-    return dict(configuration=configuration, fingerprint=fingerprint, runs=records,
+    return dict(configuration=configuration, fingerprint=fingerprint, checkpoint=str(checkpoint), runs=records,
                 mean=points.mean(axis=0).tolist(), std_ddof0=points.std(axis=0).tolist(),
                 covariance_ddof1=(np.cov(points.T, ddof=1).tolist() if len(seeds)>1 else None),
                 interpretation="independent optimizer outcomes, not posterior samples")
