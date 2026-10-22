@@ -147,6 +147,7 @@ def run_finite_shot_ensemble(
     n_samples: int = 1000,
     shots: int = 1024,
     ensemble_seed: int = 12345,
+    elite_margin: float = 0.0,
 ) -> dict[str, Any]:
     """Execute controlled ideal finite-shot ensemble on fixed circuits.
 
@@ -204,9 +205,9 @@ def run_finite_shot_ensemble(
 
             n_min_e = float(np.min(P_elite[:, d]))
             n_max_e = float(np.max(P_elite[:, d]))
-            margin = 0.05 * (n_max_e - n_min_e) if n_max_e > n_min_e else 0.05
-            n_min_e -= margin
-            n_max_e += margin
+            margin = elite_margin * (n_max_e - n_min_e)
+            n_min_e = max(float(lower[d]), n_min_e-margin)
+            n_max_e = min(float(upper[d]), n_max_e+margin)
             decoded_elite[:, d] = decode_elite_subset(
                 c_elite, n_q_elite, n_min_e, n_max_e, n_elite
             )
@@ -247,6 +248,7 @@ def compare_counts_against_ensemble(
     ensemble_results: dict[str, Any],
     initial_pop: np.ndarray,
     simulator_final_pop: np.ndarray | None = None,
+    elite_margin: float = 0.0,
 ) -> dict[str, Any]:
     """Compare real hardware counts against the controlled ideal finite-shot ensemble.
 
@@ -303,9 +305,9 @@ def compare_counts_against_ensemble(
 
         n_min_e = float(np.min(P_elite[:, d]))
         n_max_e = float(np.max(P_elite[:, d]))
-        margin = 0.05 * (n_max_e - n_min_e) if n_max_e > n_min_e else 0.05
-        n_min_e -= margin
-        n_max_e += margin
+        margin = elite_margin * (n_max_e - n_min_e)
+        n_min_e = max(float(lower[d]), n_min_e-margin)
+        n_max_e = min(float(upper[d]), n_max_e+margin)
         decoded_elite[:, d] = decode_elite_subset(
             c_elite, n_q_elite, n_min_e, n_max_e, n_elite
         )

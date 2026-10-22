@@ -48,8 +48,8 @@ from aeqga.analysis import (
     generate_frozen_generation_circuits,
     compute_circuit_ideal_probabilities,
 )
-from pantheon_problem import PantheonPlusProblem
-from aeqga_algorithm import AEQGAParameters, run_aeqga_dual
+from tests.test_hardware_workflow import ToyProblem
+from aeqga.steps.evolution.aeqga_algorithm import AEQGAParameters, run_aeqga_dual
 
 
 class TestIBMAdapter(unittest.TestCase):
@@ -144,7 +144,7 @@ class TestIBMAdapter(unittest.TestCase):
 
     def test_four_circuit_ordering(self):
         """Validates that 4-circuit generation batch has widths [4, 3, 4, 3]."""
-        prob = PantheonPlusProblem()
+        prob = ToyProblem()
         _, _, circuits, meta = generate_frozen_generation_circuits(
             prob, pop_size=32, seed=42
         )
@@ -155,7 +155,7 @@ class TestIBMAdapter(unittest.TestCase):
 
     def test_offline_generation_execution(self):
         """Test a full 1-generation AEQGA run using DryRunExecutor."""
-        prob = PantheonPlusProblem()
+        prob = ToyProblem()
         params = AEQGAParameters(
             pop_size=32,
             max_gen=1,
@@ -178,7 +178,7 @@ class TestIBMAdapter(unittest.TestCase):
 
     def test_deterministic_circuit_construction(self):
         """Test deterministic circuit construction produces identical fingerprints."""
-        prob = PantheonPlusProblem()
+        prob = ToyProblem()
         _, _, c1, _ = generate_frozen_generation_circuits(prob, pop_size=32, seed=42)
         _, _, c2, _ = generate_frozen_generation_circuits(prob, pop_size=32, seed=42)
 
@@ -280,7 +280,7 @@ class TestIBMAdapter(unittest.TestCase):
 
     def test_preservation_of_existing_aer_and_statevector_modes(self):
         """Verify standard Aer and statevector execution pathways remain fully intact."""
-        prob = PantheonPlusProblem()
+        prob = ToyProblem()
         params = AEQGAParameters(pop_size=8, max_gen=2, num_shots=100, progress_bar=False)
 
         # 1. Aer mode

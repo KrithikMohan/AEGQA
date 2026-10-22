@@ -17,6 +17,10 @@ from __future__ import annotations
 import os
 import json
 import hashlib
+import io
+import numbers
+import time
+from importlib.metadata import version, PackageNotFoundError
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
@@ -24,7 +28,7 @@ from typing import Any, Sequence
 
 import numpy as np
 import qiskit
-from qiskit import QuantumCircuit, transpile
+from qiskit import QuantumCircuit, transpile, qpy
 from qiskit.quantum_info import Statevector
 from qiskit_aer import AerSimulator
 
@@ -38,11 +42,17 @@ def get_provenance_metadata() -> dict[str, str]:
         ).strip()
     except Exception:
         pass
-    return {
+    metadata = {
         "git_sha": git_sha,
         "qiskit_version": str(getattr(qiskit, "__version__", "unknown")),
         "numpy_version": str(np.__version__),
     }
+    for package in ("qiskit-aer", "qiskit-ibm-runtime", "scipy"):
+        try:
+            metadata[package] = version(package)
+        except PackageNotFoundError:
+            metadata[package] = "not installed"
+    return metadata
 
 
 def compute_circuit_fingerprint(circuit: QuantumCircuit) -> str:
@@ -50,17 +60,13 @@ def compute_circuit_fingerprint(circuit: QuantumCircuit) -> str:
 
     Hashes qubit count, classical register structure, and instruction sequence.
     """
-    hasher = hashlib.sha256()
-    hasher.update(f"qubits:{circuit.num_qubits};clbits:{circuit.num_clbits};".encode("utf-8"))
-    for creg in circuit.cregs:
-        hasher.update(f"creg:{creg.name}:{creg.size};".encode("utf-8"))
-    for instruction in circuit.data:
-        op = instruction.operation
-        q_indices = [circuit.find_bit(q).index for q in instruction.qubits]
-        c_indices = [circuit.find_bit(c).index for c in instruction.clbits]
-        params_str = ",".join(f"{float(p):.8f}" for p in op.params if isinstance(p, (int, float, np.floating)))
-        hasher.update(f"{op.name}:{q_indices}:{c_indices}:{params_str};".encode("utf-8"))
-    return hasher.hexdigest()
+    # Include complex amplitudes and nested definitions, without lossy rounding.
+    canonical = circuit.copy()
+    canonical.name = "aeqga"
+    canonical.metadata = {}
+    stream = io.BytesIO()
+    qpy.dump(canonical, stream)
+    return hashlib.sha256(stream.getvalue()).hexdigest()
 
 
 class CompilationDiagnostics:
@@ -109,6 +115,8 @@ class CompilationDiagnostics:
                 "circuit_fingerprint": compute_circuit_fingerprint(original),
                 "compiled_fingerprint": compute_circuit_fingerprint(compiled),
                 "layout": layout_info,
+                "final_layout": (compiled.layout.final_index_layout(filter_ancillas=True)
+                                 if compiled.layout is not None else list(range(original.num_qubits))),
             }
             self.records.append(record)
 
@@ -126,19 +134,18 @@ def verify_mps_probability_equivalence(
     Uses Aer Matrix Product State (MPS) simulation on active physical qubits to
     avoid full 156-qubit statevector allocation (preventing dimension exceeded errors).
     """
-    orig_sv = Statevector(original_circuit)
+    orig_sv = Statevector(original_circuit.remove_final_measurements(inplace=False))
     orig_probs = np.asarray(orig_sv.probabilities(), dtype=float)
 
-    # Determine active physical qubits from initial layout
+    # Follow the final routed layout; swaps may move the logical output qubits.
     if transpiled_circuit.layout is not None and transpiled_circuit.layout.initial_layout is not None:
-        init_layout = transpiled_circuit.layout.initial_layout
-        active_qubits = [init_layout[q] for q in original_circuit.qubits]
+        active_qubits = transpiled_circuit.layout.final_index_layout(filter_ancillas=True)
     else:
         active_qubits = list(range(original_circuit.num_qubits))
 
     from qiskit_aer.library import save_probabilities
 
-    t_qc = transpiled_circuit.copy()
+    t_qc = transpiled_circuit.remove_final_measurements(inplace=False)
     t_qc.save_probabilities(qubits=active_qubits)
 
     sim = AerSimulator(method="matrix_product_state")
@@ -191,6 +198,8 @@ def _counts(pub_result: Any, register_name: str, shots: int, logical_width: int)
     total_shots = 0
     for bitstring, count in raw_counts.items():
         clean_bs = str(bitstring).strip().replace(" ", "")
+        if not clean_bs or set(clean_bs) - {"0", "1"}:
+            raise ValueError("Counts must use binary bitstrings")
         if len(clean_bs) != logical_width:
             # Handle possible integer or zero-padded bitstring
             clean_bs = clean_bs.zfill(logical_width)
@@ -198,6 +207,8 @@ def _counts(pub_result: Any, register_name: str, shots: int, logical_width: int)
                 raise ValueError(
                     f"Bitstring '{bitstring}' length {len(clean_bs)} does not match logical width {logical_width}"
                 )
+        if isinstance(count, bool) or not isinstance(count, numbers.Integral) or count < 0:
+            raise ValueError("Counts must be nonnegative integers")
         int_count = int(count)
         formatted_counts[clean_bs] = formatted_counts.get(clean_bs, 0) + int_count
         total_shots += int_count
@@ -253,7 +264,7 @@ class CheckpointManager:
         if int(saved_data.get("num_circuits", 0)) != expected_num_circuits:
             return False
         saved_fps = saved_data.get("circuit_fingerprints")
-        if saved_fps is not None and saved_fps != expected_fingerprints:
+        if saved_fps != expected_fingerprints:
             return False
         return True
 
@@ -262,11 +273,34 @@ class BaseExecutor:
     """Abstract interface for AEQGA quantum circuit execution."""
 
     def __init__(self, shots: int = 1024, checkpoint_dir: str | Path | None = None):
-        if shots <= 0:
+        if isinstance(shots, bool) or not isinstance(shots, numbers.Integral) or shots <= 0:
             raise ValueError("Shots must be greater than zero")
         self.shots = shots
         self.checkpoint_dir = Path(checkpoint_dir) if checkpoint_dir else None
         self.diagnostics: CompilationDiagnostics | None = None
+
+    @staticmethod
+    def validate_circuits(circuits):
+        for circuit in circuits:
+            if (len(circuit.cregs) != 1 or circuit.cregs[0].size != circuit.num_qubits
+                    or circuit.num_parameters):
+                raise ValueError("Exactly one full-width measurement register and bound parameters required")
+            if any(i.operation.name.startswith("save_") or i.operation.name == "set_statevector"
+                   for i in circuit.data):
+                raise ValueError("Simulator-only instructions cannot be submitted")
+            measurements = [(circuit.find_bit(i.qubits[0]).index,
+                             circuit.find_bit(i.clbits[0]).index)
+                            for i in circuit.data if i.operation.name == "measure"]
+            if sorted(measurements) != [(i, i) for i in range(circuit.num_qubits)]:
+                raise ValueError("Measure every logical qubit once into its matching classical bit")
+            measured = set()
+            for instruction in circuit.data:
+                if instruction.operation.name == "barrier":
+                    continue
+                if instruction.operation.name == "measure":
+                    measured.update(instruction.qubits)
+                elif measured.intersection(instruction.qubits):
+                    raise ValueError("Measurement must follow all genetic gates")
 
     def run(
         self,
@@ -286,11 +320,16 @@ class DryRunExecutor(BaseExecutor):
         checkpoint_dir: str | Path | None = None,
         seed_simulator: int | None = None,
         backend_name: str = "aer_simulator_dry_run",
+        simulation_backend: Any | None = None,
+        initial_layout: list[int] | None = None,
     ):
         super().__init__(shots=shots, checkpoint_dir=checkpoint_dir)
         self.backend_name = backend_name
         self.seed_simulator = seed_simulator
-        self.simulator = AerSimulator()
+        self.simulation_backend = simulation_backend
+        self.initial_layout = initial_layout
+        self.simulator = (AerSimulator.from_backend(simulation_backend, method="matrix_product_state")
+                          if simulation_backend is not None else AerSimulator())
 
     def run(
         self,
@@ -300,6 +339,8 @@ class DryRunExecutor(BaseExecutor):
     ) -> list[dict[str, int]]:
         if len(circuits) == 0:
             return []
+
+        self.validate_circuits(circuits)
 
         circuit_fingerprints = [compute_circuit_fingerprint(c) for c in circuits]
         circuit_widths = [c.num_qubits for c in circuits]
@@ -316,7 +357,8 @@ class DryRunExecutor(BaseExecutor):
                         f"Checkpoint experiment configuration mismatch at generation {generation}"
                     )
                 if saved.get("submission_state") == "completed" and "raw_counts" in saved:
-                    return saved["raw_counts"]
+                    return [_counts(c, "", self.shots, qc.num_qubits)
+                            for qc, c in zip(circuits, saved["raw_counts"], strict=True)]
 
         # Validate registers on original circuits
         for qc in circuits:
@@ -324,20 +366,28 @@ class DryRunExecutor(BaseExecutor):
             if len(registers) != 1 or registers[0].size != qc.num_qubits:
                 raise ValueError("Exactly one full-width measurement register required")
 
-        compiled_circuits = [transpile(qc, self.simulator) for qc in circuits]
+        compiled_circuits = [transpile(qc, self.simulation_backend or self.simulator,
+                                      seed_transpiler=self.seed_simulator,
+                                      initial_layout=self.initial_layout) for qc in circuits]
         self.diagnostics = CompilationDiagnostics(
             list(circuits), compiled_circuits, self.backend_name, optimization_level=1
         )
 
         counts_list: list[dict[str, int]] = []
-        for orig, comp in zip(circuits, compiled_circuits):
-            job = self.simulator.run(comp, shots=self.shots, seed_simulator=self.seed_simulator)
+        for index, (orig, comp) in enumerate(zip(circuits, compiled_circuits)):
+            readout_seed = (int(np.random.SeedSequence([self.seed_simulator, generation, index]).generate_state(1)[0])
+                            if self.seed_simulator is not None else None)
+            job = self.simulator.run(comp, shots=self.shots, seed_simulator=readout_seed)
             raw = job.result().get_counts()
             reg_name = list(orig.cregs)[0].name
             counts_list.append(_counts(raw, reg_name, self.shots, orig.num_qubits))
 
         if self.checkpoint_dir:
             ckpt_path = CheckpointManager.get_checkpoint_path(self.checkpoint_dir, generation)
+            self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
+            for label, group in (("logical", circuits), ("isa", compiled_circuits)):
+                with ckpt_path.with_suffix(f".{label}.qpy").open("wb") as stream:
+                    qpy.dump(list(group), stream)
             data = {
                 "generation": generation,
                 "backend": self.backend_name,
@@ -345,6 +395,8 @@ class DryRunExecutor(BaseExecutor):
                 "num_circuits": len(circuits),
                 "circuit_widths": circuit_widths,
                 "circuit_fingerprints": circuit_fingerprints,
+                "register_names": [c.cregs[0].name for c in circuits],
+                "compilation": self.diagnostics.summary(),
                 "job_id": f"dry_run_gen_{generation:04d}",
                 "submission_state": "completed",
                 "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -377,6 +429,8 @@ class IBMSamplerExecutor(BaseExecutor):
         service: Any | None = None,
         backend: Any | None = None,
         mode: str = "runtime",  # "runtime" or "dry_run"
+        runtime_mode: Any | None = None,
+        sampler_options: dict | None = None,
     ):
         super().__init__(shots=shots, checkpoint_dir=checkpoint_dir)
         self.backend_name = backend_name
@@ -385,6 +439,9 @@ class IBMSamplerExecutor(BaseExecutor):
         self.mode = mode
         self._service = service
         self._backend = backend
+        self.runtime_mode = runtime_mode
+        self.sampler_options = sampler_options or {}
+        self.calibration_sha256 = None
 
     def _get_service(self) -> Any:
         if self._service is None:
@@ -393,7 +450,7 @@ class IBMSamplerExecutor(BaseExecutor):
                 self._service = QiskitRuntimeService()
             except Exception as e:
                 raise RuntimeError(
-                    f"Failed to initialize QiskitRuntimeService. Ensure credentials are saved: {e}"
+                    "Failed to initialize QiskitRuntimeService. Check locally saved credentials."
                 ) from e
         return self._service
 
@@ -422,6 +479,13 @@ class IBMSamplerExecutor(BaseExecutor):
             self.optimization_level,
             self.seed_transpiler,
         )
+        if self.checkpoint_dir:
+            properties = backend.properties() if callable(getattr(backend, "properties", None)) else None
+            if properties is not None:
+                snapshot = json.loads(json.dumps(properties.to_dict(), default=str))
+                self.calibration_sha256 = hashlib.sha256(json.dumps(snapshot, sort_keys=True).encode()).hexdigest()
+                CheckpointManager.atomic_write(
+                    self.checkpoint_dir / f"calibration_{self.calibration_sha256}.json", snapshot)
         return compiled
 
     def run(
@@ -433,6 +497,7 @@ class IBMSamplerExecutor(BaseExecutor):
         if len(circuits) == 0:
             return []
 
+        self.validate_circuits(circuits)
         circuit_fingerprints = [compute_circuit_fingerprint(c) for c in circuits]
         circuit_widths = [c.num_qubits for c in circuits]
 
@@ -454,7 +519,8 @@ class IBMSamplerExecutor(BaseExecutor):
 
             # Case 1: Job already completed and counts cached
             if saved.get("submission_state") == "completed" and "raw_counts" in saved:
-                return saved["raw_counts"]
+                return [_counts(c, "", self.shots, qc.num_qubits)
+                        for qc, c in zip(circuits, saved["raw_counts"], strict=True)]
 
             # Case 2: Job already submitted, recover using saved job_id
             if saved.get("job_id"):
@@ -468,8 +534,13 @@ class IBMSamplerExecutor(BaseExecutor):
                 saved["submission_state"] = "completed"
                 saved["completion_time"] = datetime.now(timezone.utc).isoformat()
                 saved["raw_counts"] = counts
+                try:
+                    saved["job_metrics"] = json.loads(json.dumps(job.metrics(), default=str))
+                except Exception as exc:
+                    saved["job_metrics"] = {"unavailable": type(exc).__name__}
                 CheckpointManager.atomic_write(ckpt_path, saved)
                 return counts
+            raise RuntimeError("Submission outcome is uncertain; inspect IBM jobs before retrying this generation")
 
         # If dry-run mode requested without QPU access
         if self.mode == "dry_run":
@@ -495,10 +566,29 @@ class IBMSamplerExecutor(BaseExecutor):
         # Prepare and submit SamplerV2 job
         from qiskit_ibm_runtime import SamplerV2
         backend = self._get_backend()
-        sampler = SamplerV2(mode=backend)
+        sampler = SamplerV2(mode=self.runtime_mode if self.runtime_mode is not None else backend,
+                            options=self.sampler_options)
+
+        # Archive actual input and ISA circuits before submission for future audits.
+        if ckpt_path:
+            ckpt_path.parent.mkdir(parents=True, exist_ok=True)
+            for label, group in (("logical", circuits), ("isa", compiled_circuits)):
+                archive = ckpt_path.with_suffix(f".{label}.qpy")
+                with archive.open("wb") as stream:
+                    qpy.dump(list(group), stream)
+        started = time.monotonic()
 
         # Build list of PUBs with requested shots
         pubs = [(c, None, self.shots) for c in compiled_circuits]
+        if ckpt_path:
+            CheckpointManager.atomic_write(ckpt_path, {
+                "generation": generation, "backend": self.backend_name,
+                "shots": self.shots, "num_circuits": len(circuits),
+                "circuit_widths": circuit_widths,
+                "register_names": [c.cregs[0].name for c in circuits],
+                "circuit_fingerprints": circuit_fingerprints,
+                "submission_state": "submitting", "optimizer_state": optimizer_state,
+            })
         job = sampler.run(pubs)
         job_id = job.job_id()
 
@@ -511,6 +601,10 @@ class IBMSamplerExecutor(BaseExecutor):
                 "num_circuits": len(circuits),
                 "circuit_widths": circuit_widths,
                 "circuit_fingerprints": circuit_fingerprints,
+                "register_names": [c.cregs[0].name for c in circuits],
+                "sampler_options": self.sampler_options,
+                "calibration_sha256": self.calibration_sha256,
+                "compilation": self.diagnostics.summary(),
                 "job_id": job_id,
                 "submission_state": "submitted",
                 "submission_time": datetime.now(timezone.utc).isoformat(),
@@ -522,6 +616,10 @@ class IBMSamplerExecutor(BaseExecutor):
         # Wait for result
         result = job.result()
         counts = self._process_results(circuits, compiled_circuits, result)
+        try:
+            metrics = json.loads(json.dumps(job.metrics(), default=str))
+        except Exception as exc:
+            metrics = {"unavailable": type(exc).__name__}
 
         # Update checkpoint to completed
         if ckpt_path:
@@ -532,6 +630,12 @@ class IBMSamplerExecutor(BaseExecutor):
                 "num_circuits": len(circuits),
                 "circuit_widths": circuit_widths,
                 "circuit_fingerprints": circuit_fingerprints,
+                "register_names": [c.cregs[0].name for c in circuits],
+                "sampler_options": self.sampler_options,
+                "calibration_sha256": self.calibration_sha256,
+                "compilation": self.diagnostics.summary(),
+                "elapsed_seconds": time.monotonic() - started,
+                "job_metrics": metrics,
                 "job_id": job_id,
                 "submission_state": "completed",
                 "submission_time": init_data["submission_time"],
@@ -551,6 +655,9 @@ class IBMSamplerExecutor(BaseExecutor):
         result: Any,
     ) -> list[dict[str, int]]:
         """Validate logical width and extract counts according to Section 6."""
+        result = list(result)
+        if len(result) != len(original_circuits) or len(compiled_circuits) != len(original_circuits):
+            raise ValueError("Result cardinality does not match submitted circuits")
         counts = []
         for original, circuit, pub in zip(original_circuits, compiled_circuits, result):
             registers = list(circuit.cregs)

@@ -11,10 +11,14 @@ Safety:
 
 import sys
 import argparse
+import platform
+from aeqga.execution.ibm_sampler import get_provenance_metadata
 
 
 def run_preflight(backend_name: str | None = None):
     print("=" * 60)
+    print("Python:", platform.python_version())
+    print("Packages/source:", get_provenance_metadata())
     print("  IBM Quantum Hardware Preflight")
     print("=" * 60)
 
@@ -30,9 +34,8 @@ def run_preflight(backend_name: str | None = None):
         service = QiskitRuntimeService()
         print("✓ Authenticated successfully with IBM Quantum.")
     except Exception as e:
-        print(f"[INFO] No saved credentials found or authentication failed: {e}")
-        print("\nTo configure your account offline/locally without committing tokens:")
-        print("  python -c \"from qiskit_ibm_runtime import QiskitRuntimeService; QiskitRuntimeService.save_account(channel='ibm_quantum', token='YOUR_TOKEN')\"")
+        print(f"[INFO] Saved credentials unavailable or authentication failed ({type(e).__name__}).")
+        print("Configure credentials locally using your installed IBM Runtime SDK; never paste keys into this repository.")
         print("\nExiting preflight without error (offline mode).")
         return
 

@@ -1,91 +1,148 @@
 # AEQGA — Amplitude-Encoded Quantum Genetic Algorithm
-### Applied to Pantheon SNe Ia Cosmological Parameter Estimation
 
-Implementation of the AEQGA described in:
-> Sarracino et al., *"A Quantum Genetic Algorithm with application to
-> Cosmological Parameters Estimation"*, arXiv:2602.15459 (2026)
+Research implementation of Sarracino et al., *A Quantum Genetic Algorithm with
+application to Cosmological Parameters Estimation*, arXiv:2602.15459 (2026),
+adapted from [Quasar-UniNA/HQGA](https://github.com/Quasar-UniNA/HQGA).
 
-Adapted from the Quasar-UniNA HQGA repository:
-https://github.com/Quasar-UniNA/HQGA
+AEQGA searches over **[H0, Omega_m]**, bounded by [60, 80] km/s/Mpc and [0, 0.5].
+The CPU evaluates cosmological likelihoods, selects elites and decodes counts.
+Quantum circuits prepare amplitudes, apply bidirectional CRy(pi/2) crossover
+and Rx(pi/2) mutation, then measure. The best quarter survives unchanged;
+an elite-copy quarter and a fresh random half pass through separate circuits.
 
-## Architecture
+## Current implementation
 
-```
-aeqga_algorithm.py                      — Main AEQGA loop (Alg.1) supporting simulation & QPU injection
-amplitude_encoding.py                   — Amplitude encoding via qiskit.initialize() (§3.1, Eq.11)
-                                          + basis-state count decoding (Eq.16/17-18)
-quantum_gates.py                        — CRy(π/2) crossover (Eq.12-14) + Rx(π/2) mutation (Eq.15)
-pantheon_problem.py                     — SNe Ia χ² likelihood + Pantheon+ support + BAO/CMB stubs (§2)
-run_pantheon_aeqga.py                   — End-to-end simulation runner
-test_pantheon_aeqga.py                  — Paper integration + quantum-correctness tests (T1-T4)
-code-summary.md                         — Full diagnosis, replication plan, and hardware documentation
+- Calibrated Pantheon+ MU_SH0ES likelihood with the matching full STAT+SYS
+  covariance. Missing real inputs raise an error; the scientific runner has
+  no synthetic fallback.
+- Aer, finite-shot statevector sampling, exact-probability simulation and an
+  injected IBM Runtime SamplerV2 adapter.
+- Default scientific settings: 32 individuals, 50 updates, 4096 shots,
+  p_cross=p_mut=0.5. Generation zero is included in histories.
+- Separate BAO/CMB likelihoods using CAMB/PICO. Exact reproduction of the
+  paper's CMB configuration remains unresolved.
+- Independent-run ensembles, provenance checks, scientific figures and
+  generation-level hardware recovery.
 
-aeqga/
-  execution/ibm_sampler.py              — IBMSamplerExecutor, DryRunExecutor, CheckpointManager
-  steps/                                — Modular pipeline (encoding, operators, decoding, evolution)
-  likelihoods/pantheon_problem.py       — PantheonPlusProblem offline calibrated likelihood
-  analysis/circuit_comparison.py        — Controlled same-circuit MC ensemble & QPU comparison
+**Use the `aeqga/` package.** Root-level `aeqga_algorithm.py`,
+`pantheon_problem.py` and `AEQGA.ipynb` are historical copies. In particular,
+the root likelihood contains a synthetic fallback and is unsuitable for
+scientific hardware runs. The maintained notebook is `notebooks/AEQGA.ipynb`.
 
-scripts/
-  test_hardware_compilation.py          — 156-qubit Heron transpilation & Aer MPS numerical check
-  test_full_generation.py               — Full offline 1-generation execution test
-  compare_generation_populations.py     — Finite-shot MC ensemble vs hardware comparison
-  recover_ibm_job.py                    — Idempotent job recovery & count parsing
-  ibm_preflight.py                      — Offline-safe credentials & backend inspector
-  run_ibm_generation.py                 — Guarded generation runner (defaults to dry-run)
+## Layout
 
-tests/test_ibm_adapter.py               — 13 automated unit & integration tests
-docs/IBM_HARDWARE.md                    — Comprehensive IBM Quantum hardware integration guide
-```
+| Location | Responsibility |
+|---|---|
+| `aeqga/steps/` | Selection, encoding, genetic gates, decoding and evolution |
+| `aeqga/likelihoods/` | Pantheon+, cosmological distances, BAO and CMB |
+| `aeqga/execution/ibm_sampler.py` | Ideal/noisy Aer and IBM execution, counts, archives, diagnostics |
+| `aeqga/execution/workflow.py` | Scientific identity and full optimizer restart |
+| `aeqga/experiments/runner.py` | Resumable independent simulation ensembles |
+| `aeqga/analysis/` | Circuit distribution comparisons and offline mitigation study |
+| `aeqga/visualization/` | Convergence, objective contours and optimizer distributions |
+| `scripts/` | Simulation, hardware pilots, recovery and analysis commands |
+| `tests/` | Offline numerical, recovery and integration tests |
 
-## Key Points
+## Setup and simulation
 
-- **Amplitude encoding** uses `qiskit.initialize()` on normalized vectors (not RY angle encoding).
-- **Population size must be a power of two** (`n_p = 2^k`), required for `log₂(n_p)` qubit allocation.
-- **Dual-circuit structure**: 25% elite (bypass), 25% duplicate (circuit A), 50% random (circuit B).
-- **Search ranges** per paper §3: `Ω_M ∈ [0.0, 0.5]`, `H0 ∈ [60, 80]`.
-- **Optimal gate probabilities**: `p_cross = p_mut = 0.5` (paper §4.1).
-- **Hybrid CPU/QPU execution**: Classical CPU performs population management, likelihood evaluations, elitism, and decoding; IBM QPU executes amplitude state preparation, crossover, mutation, and measurement.
-- **Four-circuit batching**: Each generation batches 4 circuits in width order `[4, 3, 4, 3]` into a single Sampler call. Generations remain strictly sequential.
-- **156-qubit device compatibility**: Classical register validation compares against logical circuit width (3 or 4 bits), ensuring compatibility with 156-qubit Heron processors.
-- **Zero-hardware-submission safety**: All tests, preflight scripts, and runners default to offline simulation (`DryRunExecutor`). Physical submission requires explicit confirmation flags.
-
-## Requirements
-
-Core simulation:
 ```bash
-pip install -r requirements.txt
+python -m pip install -e .
+# Additional pinned IBM environment requirements:
+python -m pip install -r requirements-ibm.txt
+
+# Obtain the real SNe inputs; no credentials are involved.
+git clone https://github.com/CobayaSampler/sn_data.git sn_data
+git -C sn_data checkout 61d96434cafc2770928322c38e5a750e686368ae
+
+python -m scripts.run_pantheon_aeqga --fast
+python -m scripts.run_sne_ensemble --runs 20 --name sne_stage20
+# Full simulation ensemble:
+python -m scripts.run_sne_ensemble --runs 300 --name sne_production
 ```
 
-IBM Quantum hardware execution / Runtime:
+Source/data/configuration changes require a new experiment name. Historical
+ensemble statistics are documented in [tasks 8–12](docs/TASKS_8_TO_12_REPORT.md);
+they are optimizer outcomes, not automatically posterior uncertainties.
+
+## IBM adaptation and offline pilots
+
+A 32-individual generation submits four circuits with logical widths
+**[4, 3, 4, 3]** in a single Sampler call. Generations remain sequential.
+A 50-update run uses 200 circuit executions and 819,200 shots at 4096 shots.
+
 ```bash
-pip install -r requirements-ibm.txt
+# Does not submit hardware jobs; --backend additionally reads IBM calibration.
+python -m scripts.benchmark_hardware --shots 4096
+
+# Real-data offline pilot; repeat the same command to resume.
+python -m scripts.run_ibm_generation --generations 3 --shots 1024 \
+  --directory outputs/json/sne_offline_pilot
+
+# Credential/backend inspection only; no circuit submission.
+python -m scripts.ibm_preflight --backend ibm_kingston
+
+# Retrieve existing results; never resubmits.
+python -m scripts.recover_ibm_job \
+  --checkpoint outputs/json/sne_offline_pilot/generation_0001.json
+
+# Requires archived circuits and matching real-data provenance.
+python -m scripts.compare_generation_populations \
+  --directory outputs/json/sne_offline_pilot --samples 1000
+python -m scripts.analyze_hardware_runs --directory outputs/json/sne_offline_pilot
 ```
 
-## Usage
+Physical submission requires **both** `--submit-hardware` and
+`--confirm-run-qpu`. Use a separate experiment directory and an agreed budget.
+`--session` opts into a supported account's session mode;
+`--sampler-options options.json` passes supported Runtime suppression settings.
+`--preparation state_preparation` is a separately identified reset-free variant.
+`--runs N` uses independent seeds and separate run directories;
+`--max-total-shots N` rejects plans above the specified circuit-shot ceiling.
+That ceiling excludes calibration jobs and is not a monetary or QPU-time cap.
 
-### Simulation & Paper Tests
+The benchmark compares preparation methods, optimization levels, ideal Aer,
+backend-derived noisy Aer and an explicit readout-correction analysis. Its
+default backend is **synthetic**, not a measured IBM device. Corrected
+probabilities never silently replace raw optimizer counts.
+
+See [IBM hardware guide](docs/IBM_HARDWARE.md) for restart semantics, pilot
+criteria and remaining live-hardware validation. Historical hardware records
+exist, but the original circuits are missing; exact same-circuit provenance
+cannot be certified. No full hardware ensemble is claimed.
+
+## Accuracy against the classical answer
+
+Notebook section **9a** now reports how closely AEQGA matches the classical
+fit: signed/absolute parameter errors, percentage errors, bias, MAE, RMSE,
+and delta chi-squared. A four-panel accuracy figure shows every run, including
+outliers. The notebook compares against both the configured objective and a
+separately re-evaluated direct-distance minimum. Neither fitted reference is
+assumed to be the true value of the universe's parameters.
+
+The success fraction counts runs with delta chi-squared < 2.30. Its 95% Wilson
+interval concerns the success rate of independent comparable runs, not
+cosmological confidence. Parameter percentage errors are ordinary relative
+errors; they are never presented as a percentage probability of correctness.
+Covariance/KDE contours still describe optimizer scatter, while likelihood
+contours describe the configured model/data under a chi-squared approximation.
+
+`scripts.run_sne_ensemble` writes `NAME_accuracy.json` and accuracy figures in
+PNG/SVG/PDF. Hardware analysis writes the same accuracy metrics into
+`hardware_summary.json` and exports `hardware_accuracy.*`. The single-run
+simulation runner also writes `pantheon_accuracy.json` and figures.
+
+See [graph accuracy and interpretation](docs/GRAPH_ACCURACY.md) for exactly
+what is checked, the distance-grid limitations, and what the graphs cannot prove.
+
+## Verification
+
 ```bash
-python run_pantheon_aeqga.py --data sn_data/Pantheon
-python run_pantheon_aeqga.py --fast
-python test_pantheon_aeqga.py --data sn_data/Pantheon
+OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 python -m unittest discover -s tests -v
+python -m scripts.test_hardware_compilation
+python -m scripts.test_full_generation  # requires real Pantheon+ data
 ```
 
-### IBM Hardware Integration & Offline Tests
-```bash
-# Run full automated test suite (13 tests)
-python -m unittest discover -s tests -p "test_*.py" -v
-
-# Test 156-qubit compilation diagnostics and Aer MPS equivalence
-python scripts/test_hardware_compilation.py
-
-# Test full offline generation execution
-python scripts/test_full_generation.py
-
-# Run controlled same-circuit statistical comparison (MC ensemble vs QPU)
-python scripts/compare_generation_populations.py
-```
-
-## Note
-
-This implementation covers the **SNe Ia** component (paper §2.1) with both Pantheon and Pantheon+ likelihoods. BAO (§2.2) and CMB (§2.3) paths are stubbed for future extension. See `docs/IBM_HARDWARE.md` and `code-summary.md` for complete technical details.
+Dataset-dependent tests skip when their inputs are absent. Recovery tests use
+explicit synthetic test objectives and mocked IBM jobs; they consume no QPU
+allocation. Never place IBM credentials in notebooks, configuration, logs,
+checkpoints or version control.
