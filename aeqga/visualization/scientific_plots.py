@@ -123,6 +123,40 @@ def objective_contours(problem, reference, *, points=None, sigmas=(1,2,3,4,5)):
     ax.set(xlim=(h0[0],h0[-1]),ylim=(omega[0],omega[-1]),
            xlabel=r"$H_0$ [km s$^{-1}$ Mpc$^{-1}$]",ylabel=r"$\Omega_m$")
     ax.legend(frameon=False,fontsize=8)
+    fig.text(.5, -.02, "Gaussian-equivalent joint likelihood thresholds; conditional on model/data."
+             + (" Grid-node rendering of a nearest-neighbor objective." if problem.grid_size else ""),
+             ha="center", fontsize=7)
+    return fig
+
+
+def accuracy_comparison(report):
+    """Signed parameter offsets and objective gaps from exactly the report arrays."""
+    runs = np.arange(1, report["runs"]+1)
+    fig, axes = plt.subplots(2, 2, figsize=(10, 6), constrained_layout=True)
+    for ax, name, unit in zip(axes[0], ("H0", "Omega_m"), ("km/s/Mpc", "dimensionless")):
+        item = report["parameters"][name]
+        ax.plot(runs, item["signed_errors"], "o", ms=3, alpha=.6, label="Independent outcome")
+        ax.axhline(0, color="black", ls="--", lw=1, label="Reference")
+        ax.set(xlabel="Run", ylabel=f"{name} offset [{unit}]",
+               title=f"{name}: AEQGA minus reference ({item['reference']:.6g})")
+    gaps = np.asarray(report["delta_chi2"])
+    axes[1,0].plot(runs, gaps, "o", ms=3, alpha=.6)
+    axes[1,0].axhline(report["gap_tolerance"], color="#b95f2d", ls="--", label="Optimization tolerance")
+    axes[1,0].set(xlabel="Run", ylabel=r"$\Delta\chi^2$", title="Objective gap above reference", yscale="symlog")
+    sorted_gaps = np.sort(gaps)
+    # Include a zero-mass point before the smallest observation: a single run
+    # must not appear to have 100% cumulative mass below its own outcome.
+    x = np.r_[np.nextafter(sorted_gaps[0], -np.inf), sorted_gaps]
+    y = np.r_[0., np.arange(1, len(gaps)+1)/len(gaps)]
+    axes[1,1].step(x, y, where="post", label="Empirical cumulative fraction")
+    axes[1,1].axvline(report["gap_tolerance"], color="#b95f2d", ls="--")
+    axes[1,1].set(xlabel=r"$\Delta\chi^2$", ylabel="Fraction of runs", ylim=(0, 1.03),
+                  title=f"{100*report['success_fraction']:.1f}% below stated tolerance", xscale="symlog")
+    for ax in axes.ravel():
+        ax.grid(alpha=.18)
+    axes[0,0].legend(frameon=False, fontsize=8)
+    axes[1,0].legend(frameon=False, fontsize=8)
+    fig.suptitle("Accuracy against reference — not probability of physical correctness", fontsize=11)
     return fig
 
 

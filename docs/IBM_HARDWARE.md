@@ -1,237 +1,210 @@
-# IBM Quantum Hardware Integration for AEQGA
+# IBM Quantum integration and remaining validation
 
-This documentation describes the IBM Quantum Hardware integration for the Amplitude-Encoded Quantum Genetic Algorithm (AEQGA) applied to cosmological parameter estimation ($H_0$ and $\Omega_m$), based on:
+The maintained hardware runner is `python -m scripts.run_ibm_generation`.
+It imports `aeqga.likelihoods.pantheon_problem.PantheonPlusProblem` and the
+package evolution loop. Real data are mandatory. Root-level legacy likelihoods
+are not part of this workflow.
 
-> Sarracino et al., *A Quantum Genetic Algorithm with application to Cosmological Parameters Estimation*, arXiv:2602.15459 (2026).
+## Execution and scientific identity
 
----
+CPU: population generation, fitness, elitism, decoding and checkpointing.
+QPU: amplitude preparation, crossover, mutation and final measurement.
+For 32 individuals and two parameters, a generation submits [4,3,4,3] logical
+qubit circuits, ordered H0-random, H0-elite-copy, Omega_m-random, Omega_m-elite-copy.
+The register width is validated against logical width even when ISA circuits
+span the entire physical backend.
 
-## 1. Architectural Overview
+`IBMSamplerExecutor` uses Runtime `SamplerV2(mode=backend)` by default. Passing
+`--session` creates a Runtime Session; account permissions and time limits are
+still enforced by IBM. All four circuits are one request, not IBM Batch mode.
+Generations and the CLI's independent runs advance sequentially. Parallel run
+scheduling is not implemented; use distinct directories for independently
+managed processes and account for the combined budget.
 
-AEQGA is a hybrid classical-quantum optimizer. The division of responsibilities is:
+The runner fingerprints parameters, seed, data hashes, scientific/execution
+source hashes, backend, package versions, preparation method and Runtime
+options. Changed configurations are refused. Logical and ISA circuits are
+saved as QPY, and circuit fingerprints include complex amplitudes and nested
+instructions at full serialization precision. Runtime credentials are loaded
+from the local service configuration and never stored by this code.
 
-### Classical CPU
-- Population initialization and boundary constraints
-- Cosmological likelihood and $\chi^2$ evaluation ($SNe$ Ia Pantheon/Pantheon+)
-- Fitness calculation and ranking
-- Elite selection (top 25% elites preserved directly)
-- Measurement-result decoding (random subset Eq.16, elite-copy subset Eq.17–18)
-- Generation history, convergence logging, and atomic checkpoint persistence
+## Offline use
 
-### IBM Quantum Hardware
-- Amplitude-encoded quantum state preparation via `initialize()`
-- Quantum crossover operations via bidirectional $CR_y(\pi/2)$ gates
-- Quantum mutation operations via single-qubit $R_x(\pi/2)$ gates
-- Full-register measurement into classical bitstrings
-
-```
-                    ┌────────────────────────────────────────────────────────┐
-                    │                   Classical CPU Host                   │
-                    │                                                        │
-                    │  1. Evaluate fitness χ²(x) on SNe Ia likelihood        │
-                    │  2. Preserve top 25% elites (P_elite)                  │
-                    │  3. Duplicate elites (P_elite_copy, 25%)               │
-                    │  4. Draw fresh uniform individuals (P_rand, 50%)       │
-                    └─────────────────────────┬──────────────────────────────┘
-                                              │
-                      Construct 4 Circuits    │ Width order: [4, 3, 4, 3]
-                                              ▼
-                    ┌────────────────────────────────────────────────────────┐
-                    │             IBM Quantum Runtime (SamplerV2)            │
-                    │                                                        │
-                    │  Circuit 0: H0 random subset (4 logical qubits)        │
-                    │  Circuit 1: H0 elite-copy (3 logical qubits)           │
-                    │  Circuit 2: Ω_m random subset (4 logical qubits)       │
-                    │  Circuit 3: Ω_m elite-copy (3 logical qubits)          │
-                    │                                                        │
-                    │  - Transpiled for 156-qubit processor (e.g. Kingston)  │
-                    │  - Executed in a single batch (1024 or 4096 shots)     │
-                    └─────────────────────────┬──────────────────────────────┘
-                                              │
-                      Raw Bitstring Counts    │ [counts_0, counts_1, ...]
-                                              ▼
-                    ┌────────────────────────────────────────────────────────┐
-                    │                   Classical CPU Host                   │
-                    │                                                        │
-                    │  5. Decode basis counts (Eq. 16, 17-18)                │
-                    │  6. Assemble next generation: P ← P_elite ∪ P_decoded  │
-                    │  7. Record atomic checkpoint and update global best    │
-                    └────────────────────────────────────────────────────────┘
+```bash
+python -m scripts.run_ibm_generation --data sn_data/PantheonPlus \
+  --population 32 --generations 3 --shots 1024 \
+  --directory outputs/json/sne_offline_pilot
+python -m scripts.benchmark_hardware --shots 4096
 ```
 
----
+The benchmark's default is a reproducible synthetic four-qubit target.
+`--backend NAME` instead authenticates to read a real device and derive an Aer
+noise model; it still never submits QPU jobs. It compares both preparation
+methods and optimization levels 0–3, retains raw counts, reports TVD and shows
+both decoder branches' sensitivity. Noise models approximate device behavior;
+they do not establish actual hardware fidelity.
 
-## 2. Injected Execution Interface
-
-The core evolution algorithm exposes a pluggable `hardware_executor` keyword argument in `run_aeqga_dual`:
+For reusable programmatic execution:
 
 ```python
-from aeqga.steps.evolution.aeqga_algorithm import AEQGAParameters, run_aeqga_dual
-from aeqga.execution.ibm_sampler import IBMSamplerExecutor, DryRunExecutor
+from pathlib import Path
 from aeqga.likelihoods.pantheon_problem import PantheonPlusProblem
+from aeqga.steps.evolution.aeqga_algorithm import AEQGAParameters
+from aeqga.execution.ibm_sampler import DryRunExecutor
+from aeqga.execution.workflow import run_checkpointed, pantheon_provenance
 
+folder = Path('outputs/json/my_offline_pilot')
 problem = PantheonPlusProblem()
-params = AEQGAParameters(pop_size=32, max_gen=1, num_shots=1024)
-
-# Production IBM Hardware execution (requires account credentials)
-executor = IBMSamplerExecutor(
-    backend_name="ibm_kingston",
-    shots=1024,
-    optimization_level=1,
-    seed_transpiler=42,
-    checkpoint_dir="outputs/json/ibm_generation_01",
-)
-
-g_best, pop_evol, bests_log = run_aeqga_dual(
-    problem,
-    params,
-    hardware_executor=executor,
-    seed=42,
-)
+params = AEQGAParameters(max_gen=3, num_shots=1024, progress_bar=False)
+executor = DryRunExecutor(shots=1024, checkpoint_dir=folder, seed_simulator=42)
+result = run_checkpointed(problem, params, executor, folder,
+                          seed=42, provenance=pantheon_provenance(problem))
 ```
 
-The interface preserves existing callers:
-- `execution_mode="aer"` (default): uses local `AerSimulator()`.
-- `execution_mode="statevector"`: uses exact quantum state probabilities without shot noise.
-- `execution_mode="ibm"` or passing `hardware_executor`: executes via the injected hardware adapter.
+`DryRunExecutor(simulation_backend=backend)` uses Aer with backend-derived
+noise and MPS simulation. Each generation/circuit gets a distinct deterministic
+readout seed. Existing native Aer/statevector paths remain supported by the
+optimizer; they have not all been moved into the adapter interface.
 
----
+## Restart and recovery
 
-## 3. Circuit Batching & Sequential Generations
+Use **one writer per experiment directory**. Files include:
 
-For a standard population size $n_p = 32$ over 2 cosmological parameters ($H_0$ and $\Omega_m$):
-- $n_q(\text{random}) = \log_2(n_p) - 1 = 4$ logical qubits
-- $n_q(\text{elite}) = \log_2(n_p) - 2 = 3$ logical qubits
+- `optimizer.json`: full population, fitness, best/history, generation and
+  Python/NumPy/readout RNG states at the last decoded generation.
+- `generation_NNNN.json`: job state/ID, circuit identities, registers, counts,
+  optimizer input, compilation, calibration identity and available usage metrics.
+- `generation_NNNN.logical.qpy` and `.isa.qpy`: actual circuit definitions.
+- `calibration_HASH.json`: immutable backend-properties snapshot when available.
+- `result.json`: validated final histories and experiment identity.
 
-The 4 circuits are submitted as **one single IBM Sampler batch** per generation in the validated width order:
-```python
-[4, 3, 4, 3]
-```
+Repeat the original command. The optimizer restores the last decoded state,
+reconstructs identical next-generation circuits and reuses cached counts or
+retrieves a saved in-flight job. Its original decoding RNG state is restored,
+so a crash between count persistence and decoding gives the same trajectory.
+A completed experiment returns without circuit execution. Histories and
+fitnesses are checked against the configured objective before continuing.
 
-**Generations are strictly sequential**: Generation $t+1$ depends on the classical fitness evaluation, sorting, and splitting of the population decoded from Generation $t$. Dependent generations are never batched together.
+The adapter writes `submitting` before calling the service and saves the job
+ID before waiting. There is no atomic transaction spanning IBM submission and
+a local file. A crash in that gap leaves an uncertain submission: the code
+**refuses automatic resubmission**. Inspect IBM's job list, establish the exact
+job/circuit identity and attach the confirmed job ID to the checkpoint before
+continuing. Do not delete the checkpoint to retry blindly.
 
----
-
-## 4. Logical vs. Physical Measurement Register Width
-
-When compiling 3-qubit or 4-qubit logical circuits for a 156-qubit physical processor (e.g., Heron `ibm_kingston` or `ibm_fez`), the transpiled circuit has:
-```python
-compiled_circuit.num_qubits == 156
-```
-However, the measurement register only contains bits for the measured logical qubits (size 3 or 4).
-
-The adapter explicitly validates classical register size against the **original logical circuit width**:
-```python
-for original, circuit, pub in zip(circuits, compiled, result):
-    registers = list(circuit.cregs)
-    logical_width = original.num_qubits
-
-    if len(registers) != 1 or registers[0].size != logical_width:
-        raise ValueError("Exactly one full-width measurement register required")
-
-    counts.append(_counts(pub, registers[0].name, self.shots, logical_width))
-```
-
-This prevents the `ValueError: Exactly one full-width measurement register required` error that previously occurred when comparing register width to physical device width.
-
----
-
-## 5. Checkpointing & Job Recovery
-
-Per-generation checkpoints are saved to:
-```text
-outputs/json/ibm_generation_01/generation_0001.json
-```
-
-### Safety & Idempotency Rules
-1. **Atomic writes**: Checkpoints are written to a temporary file (`.tmp`), flushed, fsynced, and renamed via `os.replace` to prevent corrupted partial files.
-2. **Pre-execution checkpoint**: When submitting a hardware job, the job ID and state `"submitted"` are persisted *before* awaiting results.
-3. **Recovery without duplication**: If a checkpoint contains a valid `job_id`, the adapter retrieves the existing job rather than submitting a duplicate.
-4. **Fingerprint protection**: Before reusing a checkpoint, the adapter verifies backend name, shot count, number of circuits, and circuit SHA-256 fingerprints. Any configuration mismatch immediately raises `ValueError` rather than reusing incorrect results.
-
----
-
-## 6. Hardware Compilation & Aer MPS Equivalence
-
-On physical processors, amplitude encoding via `initialize()` decomposes into single-qubit rotations, resets, and two-qubit entangling gates ($CZ$ / $CX$).
-
-Compilation diagnostics record:
-- Original vs. transpiled width and depth
-- Layout mapping from logical to physical qubits
-- Gate counts ($SX$, $RZ$, $CZ$/$CX$, $Reset$, $Measure$)
-- Two-qubit gate counts
-
-### Numerical Equivalence Check
-To verify transpiler correctness without running out of host memory:
-- **Do NOT allocate full 156-qubit statevectors** (fails with `ValueError: Maximum allowed dimension exceeded`).
-- Use **Aer Matrix Product State (MPS)** simulation targeting only the active physical qubits:
-  ```python
-  from aeqga.execution.ibm_sampler import verify_mps_probability_equivalence
-  max_diff = verify_mps_probability_equivalence(orig_circuit, transpiled_circuit, atol=1e-10)
-  ```
-  Expected maximum absolute probability difference: $\approx 10^{-11} - 10^{-16}$.
-
----
-
-## 7. Controlled Same-Circuit Scientific Comparison
-
-To determine the exact impact of hardware execution versus finite-shot sampling, the pipeline decouples circuit construction from execution:
-
-1. **Deterministic freeze**: Generate Generation 1 circuits with fixed seed (42).
-2. **Ideal probabilities**: Calculate exact basis-state probability distribution $P_{\text{ideal}}$.
-3. **Finite-shot ensemble**: Draw 10,000 independent multinomial samples of 1024 shots each.
-4. **Statistical comparison**: Compare hardware counts TVD against the finite-shot empirical TVD distribution.
-5. **Distribution metrics**: Evaluate population differences using Wasserstein distance and Kolmogorov-Smirnov tests to avoid artifacts from arbitrary individual indexing.
-
-Run the comparison:
 ```bash
-python scripts/compare_generation_populations.py
+python -m scripts.recover_ibm_job \
+  --checkpoint outputs/json/my_hardware_pilot/generation_0001.json \
+  --output outputs/json/my_hardware_pilot/recovered_counts.json
 ```
 
----
+Recovery handles string/enum statuses, validates register/count cardinality,
+widths and shot totals, writes plain JSON counts and updates the existing
+checkpoint. Historical completed cached counts remain readable. Incomplete
+historical checkpoints without register mapping require the original circuit
+mapping; recovery refuses to guess.
 
-## 8. Historical Experiments
+## Live submission, budget and suppression
 
-### Experiment A: Single-Circuit Pilot
-- **Backend**: `ibm_kingston`
-- **Job ID**: `db5qnv4vf2bc73d09org`
-- **Configuration**: 4 logical qubits, 1024 shots, $p_{\text{cross}}=1.0$, $p_{\text{mut}}=1.0$, seed=42.
-- **Observed TVD**: $0.110565$
-- **Finite-shot reference ensemble**: Mean TVD $0.040679$, 99th percentile $0.064987$.
-- **Finding**: Hardware noise lies beyond pure finite-shot sampling uncertainty.
+First establish account/instance, accessible backend, session eligibility,
+QPU-time/credit budget and pilot scope. Preflight never submits:
 
-### Experiment B: Complete Generation 1
-- **Backend**: `ibm_kingston`
-- **Job ID**: `db5r25imb58s738at2v0`
-- **Configuration**: Pop 32, [4, 3, 4, 3] circuits, 1024 shots per circuit, seed=42.
-- **End-of-generation best**: $H_0 = 71.958$, $\Omega_m = 0.461$, $\chi^2 = 1778.76$.
-- **Likelihood evaluations**: 64 (32 initial + 32 generation 1).
-- **Caveat**: The best individual was retained via classical elitism.
-
----
-
-## 9. Offline Verification & Tests
-
-Run the full offline test suite without credentials or QPU jobs:
 ```bash
-python -m unittest discover -s tests -p "test_*.py" -v
+python -m scripts.ibm_preflight --backend ibm_kingston
 ```
 
-Run compilation diagnostics:
+Example for a separately authorized pilot:
+
 ```bash
-python scripts/test_hardware_compilation.py
+python -m scripts.run_ibm_generation --backend ibm_kingston \
+  --generations 1 --shots 1024 --max-total-shots 4096 \
+  --directory outputs/json/my_hardware_pilot \
+  --submit-hardware --confirm-run-qpu
 ```
 
-Run full generation offline test:
+Both flags are required. Add `--session` only with supported access. Runtime
+options can be supplied via `--sampler-options options.json`; the installed
+Runtime SDK validates supported fields and combinations. Keep untreated,
+twirled and dynamical-decoupling experiments in distinct directories, change
+one setting at a time, and compare identical archived circuit inputs. Device
+compatibility and efficacy must be measured; this repository does not claim
+live validation of those suppression settings.
+
+`--runs N` derives independent seeds and keeps each run in its own directory.
+The shot ceiling conservatively covers the full requested plan, even on
+resume, and excludes calibration/mitigation overhead. It is not a QPU-time or
+financial cap. Use IBM's reported job metrics to determine affordable scaling.
+50 updates at 4096 shots consume 819,200 circuit shots; 300 such runs consume
+245.76 million before extra calibration work. No automatic large QPU run occurs.
+
+Reset-free `--preparation state_preparation` is valid because every circuit
+starts in zero. It is a separately fingerprinted experimental variant. The
+offline benchmark verifies ideal equivalence with `initialize()` and reports
+compiled depth, resets, layout and entangling-gate counts.
+
+## Readout correction policy
+
+`aeqga.analysis.hardware_validation` supplies computational-basis calibration
+circuits and a joint assignment matrix. For small 3/4-qubit circuits this needs
+8/16 calibration circuits **per measured physical layout**. Calibration must
+use the same physical qubits/readout mapping as the experiment; independently
+transpiled live calibration is not validated here.
+
+Analysis uses linear inversion followed by clipping negative values and
+normalizing. It reports clipped mass and matrix conditioning, rejects singular
+matrices, and retains raw counts/calibration data. This projection introduces
+bias and may worsen a result. Corrected probabilities are analysis-only: the
+scientific optimizer continues to consume raw validated integer counts.
+Layout-matched live calibration, its overhead and suppression combinations
+remain live-research work.
+
+## Analysis and pilot acceptance
+
 ```bash
-python scripts/test_full_generation.py
+python -m scripts.compare_generation_populations \
+  --directory outputs/json/my_hardware_pilot --samples 1000
+python -m scripts.analyze_hardware_runs \
+  --directory outputs/json/my_hardware_pilot --max-gap 2.30
 ```
 
-## Consolidated notebook and environment
+Comparison loads the actual QPY circuits and verifies their identities against
+counts and real-data provenance. It ranks elites using the real objective and
+uses the optimizer's actual clipped elite margin. The finite-shot ensemble
+reports per-circuit TVD reference quantiles and distribution comparisons.
+Re-decoding is explicitly labeled a conditional analysis with an analysis
+seed; recorded optimizer histories remain the trajectory evidence.
 
-Use `notebooks/AEQGA.ipynb`, Part 13, for offline rehearsal and opt-in physical
-execution on the calibrated Pantheon+ objective. The former root notebook has
-been removed. Install `requirements.txt` for both simulation and IBM execution;
-`requirements-ibm.txt` now delegates to it. Select the `Python (AEQGA venv)`
-kernel after registering it with `python -m ipykernel install --sys-prefix
---name aeqga --display-name "Python (AEQGA venv)"`.
+The summary validates each fit/history and reports optimization gaps, scatter,
+success fraction under the supplied gap tolerance, shots, available job usage
+metrics and elapsed execution time, plus PNG/SVG/PDF plots. The elapsed field
+sums active process invocations; downtime between restarts is excluded. The
+2.30 gap is an optimization diagnostic, not posterior coverage. Optional
+`--max-tvd VALUE` evaluates an explicitly chosen fidelity threshold; absent
+comparisons produce an unknown result, never a pass.
+
+Before escalating a pilot, require:
+
+1. Known-state bit ordering, register integrity and shot totals pass.
+2. A deliberate interruption recovers without a second submission and yields
+   the same decoded trajectory (automated offline tests cover these boundaries).
+3. Representative circuits meet a predeclared TVD/noise tolerance on hardware.
+4. Several short independent real-data runs meet declared optimization targets.
+5. Measured QPU usage, queue time and calibration drift fit the agreed budget.
+
+There is no automatic promotion to a 50-update run or an ensemble.
+
+## Historical records and remaining work
+
+Local records describe pilot job `db5qnv4vf2bc73d09org` and one-generation job
+`db5r25imb58s738at2v0` on `ibm_kingston`, at 1024 shots. Their original serialized
+circuits and full restart states are absent. The generation checkpoint marks
+circuit provenance unverified. Do not certify exact same-circuit equivalence or
+real-data likelihood reproducibility from those records. New comparison tools
+refuse historical reconstruction without archives and experiment identity.
+
+Still requiring live access/budget: actual session execution, device-specific
+suppression validation, layout-matched readout calibration, known-state QPU
+checks, repeatable short scientific runs, measured cost/fidelity thresholds,
+and full hardware runs/ensembles. SDK/backend compatibility and scheduling
+limits must be established in that environment. The old hardware records and
+simulation ensembles do not establish completion of these tasks.

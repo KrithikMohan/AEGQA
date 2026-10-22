@@ -1,17 +1,7 @@
-#!/usr/bin/env python3
-"""
-recover_ibm_job.py
-==================
-Job recovery script for IBM Quantum Hardware AEQGA jobs.
-
-Recovers previously submitted jobs from their saved IDs or checkpoint files
-rather than submitting duplicate jobs.
-"""
-
-import sys
-import json
+"""Retrieve an existing IBM job into validated counts; never submits work."""
 import argparse
 from pathlib import Path
+import sys
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
@@ -20,68 +10,53 @@ if str(REPO_ROOT) not in sys.path:
 from aeqga.execution.ibm_sampler import CheckpointManager, _counts
 
 
-def recover_job(job_id: str | None = None, checkpoint_path: str | None = None, output_file: str | None = None):
-    print("=" * 60)
-    print("  AEQGA IBM Quantum Job Recovery")
-    print("=" * 60)
-
-    ckpt_data = None
-    if checkpoint_path:
-        ckpt_path = Path(checkpoint_path)
-        ckpt_data = CheckpointManager.load(ckpt_path)
-        if ckpt_data is None:
-            print(f"[ERROR] Checkpoint file {checkpoint_path} not found.")
-            sys.exit(1)
-        job_id = ckpt_data.get("job_id", job_id)
-        print(f"Loaded checkpoint for generation {ckpt_data.get('generation')}")
-
+def recover_job(job_id=None, checkpoint_path=None, output_file=None, *, service=None):
+    if checkpoint_path is None:
+        raise ValueError("A checkpoint is required to establish register names, widths and shots")
+    saved = CheckpointManager.load(checkpoint_path)
+    if saved is None:
+        raise FileNotFoundError(checkpoint_path)
+    if job_id is not None and job_id != saved.get("job_id"):
+        raise ValueError("Job ID does not match checkpoint")
+    job_id = saved.get("job_id")
     if not job_id:
-        print("[ERROR] Neither job_id nor valid checkpoint provided.")
-        sys.exit(1)
-
-    print(f"\nTarget Job ID: {job_id}")
-
-    # Check if counts already exist in checkpoint
-    if ckpt_data and ckpt_data.get("submission_state") == "completed" and "raw_counts" in ckpt_data:
-        print("✓ Results already completed and preserved in checkpoint.")
-        counts = ckpt_data["raw_counts"]
+        raise ValueError("Checkpoint has no submitted job ID")
+    widths, shots = saved["circuit_widths"], saved["shots"]
+    if len(widths) != saved["num_circuits"]:
+        raise ValueError("Invalid checkpoint circuit cardinality")
+    if saved.get("submission_state") == "completed" and "raw_counts" in saved:
+        raw = saved["raw_counts"]
+        if len(raw) != len(widths):
+            raise ValueError("Cached result cardinality mismatch")
+        counts = [_counts(c, "", shots, width) for c, width in zip(raw, widths)]
     else:
-        # Connect to runtime service
-        try:
+        registers = saved.get("register_names")
+        if not registers or len(registers) != len(widths):
+            raise ValueError("Checkpoint lacks register mapping; recover original circuit archives first")
+        if service is None:
             from qiskit_ibm_runtime import QiskitRuntimeService
             service = QiskitRuntimeService()
-            print("Connecting to IBM Quantum Runtime Service...")
-            job = service.job(job_id)
-            status = job.status()
-            print(f"Job status: {status}")
-
-            if status.name == "DONE":
-                result = job.result()
-                print("Extracting counts from job result...")
-                # Note: exact register mapping depends on original circuits
-                counts = result
-            else:
-                print(f"Job is not yet complete (status: {status}). Please check later.")
-                return
-        except Exception as e:
-            print(f"[INFO] Could not query remote IBM service ({e}).")
-            if ckpt_data:
-                print("Displaying checkpoint metadata:")
-                print(json.dumps(ckpt_data, indent=2))
-            return
-
-    if output_file and "counts" in locals():
-        out_p = Path(output_file)
-        out_p.parent.mkdir(parents=True, exist_ok=True)
-        with open(out_p, "w", encoding="utf-8") as f:
-            json.dump({"job_id": job_id, "recovered_counts": counts}, f, indent=2)
-        print(f"Saved recovered counts to {output_file}")
+        job = service.job(job_id)
+        status = job.status()
+        status_name = getattr(status, "name", str(status)).upper()
+        if status_name not in {"DONE", "COMPLETED"}:
+            raise RuntimeError(f"Job {job_id} is {status_name}; no submission was made")
+        results = list(job.result())
+        if len(results) != len(widths):
+            raise ValueError("Remote result cardinality mismatch")
+        counts = [_counts(pub, register, shots, width)
+                  for pub, register, width in zip(results, registers, widths)]
+        saved.update(submission_state="completed", raw_counts=counts)
+        CheckpointManager.atomic_write(checkpoint_path, saved)
+    if output_file:
+        CheckpointManager.atomic_write(output_file, dict(job_id=job_id, recovered_counts=counts))
+    return counts
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Recover IBM Quantum Job")
-    parser.add_argument("--job-id", default=None, help="IBM Quantum job ID")
-    parser.add_argument("--checkpoint", default=None, help="Path to checkpoint JSON")
-    parser.add_argument("--output", default=None, help="Path to save recovered counts JSON")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--checkpoint", required=True)
+    parser.add_argument("--job-id")
+    parser.add_argument("--output")
     args = parser.parse_args()
-    recover_job(args.job_id, args.checkpoint, args.output)
+    print(recover_job(args.job_id, args.checkpoint, args.output))
