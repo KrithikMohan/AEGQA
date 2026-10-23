@@ -1,0 +1,70 @@
+{
+  "experiment": {
+    "execution_mode": "statevector_shots",
+    "parameters": {
+      "elite_margin": 0.0,
+      "max_gen": 50,
+      "num_shots": 4096,
+      "p_cross": 0.5,
+      "p_mut": 0.5,
+      "pop_size": 32,
+      "progress_bar": false,
+      "state_preparation": "initialize",
+      "verbose": false
+    },
+    "provenance": {
+      "bounds": [
+        [
+          60.0,
+          0.0
+        ],
+        [
+          80.0,
+          0.5
+        ]
+      ],
+      "datasets": {
+        "covariance_file": {
+          "path": "/home/bobjoe/PycharmProjects/AEGQA/sn_data/PantheonPlus/Pantheon+SH0ES_STAT+SYS.cov",
+          "sha256": "abf806d966485e64afdb359c87bffc0ecc00d05eff0a31ced66f247385df0fdc"
+        },
+        "table_file": {
+          "path": "/home/bobjoe/PycharmProjects/AEGQA/sn_data/PantheonPlus/Pantheon+SH0ES.dat",
+          "sha256": "1cb0fc379ef066afdc2ffd1857681cc478024570d8a3eba284fb645775198cf8"
+        }
+      },
+      "grid_size": 300,
+      "n_rows": 1701,
+      "objective": "calibrated Pantheon+ MU_SH0ES / full STAT+SYS covariance",
+      "redshift": "hd_hel",
+      "selection": "all"
+    },
+    "schema_version": 1,
+    "seeds": [
+      23
+    ],
+    "source_sha256": "5251c2345274f30b5584fbd4a8eae057db7586a94bb044c6eb4cf83051bc8b2e",
+    "versions": {
+      "numpy": "2.5.3",
+      "qiskit": "2.5.2",
+      "qiskit-aer": "0.17.2",
+      "scipy": "1.18.1"
+    }
+  },
+  "plotting_source_sha256": "2c445dc767f6b27f650465b5aab7143590ec34f6608296ef59726e5769845e77",
+  "matplotlib_version": "3.11.2",
+  "exports": [
+    {
+      "path": "/home/bobjoe/PycharmProjects/AEGQA/outputs/png/notebook_sne_diagnostics.png",
+      "sha256": "30655beece2a1814e3d89e1b0f3fce5e8405edf276ee8bff63dc474cec8f0862"
+    },
+    {
+      "path": "/home/bobjoe/PycharmProjects/AEGQA/outputs/svg/notebook_sne_diagnostics.svg",
+      "sha256": "3a01524baaa3128689141164496f71cb798aceab52ddc89b610c586c9304d75c"
+    },
+    {
+      "path": "/home/bobjoe/PycharmProjects/AEGQA/outputs/pdf/notebook_sne_diagnostics.pdf",
+      "sha256": "ed747692480096e44522898c4a61fc37a4ae590d5c1cbcd318574b8bbbafedf9"
+    }
+  ]
+}

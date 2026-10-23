@@ -114,6 +114,9 @@ cannot be certified. No full hardware ensemble is claimed.
 
 ## Accuracy against the classical answer
 
+The [latest 300-run plot results](docs/SNE_PLOT_RESULTS.md) include graph previews,
+PNG/SVG/PDF downloads, measured accuracy statistics and the saved numeric reports.
+
 Notebook section **9a** now reports how closely AEQGA matches the classical
 fit: signed/absolute parameter errors, percentage errors, bias, MAE, RMSE,
 and delta chi-squared. A four-panel accuracy figure shows every run, including
