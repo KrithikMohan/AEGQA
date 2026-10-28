@@ -36,6 +36,7 @@ outputs/pdf/*
 !outputs/pdf/.gitkeep
 !outputs/png/.gitkeep
 !outputs/json/.gitkeep
+!outputs/png/ionq_reference_demo_100shot.png
 *.egg-info/
 build/
 dist/
