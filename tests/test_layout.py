@@ -51,12 +51,8 @@ class LayoutTests(unittest.TestCase):
         self.assertIn('"qiskit-ibm-runtime"', code)
         for cell in notebook['cells']:
             if cell['cell_type']=='code':
-                # Executed outputs are research evidence intended for GitHub.
-                count = cell['execution_count']
-                self.assertTrue(count is None or (type(count) is int and count > 0))
-                for output in cell['outputs']:
-                    self.assertNotEqual(output['output_type'], 'error',
-                                        f"Saved execution error in cell {cell['id']}")
+                self.assertIsNone(cell['execution_count'])
+                self.assertEqual(cell['outputs'],[])
 
     def test_retired_apis_are_not_executable(self):
         from aeqga.likelihoods import pantheon_problem

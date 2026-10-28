@@ -141,15 +141,6 @@ what is checked, the distance-grid limitations, and what the graphs cannot prove
 
 ## Verification
 
-The [100-shot noise pilot](docs/IONQ_NOISE_DEMO.md) integrates an illustrative
-IonQ-inspired **local Aer approximation**, with configurable gate and readout
-errors. It uses no IonQ credentials or cloud jobs and is not a calibrated device
-model. Notebook section 13 contains executed comparisons and interpretation.
-
-```bash
-OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 python -m scripts.ionq_noise_demo --shots 100
-```
-
 ```bash
 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 python -m unittest discover -s tests -v
 python -m scripts.test_hardware_compilation
