@@ -139,6 +139,23 @@ simulation runner also writes `pantheon_accuracy.json` and figures.
 See [graph accuracy and interpretation](docs/GRAPH_ACCURACY.md) for exactly
 what is checked, the distance-grid limitations, and what the graphs cannot prove.
 
+## Supplied noisy/QPU examples
+
+The demo uploaded to GitHub `main` is copied here as
+`qml_demo_noisy_and_qpu.zip` and unpacked in `qml_demo_noisy_and_qpu/`.
+The ZIP preserves the original files. The extracted
+[`test_ionq_sim.ipynb`](qml_demo_noisy_and_qpu/test_ionq_sim.ipynb) now defaults
+to 100 shots and includes executed counts, a plot, and an interpretation.
+With no IonQ provider package or API credential in this environment, its
+recorded result uses local Aer with IBM FakeBrisbane noise; it is **not** an
+IonQ `aria-1` result. The extracted `test_noisy_sim.py` also runs at 100 shots.
+The other two examples require an IBM account or target hardware and were not
+run. The measured local run executed one circuit in 0.919 seconds with zero
+cloud service charges; its [plot](outputs/png/ionq_reference_demo_100shot.png)
+shows the observed counts against ideal probabilities. For a hosted IonQ
+`aria-1` run, install `qiskit-ionq`, configure the IonQ credential locally,
+and set `RUN_IONQ_CLOUD = True` in the extracted notebook.
+
 ## Verification
 
 ```bash
