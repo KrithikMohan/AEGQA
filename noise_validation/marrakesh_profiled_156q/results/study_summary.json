@@ -1,0 +1,1402 @@
+{
+  "plan": {
+    "generations": 100,
+    "shots": 100,
+    "seed": 7,
+    "requested_active_qubits": 156,
+    "workers": 24,
+    "objective_threads": 4,
+    "widths": [
+      8,
+      3,
+      7,
+      4,
+      6,
+      5
+    ],
+    "modes": [
+      "noisy",
+      "ideal"
+    ],
+    "snapshot_date": "2025-02-26T14:52:45-05:00",
+    "classical_reference": {
+      "p": [
+        73.53278385939608,
+        0.3318120913006932,
+        -19.24405748751191
+      ],
+      "chi2": 1452.015949980178,
+      "success": true,
+      "method": "GLS profile in M and -5log10(H0/70); golden-section Omega_m search"
+    },
+    "provenance": {
+      "source_sha256": {
+        "aeqga.py": "c8245b97c1ca052eb46e1d62c5e014086747b4649863414d7b0ce4cff639c39e",
+        "aeqga_legacy.py": "41a8052f27a2e1c6d26b40cc3a875a57a26b681b1880b53aee417ad36f91b7da",
+        "aeqga_parallel.py": "184162e7e3ed90d1c1f79451ba0573041e0f89ce1558eaa45c6c37fa6d9ecfa2",
+        "aeqga_ibm_noise.py": "0a5922dfb6c3a5a4136e655cdeb905613ced1392670377e86deb3b9921cb1d5e",
+        "aeqga_ibm_noise_legacy.py": "f0c928380510a4220b8aa943d134a8b610e5222cb13f26b0b8b898d52fab132a",
+        "aeqga_profiled_pantheon.py": "280c66b10d4c93db92bff99bb9b58826ea86a16387a929eeafcd46bd643b19b7",
+        "aeqga_factorized_noise.py": "b915a89b3eab1eeeac6fb06c39622d1ae114589b9e6c22c1c792ab4fdb760b33",
+        "aeqga_profiled_ibm.py": "24255d64ce01c8b6f0485707114c3aee27805a77988d03abbbec21b6152dc2df",
+        "run_pantheon_aeqga.py": "520a7b904764e3010297248bdeb291cb7f87973e6afaa872068124e4e08ac55f",
+        "run_marrakesh_profiled_study.py": "ff0c5c0d9ea166083a52a5631ceadc6166d5f1a8099f8f3c35373226430d509c",
+        "test_profiled_marrakesh.py": "fe549f189a7e0559307812095cd623cb9fdc3e93e6fb5cffbbaf89c17b1ede3d",
+        "state_preparation_regression.json": "033946ccc5271dd4499debbb225f31264700b4fe38dd06e480a0323a07133fad"
+      },
+      "snapshot_sha256": {
+        "conf_marrakesh.json": "5a9a7c14a0187a9ec8109e4e396f96f73cbb1e0c263a6d9d5912a9691ee24e5d",
+        "props_marrakesh.json": "d49d7ae07deb95947ea10e5b9b9c5cbab6df21f98610543817f35ade2b1aece6"
+      },
+      "data_sha256": {
+        "Pantheon+SH0ES.dat": "1cb0fc379ef066afdc2ffd1857681cc478024570d8a3eba284fb645775198cf8",
+        "Pantheon+SH0ES_STAT+SYS.cov": "abf806d966485e64afdb359c87bffc0ecc00d05eff0a31ced66f247385df0fdc"
+      }
+    },
+    "configurations": [
+      {
+        "width": 8,
+        "circuits": 19,
+        "used_qubits": 152,
+        "total_candidates": 4864
+      },
+      {
+        "width": 3,
+        "circuits": 52,
+        "used_qubits": 156,
+        "total_candidates": 416
+      },
+      {
+        "width": 7,
+        "circuits": 22,
+        "used_qubits": 154,
+        "total_candidates": 2816
+      },
+      {
+        "width": 4,
+        "circuits": 38,
+        "used_qubits": 152,
+        "total_candidates": 608
+      },
+      {
+        "width": 6,
+        "circuits": 26,
+        "used_qubits": 156,
+        "total_candidates": 1664
+      },
+      {
+        "width": 5,
+        "circuits": 31,
+        "used_qubits": 155,
+        "total_candidates": 992
+      }
+    ]
+  },
+  "runs": [
+    {
+      "config": {
+        "qubits_per_circuit": 3,
+        "active_qubits_requested": 156,
+        "parallel_circuits": 52,
+        "generations": 100,
+        "shots": 100,
+        "seed": 7,
+        "mode": "ideal",
+        "provenance": {
+          "source_sha256": {
+            "aeqga.py": "c8245b97c1ca052eb46e1d62c5e014086747b4649863414d7b0ce4cff639c39e",
+            "aeqga_legacy.py": "41a8052f27a2e1c6d26b40cc3a875a57a26b681b1880b53aee417ad36f91b7da",
+            "aeqga_parallel.py": "184162e7e3ed90d1c1f79451ba0573041e0f89ce1558eaa45c6c37fa6d9ecfa2",
+            "aeqga_ibm_noise.py": "0a5922dfb6c3a5a4136e655cdeb905613ced1392670377e86deb3b9921cb1d5e",
+            "aeqga_ibm_noise_legacy.py": "f0c928380510a4220b8aa943d134a8b610e5222cb13f26b0b8b898d52fab132a",
+            "aeqga_profiled_pantheon.py": "280c66b10d4c93db92bff99bb9b58826ea86a16387a929eeafcd46bd643b19b7",
+            "aeqga_factorized_noise.py": "b915a89b3eab1eeeac6fb06c39622d1ae114589b9e6c22c1c792ab4fdb760b33",
+            "aeqga_profiled_ibm.py": "24255d64ce01c8b6f0485707114c3aee27805a77988d03abbbec21b6152dc2df",
+            "run_pantheon_aeqga.py": "520a7b904764e3010297248bdeb291cb7f87973e6afaa872068124e4e08ac55f",
+            "run_marrakesh_profiled_study.py": "ff0c5c0d9ea166083a52a5631ceadc6166d5f1a8099f8f3c35373226430d509c",
+            "test_profiled_marrakesh.py": "fe549f189a7e0559307812095cd623cb9fdc3e93e6fb5cffbbaf89c17b1ede3d",
+            "state_preparation_regression.json": "033946ccc5271dd4499debbb225f31264700b4fe38dd06e480a0323a07133fad"
+          },
+          "snapshot_sha256": {
+            "conf_marrakesh.json": "5a9a7c14a0187a9ec8109e4e396f96f73cbb1e0c263a6d9d5912a9691ee24e5d",
+            "props_marrakesh.json": "d49d7ae07deb95947ea10e5b9b9c5cbab6df21f98610543817f35ade2b1aece6"
+          },
+          "data_sha256": {
+            "Pantheon+SH0ES.dat": "1cb0fc379ef066afdc2ffd1857681cc478024570d8a3eba284fb645775198cf8",
+            "Pantheon+SH0ES_STAT+SYS.cov": "abf806d966485e64afdb359c87bffc0ecc00d05eff0a31ced66f247385df0fdc"
+          }
+        }
+      },
+      "width": 3,
+      "mode": "ideal",
+      "used_active_qubits": 156,
+      "discarded_qubits": 0,
+      "population_per_circuit": 8,
+      "total_population": 416,
+      "per_group_elite_local_global": [
+        2,
+        2,
+        4
+      ],
+      "best_parameters": [
+        73.53284238359363,
+        0.3318048287279095,
+        -19.244058089932846
+      ],
+      "chi2": 1452.0159501436406,
+      "delta_chi2": 1.6346257325494662e-07,
+      "initial_delta_chi2": 0.044793655869852955,
+      "classical_reference": {
+        "p": [
+          73.53278385939608,
+          0.3318120913006932,
+          -19.24405748751191
+        ],
+        "chi2": 1452.015949980178,
+        "success": true,
+        "method": "GLS profile in M and -5log10(H0/70); golden-section Omega_m search"
+      },
+      "fitness_evaluations": 31616,
+      "candidate_rows": 42016,
+      "M_boundary_rows": 951,
+      "maximum_independent_best_chi2_error": 9.231371222995222e-11,
+      "maximum_probability_trace_error": 2.220446049250313e-15,
+      "training_wall_seconds": 57.68186549999973,
+      "objective_wall_seconds": 19.287002500008384,
+      "factorized_quantum_wall_seconds": 20.050847599992267,
+      "compile_worker_seconds": 106.12256739997883,
+      "simulation_worker_seconds": 14.547584900024958,
+      "shots_times_scheduled_duration_total": 0.26397920000000014,
+      "logical_packed_executions": 100,
+      "full_subpopulation_circuits": 5200,
+      "stages": 20800,
+      "thresholds": {
+        "0.1": {
+          "generation": 0,
+          "fitness_evaluations": 416,
+          "elapsed_wall_seconds": 0.3500192000001334,
+          "scheduled_shot_seconds": 0.0
+        },
+        "0.01": {
+          "generation": 2,
+          "fitness_evaluations": 1040,
+          "elapsed_wall_seconds": 1.4267406999997547,
+          "scheduled_shot_seconds": 0.005308800000000001
+        },
+        "0.001": {
+          "generation": 2,
+          "fitness_evaluations": 1040,
+          "elapsed_wall_seconds": 1.4267406999997547,
+          "scheduled_shot_seconds": 0.005308800000000001
+        }
+      },
+      "mean_metrics": {
+        "mean_noise_tvd": 0.0,
+        "mean_sampling_tvd": 0.06603063451784695,
+        "mean_zero_fraction": 0.013521634615384616,
+        "mean_unused_amplitude_probability": 0.19070773439037567,
+        "max_probability_trace_error": 1.5099033134902129e-15,
+        "mean_cz_per_group": 26.159230769230767,
+        "mean_depth_per_group": 126.69269230769231,
+        "maximum_scheduled_circuit_seconds": 2.639792e-05,
+        "shots_times_scheduled_duration": 0.002639792
+      },
+      "validation": "passed"
+    },
+    {
+      "config": {
+        "qubits_per_circuit": 3,
+        "active_qubits_requested": 156,
+        "parallel_circuits": 52,
+        "generations": 100,
+        "shots": 100,
+        "seed": 7,
+        "mode": "noisy",
+        "provenance": {
+          "source_sha256": {
+            "aeqga.py": "c8245b97c1ca052eb46e1d62c5e014086747b4649863414d7b0ce4cff639c39e",
+            "aeqga_legacy.py": "41a8052f27a2e1c6d26b40cc3a875a57a26b681b1880b53aee417ad36f91b7da",
+            "aeqga_parallel.py": "184162e7e3ed90d1c1f79451ba0573041e0f89ce1558eaa45c6c37fa6d9ecfa2",
+            "aeqga_ibm_noise.py": "0a5922dfb6c3a5a4136e655cdeb905613ced1392670377e86deb3b9921cb1d5e",
+            "aeqga_ibm_noise_legacy.py": "f0c928380510a4220b8aa943d134a8b610e5222cb13f26b0b8b898d52fab132a",
+            "aeqga_profiled_pantheon.py": "280c66b10d4c93db92bff99bb9b58826ea86a16387a929eeafcd46bd643b19b7",
+            "aeqga_factorized_noise.py": "b915a89b3eab1eeeac6fb06c39622d1ae114589b9e6c22c1c792ab4fdb760b33",
+            "aeqga_profiled_ibm.py": "24255d64ce01c8b6f0485707114c3aee27805a77988d03abbbec21b6152dc2df",
+            "run_pantheon_aeqga.py": "520a7b904764e3010297248bdeb291cb7f87973e6afaa872068124e4e08ac55f",
+            "run_marrakesh_profiled_study.py": "ff0c5c0d9ea166083a52a5631ceadc6166d5f1a8099f8f3c35373226430d509c",
+            "test_profiled_marrakesh.py": "fe549f189a7e0559307812095cd623cb9fdc3e93e6fb5cffbbaf89c17b1ede3d",
+            "state_preparation_regression.json": "033946ccc5271dd4499debbb225f31264700b4fe38dd06e480a0323a07133fad"
+          },
+          "snapshot_sha256": {
+            "conf_marrakesh.json": "5a9a7c14a0187a9ec8109e4e396f96f73cbb1e0c263a6d9d5912a9691ee24e5d",
+            "props_marrakesh.json": "d49d7ae07deb95947ea10e5b9b9c5cbab6df21f98610543817f35ade2b1aece6"
+          },
+          "data_sha256": {
+            "Pantheon+SH0ES.dat": "1cb0fc379ef066afdc2ffd1857681cc478024570d8a3eba284fb645775198cf8",
+            "Pantheon+SH0ES_STAT+SYS.cov": "abf806d966485e64afdb359c87bffc0ecc00d05eff0a31ced66f247385df0fdc"
+          }
+        }
+      },
+      "width": 3,
+      "mode": "noisy",
+      "used_active_qubits": 156,
+      "discarded_qubits": 0,
+      "population_per_circuit": 8,
+      "total_population": 416,
+      "per_group_elite_local_global": [
+        2,
+        2,
+        4
+      ],
+      "best_parameters": [
+        73.53339920363142,
+        0.33181772309367086,
+        -19.24403782534038
+      ],
+      "chi2": 1452.015950504715,
+      "delta_chi2": 5.245369720796589e-07,
+      "initial_delta_chi2": 0.044793655869852955,
+      "classical_reference": {
+        "p": [
+          73.53278385939608,
+          0.3318120913006932,
+          -19.24405748751191
+        ],
+        "chi2": 1452.015949980178,
+        "success": true,
+        "method": "GLS profile in M and -5log10(H0/70); golden-section Omega_m search"
+      },
+      "fitness_evaluations": 31616,
+      "candidate_rows": 42016,
+      "M_boundary_rows": 1119,
+      "maximum_independent_best_chi2_error": 9.231371222995222e-11,
+      "maximum_probability_trace_error": 3.604414411384482e-08,
+      "training_wall_seconds": 109.79463429999942,
+      "objective_wall_seconds": 19.079307199998766,
+      "factorized_quantum_wall_seconds": 70.67046349999418,
+      "compile_worker_seconds": 112.62401359999603,
+      "simulation_worker_seconds": 382.92136440004015,
+      "shots_times_scheduled_duration_total": 0.2637760000000001,
+      "logical_packed_executions": 100,
+      "full_subpopulation_circuits": 5200,
+      "stages": 20800,
+      "thresholds": {
+        "0.1": {
+          "generation": 0,
+          "fitness_evaluations": 416,
+          "elapsed_wall_seconds": 0.34119749999990745,
+          "scheduled_shot_seconds": 0.0
+        },
+        "0.01": {
+          "generation": 5,
+          "fitness_evaluations": 1976,
+          "elapsed_wall_seconds": 5.972615599999699,
+          "scheduled_shot_seconds": 0.013136400000000003
+        },
+        "0.001": {
+          "generation": 6,
+          "fitness_evaluations": 2288,
+          "elapsed_wall_seconds": 6.94901740000023,
+          "scheduled_shot_seconds": 0.015753200000000002
+        }
+      },
+      "mean_metrics": {
+        "mean_noise_tvd": 0.08571754616625751,
+        "mean_sampling_tvd": 0.07778450371950937,
+        "mean_zero_fraction": 0.0032692307692307686,
+        "mean_unused_amplitude_probability": 0.2447325511192281,
+        "max_probability_trace_error": 2.4645271576861916e-08,
+        "mean_cz_per_group": 26.231538461538456,
+        "mean_depth_per_group": 126.8519230769231,
+        "maximum_scheduled_circuit_seconds": 2.63776e-05,
+        "shots_times_scheduled_duration": 0.0026377600000000003
+      },
+      "validation": "passed"
+    },
+    {
+      "config": {
+        "qubits_per_circuit": 4,
+        "active_qubits_requested": 156,
+        "parallel_circuits": 38,
+        "generations": 100,
+        "shots": 100,
+        "seed": 7,
+        "mode": "ideal",
+        "provenance": {
+          "source_sha256": {
+            "aeqga.py": "c8245b97c1ca052eb46e1d62c5e014086747b4649863414d7b0ce4cff639c39e",
+            "aeqga_legacy.py": "41a8052f27a2e1c6d26b40cc3a875a57a26b681b1880b53aee417ad36f91b7da",
+            "aeqga_parallel.py": "184162e7e3ed90d1c1f79451ba0573041e0f89ce1558eaa45c6c37fa6d9ecfa2",
+            "aeqga_ibm_noise.py": "0a5922dfb6c3a5a4136e655cdeb905613ced1392670377e86deb3b9921cb1d5e",
+            "aeqga_ibm_noise_legacy.py": "f0c928380510a4220b8aa943d134a8b610e5222cb13f26b0b8b898d52fab132a",
+            "aeqga_profiled_pantheon.py": "280c66b10d4c93db92bff99bb9b58826ea86a16387a929eeafcd46bd643b19b7",
+            "aeqga_factorized_noise.py": "b915a89b3eab1eeeac6fb06c39622d1ae114589b9e6c22c1c792ab4fdb760b33",
+            "aeqga_profiled_ibm.py": "24255d64ce01c8b6f0485707114c3aee27805a77988d03abbbec21b6152dc2df",
+            "run_pantheon_aeqga.py": "520a7b904764e3010297248bdeb291cb7f87973e6afaa872068124e4e08ac55f",
+            "run_marrakesh_profiled_study.py": "ff0c5c0d9ea166083a52a5631ceadc6166d5f1a8099f8f3c35373226430d509c",
+            "test_profiled_marrakesh.py": "fe549f189a7e0559307812095cd623cb9fdc3e93e6fb5cffbbaf89c17b1ede3d",
+            "state_preparation_regression.json": "033946ccc5271dd4499debbb225f31264700b4fe38dd06e480a0323a07133fad"
+          },
+          "snapshot_sha256": {
+            "conf_marrakesh.json": "5a9a7c14a0187a9ec8109e4e396f96f73cbb1e0c263a6d9d5912a9691ee24e5d",
+            "props_marrakesh.json": "d49d7ae07deb95947ea10e5b9b9c5cbab6df21f98610543817f35ade2b1aece6"
+          },
+          "data_sha256": {
+            "Pantheon+SH0ES.dat": "1cb0fc379ef066afdc2ffd1857681cc478024570d8a3eba284fb645775198cf8",
+            "Pantheon+SH0ES_STAT+SYS.cov": "abf806d966485e64afdb359c87bffc0ecc00d05eff0a31ced66f247385df0fdc"
+          }
+        }
+      },
+      "width": 4,
+      "mode": "ideal",
+      "used_active_qubits": 152,
+      "discarded_qubits": 4,
+      "population_per_circuit": 16,
+      "total_population": 608,
+      "per_group_elite_local_global": [
+        4,
+        4,
+        8
+      ],
+      "best_parameters": [
+        73.5329395062343,
+        0.3318154039926786,
+        -19.244051915442824
+      ],
+      "chi2": 1452.0159500457562,
+      "delta_chi2": 6.557820597663522e-08,
+      "initial_delta_chi2": 0.044793655869852955,
+      "classical_reference": {
+        "p": [
+          73.53278385939608,
+          0.3318120913006932,
+          -19.24405748751191
+        ],
+        "chi2": 1452.015949980178,
+        "success": true,
+        "method": "GLS profile in M and -5log10(H0/70); golden-section Omega_m search"
+      },
+      "fitness_evaluations": 46208,
+      "candidate_rows": 61408,
+      "M_boundary_rows": 1952,
+      "maximum_independent_best_chi2_error": 7.935341272968799e-11,
+      "maximum_probability_trace_error": 3.1086244689504383e-15,
+      "training_wall_seconds": 73.17996760000096,
+      "objective_wall_seconds": 26.70196350000333,
+      "factorized_quantum_wall_seconds": 28.1187132999994,
+      "compile_worker_seconds": 162.3275270999793,
+      "simulation_worker_seconds": 21.833849699990424,
+      "shots_times_scheduled_duration_total": 0.3403644,
+      "logical_packed_executions": 100,
+      "full_subpopulation_circuits": 3800,
+      "stages": 15200,
+      "thresholds": {
+        "0.1": {
+          "generation": 0,
+          "fitness_evaluations": 608,
+          "elapsed_wall_seconds": 0.6601221000000805,
+          "scheduled_shot_seconds": 0.0
+        },
+        "0.01": {
+          "generation": 2,
+          "fitness_evaluations": 1520,
+          "elapsed_wall_seconds": 1.8350546000001486,
+          "scheduled_shot_seconds": 0.0067664000000000005
+        },
+        "0.001": {
+          "generation": 7,
+          "fitness_evaluations": 3800,
+          "elapsed_wall_seconds": 5.472983999999997,
+          "scheduled_shot_seconds": 0.023764800000000003
+        }
+      },
+      "mean_metrics": {
+        "mean_noise_tvd": 0.0,
+        "mean_sampling_tvd": 0.0975157899953658,
+        "mean_zero_fraction": 0.039597039473684204,
+        "mean_unused_amplitude_probability": 0.15809702923245758,
+        "max_probability_trace_error": 2.1871393585115583e-15,
+        "mean_cz_per_group": 82.03605263157895,
+        "mean_depth_per_group": 324.03763157894736,
+        "maximum_scheduled_circuit_seconds": 3.403644e-05,
+        "shots_times_scheduled_duration": 0.003403644000000001
+      },
+      "validation": "passed"
+    },
+    {
+      "config": {
+        "qubits_per_circuit": 4,
+        "active_qubits_requested": 156,
+        "parallel_circuits": 38,
+        "generations": 100,
+        "shots": 100,
+        "seed": 7,
+        "mode": "noisy",
+        "provenance": {
+          "source_sha256": {
+            "aeqga.py": "c8245b97c1ca052eb46e1d62c5e014086747b4649863414d7b0ce4cff639c39e",
+            "aeqga_legacy.py": "41a8052f27a2e1c6d26b40cc3a875a57a26b681b1880b53aee417ad36f91b7da",
+            "aeqga_parallel.py": "184162e7e3ed90d1c1f79451ba0573041e0f89ce1558eaa45c6c37fa6d9ecfa2",
+            "aeqga_ibm_noise.py": "0a5922dfb6c3a5a4136e655cdeb905613ced1392670377e86deb3b9921cb1d5e",
+            "aeqga_ibm_noise_legacy.py": "f0c928380510a4220b8aa943d134a8b610e5222cb13f26b0b8b898d52fab132a",
+            "aeqga_profiled_pantheon.py": "280c66b10d4c93db92bff99bb9b58826ea86a16387a929eeafcd46bd643b19b7",
+            "aeqga_factorized_noise.py": "b915a89b3eab1eeeac6fb06c39622d1ae114589b9e6c22c1c792ab4fdb760b33",
+            "aeqga_profiled_ibm.py": "24255d64ce01c8b6f0485707114c3aee27805a77988d03abbbec21b6152dc2df",
+            "run_pantheon_aeqga.py": "520a7b904764e3010297248bdeb291cb7f87973e6afaa872068124e4e08ac55f",
+            "run_marrakesh_profiled_study.py": "ff0c5c0d9ea166083a52a5631ceadc6166d5f1a8099f8f3c35373226430d509c",
+            "test_profiled_marrakesh.py": "fe549f189a7e0559307812095cd623cb9fdc3e93e6fb5cffbbaf89c17b1ede3d",
+            "state_preparation_regression.json": "033946ccc5271dd4499debbb225f31264700b4fe38dd06e480a0323a07133fad"
+          },
+          "snapshot_sha256": {
+            "conf_marrakesh.json": "5a9a7c14a0187a9ec8109e4e396f96f73cbb1e0c263a6d9d5912a9691ee24e5d",
+            "props_marrakesh.json": "d49d7ae07deb95947ea10e5b9b9c5cbab6df21f98610543817f35ade2b1aece6"
+          },
+          "data_sha256": {
+            "Pantheon+SH0ES.dat": "1cb0fc379ef066afdc2ffd1857681cc478024570d8a3eba284fb645775198cf8",
+            "Pantheon+SH0ES_STAT+SYS.cov": "abf806d966485e64afdb359c87bffc0ecc00d05eff0a31ced66f247385df0fdc"
+          }
+        }
+      },
+      "width": 4,
+      "mode": "noisy",
+      "used_active_qubits": 152,
+      "discarded_qubits": 4,
+      "population_per_circuit": 16,
+      "total_population": 608,
+      "per_group_elite_local_global": [
+        4,
+        4,
+        8
+      ],
+      "best_parameters": [
+        73.5328992830295,
+        0.33180154910510506,
+        -19.244057476746814
+      ],
+      "chi2": 1452.015950324745,
+      "delta_chi2": 3.445670699875336e-07,
+      "initial_delta_chi2": 0.044793655869852955,
+      "classical_reference": {
+        "p": [
+          73.53278385939608,
+          0.3318120913006932,
+          -19.24405748751191
+        ],
+        "chi2": 1452.015949980178,
+        "success": true,
+        "method": "GLS profile in M and -5log10(H0/70); golden-section Omega_m search"
+      },
+      "fitness_evaluations": 46208,
+      "candidate_rows": 61408,
+      "M_boundary_rows": 2474,
+      "maximum_independent_best_chi2_error": 7.912603905424476e-11,
+      "maximum_probability_trace_error": 8.687561647846564e-08,
+      "training_wall_seconds": 166.77146640000046,
+      "objective_wall_seconds": 25.466183499995168,
+      "factorized_quantum_wall_seconds": 120.48752830000467,
+      "compile_worker_seconds": 158.86545339998338,
+      "simulation_worker_seconds": 489.5014460999637,
+      "shots_times_scheduled_duration_total": 0.34031720000000004,
+      "logical_packed_executions": 100,
+      "full_subpopulation_circuits": 3800,
+      "stages": 15200,
+      "thresholds": {
+        "0.1": {
+          "generation": 0,
+          "fitness_evaluations": 608,
+          "elapsed_wall_seconds": 0.5027761999999711,
+          "scheduled_shot_seconds": 0.0
+        },
+        "0.01": {
+          "generation": 1,
+          "fitness_evaluations": 1064,
+          "elapsed_wall_seconds": 2.3604848000004495,
+          "scheduled_shot_seconds": 0.0033980000000000004
+        },
+        "0.001": {
+          "generation": 6,
+          "fitness_evaluations": 3344,
+          "elapsed_wall_seconds": 10.880181700000321,
+          "scheduled_shot_seconds": 0.0204152
+        }
+      },
+      "mean_metrics": {
+        "mean_noise_tvd": 0.11748109675707838,
+        "mean_sampling_tvd": 0.11663449965491793,
+        "mean_zero_fraction": 0.015789473684210523,
+        "mean_unused_amplitude_probability": 0.22987316473193448,
+        "max_probability_trace_error": 6.245679041838592e-08,
+        "mean_cz_per_group": 82.0792105263158,
+        "mean_depth_per_group": 324.8028947368421,
+        "maximum_scheduled_circuit_seconds": 3.403172e-05,
+        "shots_times_scheduled_duration": 0.0034031720000000003
+      },
+      "validation": "passed"
+    },
+    {
+      "config": {
+        "qubits_per_circuit": 5,
+        "active_qubits_requested": 156,
+        "parallel_circuits": 31,
+        "generations": 100,
+        "shots": 100,
+        "seed": 7,
+        "mode": "ideal",
+        "provenance": {
+          "source_sha256": {
+            "aeqga.py": "c8245b97c1ca052eb46e1d62c5e014086747b4649863414d7b0ce4cff639c39e",
+            "aeqga_legacy.py": "41a8052f27a2e1c6d26b40cc3a875a57a26b681b1880b53aee417ad36f91b7da",
+            "aeqga_parallel.py": "184162e7e3ed90d1c1f79451ba0573041e0f89ce1558eaa45c6c37fa6d9ecfa2",
+            "aeqga_ibm_noise.py": "0a5922dfb6c3a5a4136e655cdeb905613ced1392670377e86deb3b9921cb1d5e",
+            "aeqga_ibm_noise_legacy.py": "f0c928380510a4220b8aa943d134a8b610e5222cb13f26b0b8b898d52fab132a",
+            "aeqga_profiled_pantheon.py": "280c66b10d4c93db92bff99bb9b58826ea86a16387a929eeafcd46bd643b19b7",
+            "aeqga_factorized_noise.py": "b915a89b3eab1eeeac6fb06c39622d1ae114589b9e6c22c1c792ab4fdb760b33",
+            "aeqga_profiled_ibm.py": "24255d64ce01c8b6f0485707114c3aee27805a77988d03abbbec21b6152dc2df",
+            "run_pantheon_aeqga.py": "520a7b904764e3010297248bdeb291cb7f87973e6afaa872068124e4e08ac55f",
+            "run_marrakesh_profiled_study.py": "ff0c5c0d9ea166083a52a5631ceadc6166d5f1a8099f8f3c35373226430d509c",
+            "test_profiled_marrakesh.py": "fe549f189a7e0559307812095cd623cb9fdc3e93e6fb5cffbbaf89c17b1ede3d",
+            "state_preparation_regression.json": "033946ccc5271dd4499debbb225f31264700b4fe38dd06e480a0323a07133fad"
+          },
+          "snapshot_sha256": {
+            "conf_marrakesh.json": "5a9a7c14a0187a9ec8109e4e396f96f73cbb1e0c263a6d9d5912a9691ee24e5d",
+            "props_marrakesh.json": "d49d7ae07deb95947ea10e5b9b9c5cbab6df21f98610543817f35ade2b1aece6"
+          },
+          "data_sha256": {
+            "Pantheon+SH0ES.dat": "1cb0fc379ef066afdc2ffd1857681cc478024570d8a3eba284fb645775198cf8",
+            "Pantheon+SH0ES_STAT+SYS.cov": "abf806d966485e64afdb359c87bffc0ecc00d05eff0a31ced66f247385df0fdc"
+          }
+        }
+      },
+      "width": 5,
+      "mode": "ideal",
+      "used_active_qubits": 155,
+      "discarded_qubits": 1,
+      "population_per_circuit": 32,
+      "total_population": 992,
+      "per_group_elite_local_global": [
+        8,
+        8,
+        16
+      ],
+      "best_parameters": [
+        73.53880768171625,
+        0.3315910237816246,
+        -19.243952590339713
+      ],
+      "chi2": 1452.0161184927726,
+      "delta_chi2": 0.00016851259465511248,
+      "initial_delta_chi2": 0.044793655869852955,
+      "classical_reference": {
+        "p": [
+          73.53278385939608,
+          0.3318120913006932,
+          -19.24405748751191
+        ],
+        "chi2": 1452.015949980178,
+        "success": true,
+        "method": "GLS profile in M and -5log10(H0/70); golden-section Omega_m search"
+      },
+      "fitness_evaluations": 75392,
+      "candidate_rows": 100192,
+      "M_boundary_rows": 4812,
+      "maximum_independent_best_chi2_error": 6.343725544866174e-11,
+      "maximum_probability_trace_error": 3.774758283725532e-15,
+      "training_wall_seconds": 113.12040980000165,
+      "objective_wall_seconds": 35.47769069999413,
+      "factorized_quantum_wall_seconds": 56.661738899996635,
+      "compile_worker_seconds": 303.3180114000261,
+      "simulation_worker_seconds": 38.500854499918205,
+      "shots_times_scheduled_duration_total": 0.46354799999999996,
+      "logical_packed_executions": 100,
+      "full_subpopulation_circuits": 3100,
+      "stages": 12400,
+      "thresholds": {
+        "0.1": {
+          "generation": 0,
+          "fitness_evaluations": 992,
+          "elapsed_wall_seconds": 0.8302169000016875,
+          "scheduled_shot_seconds": 0.0
+        },
+        "0.01": {
+          "generation": 16,
+          "fitness_evaluations": 12896,
+          "elapsed_wall_seconds": 17.15149520000159,
+          "scheduled_shot_seconds": 0.07401440000000001
+        },
+        "0.001": {
+          "generation": 27,
+          "fitness_evaluations": 21080,
+          "elapsed_wall_seconds": 31.396775800001706,
+          "scheduled_shot_seconds": 0.12515479999999998
+        }
+      },
+      "mean_metrics": {
+        "mean_noise_tvd": 0.0,
+        "mean_sampling_tvd": 0.13893422265358102,
+        "mean_zero_fraction": 0.07944052419354838,
+        "mean_unused_amplitude_probability": 0.1301594728165909,
+        "max_probability_trace_error": 2.5879298704012398e-15,
+        "mean_cz_per_group": 217.88451612903225,
+        "mean_depth_per_group": 676.1790322580646,
+        "maximum_scheduled_circuit_seconds": 4.635480000000002e-05,
+        "shots_times_scheduled_duration": 0.00463548
+      },
+      "validation": "passed"
+    },
+    {
+      "config": {
+        "qubits_per_circuit": 5,
+        "active_qubits_requested": 156,
+        "parallel_circuits": 31,
+        "generations": 100,
+        "shots": 100,
+        "seed": 7,
+        "mode": "noisy",
+        "provenance": {
+          "source_sha256": {
+            "aeqga.py": "c8245b97c1ca052eb46e1d62c5e014086747b4649863414d7b0ce4cff639c39e",
+            "aeqga_legacy.py": "41a8052f27a2e1c6d26b40cc3a875a57a26b681b1880b53aee417ad36f91b7da",
+            "aeqga_parallel.py": "184162e7e3ed90d1c1f79451ba0573041e0f89ce1558eaa45c6c37fa6d9ecfa2",
+            "aeqga_ibm_noise.py": "0a5922dfb6c3a5a4136e655cdeb905613ced1392670377e86deb3b9921cb1d5e",
+            "aeqga_ibm_noise_legacy.py": "f0c928380510a4220b8aa943d134a8b610e5222cb13f26b0b8b898d52fab132a",
+            "aeqga_profiled_pantheon.py": "280c66b10d4c93db92bff99bb9b58826ea86a16387a929eeafcd46bd643b19b7",
+            "aeqga_factorized_noise.py": "b915a89b3eab1eeeac6fb06c39622d1ae114589b9e6c22c1c792ab4fdb760b33",
+            "aeqga_profiled_ibm.py": "24255d64ce01c8b6f0485707114c3aee27805a77988d03abbbec21b6152dc2df",
+            "run_pantheon_aeqga.py": "520a7b904764e3010297248bdeb291cb7f87973e6afaa872068124e4e08ac55f",
+            "run_marrakesh_profiled_study.py": "ff0c5c0d9ea166083a52a5631ceadc6166d5f1a8099f8f3c35373226430d509c",
+            "test_profiled_marrakesh.py": "fe549f189a7e0559307812095cd623cb9fdc3e93e6fb5cffbbaf89c17b1ede3d",
+            "state_preparation_regression.json": "033946ccc5271dd4499debbb225f31264700b4fe38dd06e480a0323a07133fad"
+          },
+          "snapshot_sha256": {
+            "conf_marrakesh.json": "5a9a7c14a0187a9ec8109e4e396f96f73cbb1e0c263a6d9d5912a9691ee24e5d",
+            "props_marrakesh.json": "d49d7ae07deb95947ea10e5b9b9c5cbab6df21f98610543817f35ade2b1aece6"
+          },
+          "data_sha256": {
+            "Pantheon+SH0ES.dat": "1cb0fc379ef066afdc2ffd1857681cc478024570d8a3eba284fb645775198cf8",
+            "Pantheon+SH0ES_STAT+SYS.cov": "abf806d966485e64afdb359c87bffc0ecc00d05eff0a31ced66f247385df0fdc"
+          }
+        }
+      },
+      "width": 5,
+      "mode": "noisy",
+      "used_active_qubits": 155,
+      "discarded_qubits": 1,
+      "population_per_circuit": 32,
+      "total_population": 992,
+      "per_group_elite_local_global": [
+        8,
+        8,
+        16
+      ],
+      "best_parameters": [
+        73.52586581679154,
+        0.33260170427922403,
+        -19.244008206817252
+      ],
+      "chi2": 1452.0178638858538,
+      "delta_chi2": 0.0019139056757921935,
+      "initial_delta_chi2": 0.044793655869852955,
+      "classical_reference": {
+        "p": [
+          73.53278385939608,
+          0.3318120913006932,
+          -19.24405748751191
+        ],
+        "chi2": 1452.015949980178,
+        "success": true,
+        "method": "GLS profile in M and -5log10(H0/70); golden-section Omega_m search"
+      },
+      "fitness_evaluations": 75392,
+      "candidate_rows": 100192,
+      "M_boundary_rows": 5330,
+      "maximum_independent_best_chi2_error": 7.435119186993688e-11,
+      "maximum_probability_trace_error": 1.2442206687168778e-07,
+      "training_wall_seconds": 234.3525791000011,
+      "objective_wall_seconds": 29.534293199996682,
+      "factorized_quantum_wall_seconds": 182.8819777999979,
+      "compile_worker_seconds": 277.65904359992965,
+      "simulation_worker_seconds": 751.6187256999838,
+      "shots_times_scheduled_duration_total": 0.4628939999999999,
+      "logical_packed_executions": 100,
+      "full_subpopulation_circuits": 3100,
+      "stages": 12400,
+      "thresholds": {
+        "0.1": {
+          "generation": 0,
+          "fitness_evaluations": 992,
+          "elapsed_wall_seconds": 0.8162674000013794,
+          "scheduled_shot_seconds": 0.0
+        },
+        "0.01": {
+          "generation": 29,
+          "fitness_evaluations": 22568,
+          "elapsed_wall_seconds": 69.14497550000124,
+          "scheduled_shot_seconds": 0.1342408
+        },
+        "0.001": null
+      },
+      "mean_metrics": {
+        "mean_noise_tvd": 0.20046879747585702,
+        "mean_sampling_tvd": 0.17938222571435739,
+        "mean_zero_fraction": 0.037787298387096775,
+        "mean_unused_amplitude_probability": 0.2631413935746535,
+        "max_probability_trace_error": 1.1400540735229114e-07,
+        "mean_cz_per_group": 217.5887096774194,
+        "mean_depth_per_group": 676.5254838709677,
+        "maximum_scheduled_circuit_seconds": 4.6289400000000004e-05,
+        "shots_times_scheduled_duration": 0.004628940000000001
+      },
+      "validation": "passed"
+    },
+    {
+      "config": {
+        "qubits_per_circuit": 6,
+        "active_qubits_requested": 156,
+        "parallel_circuits": 26,
+        "generations": 100,
+        "shots": 100,
+        "seed": 7,
+        "mode": "ideal",
+        "provenance": {
+          "source_sha256": {
+            "aeqga.py": "c8245b97c1ca052eb46e1d62c5e014086747b4649863414d7b0ce4cff639c39e",
+            "aeqga_legacy.py": "41a8052f27a2e1c6d26b40cc3a875a57a26b681b1880b53aee417ad36f91b7da",
+            "aeqga_parallel.py": "184162e7e3ed90d1c1f79451ba0573041e0f89ce1558eaa45c6c37fa6d9ecfa2",
+            "aeqga_ibm_noise.py": "0a5922dfb6c3a5a4136e655cdeb905613ced1392670377e86deb3b9921cb1d5e",
+            "aeqga_ibm_noise_legacy.py": "f0c928380510a4220b8aa943d134a8b610e5222cb13f26b0b8b898d52fab132a",
+            "aeqga_profiled_pantheon.py": "280c66b10d4c93db92bff99bb9b58826ea86a16387a929eeafcd46bd643b19b7",
+            "aeqga_factorized_noise.py": "b915a89b3eab1eeeac6fb06c39622d1ae114589b9e6c22c1c792ab4fdb760b33",
+            "aeqga_profiled_ibm.py": "24255d64ce01c8b6f0485707114c3aee27805a77988d03abbbec21b6152dc2df",
+            "run_pantheon_aeqga.py": "520a7b904764e3010297248bdeb291cb7f87973e6afaa872068124e4e08ac55f",
+            "run_marrakesh_profiled_study.py": "ff0c5c0d9ea166083a52a5631ceadc6166d5f1a8099f8f3c35373226430d509c",
+            "test_profiled_marrakesh.py": "fe549f189a7e0559307812095cd623cb9fdc3e93e6fb5cffbbaf89c17b1ede3d",
+            "state_preparation_regression.json": "033946ccc5271dd4499debbb225f31264700b4fe38dd06e480a0323a07133fad"
+          },
+          "snapshot_sha256": {
+            "conf_marrakesh.json": "5a9a7c14a0187a9ec8109e4e396f96f73cbb1e0c263a6d9d5912a9691ee24e5d",
+            "props_marrakesh.json": "d49d7ae07deb95947ea10e5b9b9c5cbab6df21f98610543817f35ade2b1aece6"
+          },
+          "data_sha256": {
+            "Pantheon+SH0ES.dat": "1cb0fc379ef066afdc2ffd1857681cc478024570d8a3eba284fb645775198cf8",
+            "Pantheon+SH0ES_STAT+SYS.cov": "abf806d966485e64afdb359c87bffc0ecc00d05eff0a31ced66f247385df0fdc"
+          }
+        }
+      },
+      "width": 6,
+      "mode": "ideal",
+      "used_active_qubits": 156,
+      "discarded_qubits": 0,
+      "population_per_circuit": 64,
+      "total_population": 1664,
+      "per_group_elite_local_global": [
+        16,
+        16,
+        32
+      ],
+      "best_parameters": [
+        73.55533626064215,
+        0.33126494949923535,
+        -19.243575919316793
+      ],
+      "chi2": 1452.0172005433096,
+      "delta_chi2": 0.001250563131634408,
+      "initial_delta_chi2": 0.03331954287523331,
+      "classical_reference": {
+        "p": [
+          73.53278385939608,
+          0.3318120913006932,
+          -19.24405748751191
+        ],
+        "chi2": 1452.015949980178,
+        "success": true,
+        "method": "GLS profile in M and -5log10(H0/70); golden-section Omega_m search"
+      },
+      "fitness_evaluations": 126464,
+      "candidate_rows": 168064,
+      "M_boundary_rows": 11269,
+      "maximum_independent_best_chi2_error": 6.275513442233205e-11,
+      "maximum_probability_trace_error": 4.6629367034256575e-15,
+      "training_wall_seconds": 167.98930389999987,
+      "objective_wall_seconds": 45.75562259999606,
+      "factorized_quantum_wall_seconds": 99.53386750000936,
+      "compile_worker_seconds": 517.6263874999495,
+      "simulation_worker_seconds": 68.27075490000607,
+      "shots_times_scheduled_duration_total": 0.7536540000000005,
+      "logical_packed_executions": 100,
+      "full_subpopulation_circuits": 2600,
+      "stages": 10400,
+      "thresholds": {
+        "0.1": {
+          "generation": 0,
+          "fitness_evaluations": 1664,
+          "elapsed_wall_seconds": 1.378215500000806,
+          "scheduled_shot_seconds": 0.0
+        },
+        "0.01": {
+          "generation": 39,
+          "fitness_evaluations": 50336,
+          "elapsed_wall_seconds": 67.6733908999995,
+          "scheduled_shot_seconds": 0.2932112000000001
+        },
+        "0.001": null
+      },
+      "mean_metrics": {
+        "mean_noise_tvd": 0.0,
+        "mean_sampling_tvd": 0.19414942320922773,
+        "mean_zero_fraction": 0.1453846153846154,
+        "mean_unused_amplitude_probability": 0.10777804798208449,
+        "max_probability_trace_error": 2.9753977059954196e-15,
+        "mean_cz_per_group": 506.57961538461524,
+        "mean_depth_per_group": 1357.2576923076924,
+        "maximum_scheduled_circuit_seconds": 7.536540000000001e-05,
+        "shots_times_scheduled_duration": 0.00753654
+      },
+      "validation": "passed"
+    },
+    {
+      "config": {
+        "qubits_per_circuit": 6,
+        "active_qubits_requested": 156,
+        "parallel_circuits": 26,
+        "generations": 100,
+        "shots": 100,
+        "seed": 7,
+        "mode": "noisy",
+        "provenance": {
+          "source_sha256": {
+            "aeqga.py": "c8245b97c1ca052eb46e1d62c5e014086747b4649863414d7b0ce4cff639c39e",
+            "aeqga_legacy.py": "41a8052f27a2e1c6d26b40cc3a875a57a26b681b1880b53aee417ad36f91b7da",
+            "aeqga_parallel.py": "184162e7e3ed90d1c1f79451ba0573041e0f89ce1558eaa45c6c37fa6d9ecfa2",
+            "aeqga_ibm_noise.py": "0a5922dfb6c3a5a4136e655cdeb905613ced1392670377e86deb3b9921cb1d5e",
+            "aeqga_ibm_noise_legacy.py": "f0c928380510a4220b8aa943d134a8b610e5222cb13f26b0b8b898d52fab132a",
+            "aeqga_profiled_pantheon.py": "280c66b10d4c93db92bff99bb9b58826ea86a16387a929eeafcd46bd643b19b7",
+            "aeqga_factorized_noise.py": "b915a89b3eab1eeeac6fb06c39622d1ae114589b9e6c22c1c792ab4fdb760b33",
+            "aeqga_profiled_ibm.py": "24255d64ce01c8b6f0485707114c3aee27805a77988d03abbbec21b6152dc2df",
+            "run_pantheon_aeqga.py": "520a7b904764e3010297248bdeb291cb7f87973e6afaa872068124e4e08ac55f",
+            "run_marrakesh_profiled_study.py": "ff0c5c0d9ea166083a52a5631ceadc6166d5f1a8099f8f3c35373226430d509c",
+            "test_profiled_marrakesh.py": "fe549f189a7e0559307812095cd623cb9fdc3e93e6fb5cffbbaf89c17b1ede3d",
+            "state_preparation_regression.json": "033946ccc5271dd4499debbb225f31264700b4fe38dd06e480a0323a07133fad"
+          },
+          "snapshot_sha256": {
+            "conf_marrakesh.json": "5a9a7c14a0187a9ec8109e4e396f96f73cbb1e0c263a6d9d5912a9691ee24e5d",
+            "props_marrakesh.json": "d49d7ae07deb95947ea10e5b9b9c5cbab6df21f98610543817f35ade2b1aece6"
+          },
+          "data_sha256": {
+            "Pantheon+SH0ES.dat": "1cb0fc379ef066afdc2ffd1857681cc478024570d8a3eba284fb645775198cf8",
+            "Pantheon+SH0ES_STAT+SYS.cov": "abf806d966485e64afdb359c87bffc0ecc00d05eff0a31ced66f247385df0fdc"
+          }
+        }
+      },
+      "width": 6,
+      "mode": "noisy",
+      "used_active_qubits": 156,
+      "discarded_qubits": 0,
+      "population_per_circuit": 64,
+      "total_population": 1664,
+      "per_group_elite_local_global": [
+        16,
+        16,
+        32
+      ],
+      "best_parameters": [
+        73.53544434449742,
+        0.33213114218780043,
+        -19.2438790545936
+      ],
+      "chi2": 1452.016288528328,
+      "delta_chi2": 0.00033854815001177485,
+      "initial_delta_chi2": 0.03331954287523331,
+      "classical_reference": {
+        "p": [
+          73.53278385939608,
+          0.3318120913006932,
+          -19.24405748751191
+        ],
+        "chi2": 1452.015949980178,
+        "success": true,
+        "method": "GLS profile in M and -5log10(H0/70); golden-section Omega_m search"
+      },
+      "fitness_evaluations": 126464,
+      "candidate_rows": 168064,
+      "M_boundary_rows": 11344,
+      "maximum_independent_best_chi2_error": 6.912159733474255e-11,
+      "maximum_probability_trace_error": 2.807297090345884e-07,
+      "training_wall_seconds": 282.69371169999977,
+      "objective_wall_seconds": 33.68949309999516,
+      "factorized_quantum_wall_seconds": 225.24860400000762,
+      "compile_worker_seconds": 490.18054190001385,
+      "simulation_worker_seconds": 1187.6926987000188,
+      "shots_times_scheduled_duration_total": 0.7517731999999998,
+      "logical_packed_executions": 100,
+      "full_subpopulation_circuits": 2600,
+      "stages": 10400,
+      "thresholds": {
+        "0.1": {
+          "generation": 0,
+          "fitness_evaluations": 1664,
+          "elapsed_wall_seconds": 1.3533465999989858,
+          "scheduled_shot_seconds": 0.0
+        },
+        "0.01": {
+          "generation": 33,
+          "fitness_evaluations": 42848,
+          "elapsed_wall_seconds": 91.28058640000017,
+          "scheduled_shot_seconds": 0.24900760000000002
+        },
+        "0.001": {
+          "generation": 85,
+          "fitness_evaluations": 107744,
+          "elapsed_wall_seconds": 240.7915041999986,
+          "scheduled_shot_seconds": 0.6387204
+        }
+      },
+      "mean_metrics": {
+        "mean_noise_tvd": 0.25808163751098484,
+        "mean_sampling_tvd": 0.2647895143238468,
+        "mean_zero_fraction": 0.10825721153846153,
+        "mean_unused_amplitude_probability": 0.27354724876305864,
+        "max_probability_trace_error": 2.1591134570564387e-07,
+        "mean_cz_per_group": 506.76346153846157,
+        "mean_depth_per_group": 1357.4657692307692,
+        "maximum_scheduled_circuit_seconds": 7.517732000000001e-05,
+        "shots_times_scheduled_duration": 0.007517732
+      },
+      "validation": "passed"
+    },
+    {
+      "config": {
+        "qubits_per_circuit": 7,
+        "active_qubits_requested": 156,
+        "parallel_circuits": 22,
+        "generations": 100,
+        "shots": 100,
+        "seed": 7,
+        "mode": "ideal",
+        "provenance": {
+          "source_sha256": {
+            "aeqga.py": "c8245b97c1ca052eb46e1d62c5e014086747b4649863414d7b0ce4cff639c39e",
+            "aeqga_legacy.py": "41a8052f27a2e1c6d26b40cc3a875a57a26b681b1880b53aee417ad36f91b7da",
+            "aeqga_parallel.py": "184162e7e3ed90d1c1f79451ba0573041e0f89ce1558eaa45c6c37fa6d9ecfa2",
+            "aeqga_ibm_noise.py": "0a5922dfb6c3a5a4136e655cdeb905613ced1392670377e86deb3b9921cb1d5e",
+            "aeqga_ibm_noise_legacy.py": "f0c928380510a4220b8aa943d134a8b610e5222cb13f26b0b8b898d52fab132a",
+            "aeqga_profiled_pantheon.py": "280c66b10d4c93db92bff99bb9b58826ea86a16387a929eeafcd46bd643b19b7",
+            "aeqga_factorized_noise.py": "b915a89b3eab1eeeac6fb06c39622d1ae114589b9e6c22c1c792ab4fdb760b33",
+            "aeqga_profiled_ibm.py": "24255d64ce01c8b6f0485707114c3aee27805a77988d03abbbec21b6152dc2df",
+            "run_pantheon_aeqga.py": "520a7b904764e3010297248bdeb291cb7f87973e6afaa872068124e4e08ac55f",
+            "run_marrakesh_profiled_study.py": "ff0c5c0d9ea166083a52a5631ceadc6166d5f1a8099f8f3c35373226430d509c",
+            "test_profiled_marrakesh.py": "fe549f189a7e0559307812095cd623cb9fdc3e93e6fb5cffbbaf89c17b1ede3d",
+            "state_preparation_regression.json": "033946ccc5271dd4499debbb225f31264700b4fe38dd06e480a0323a07133fad"
+          },
+          "snapshot_sha256": {
+            "conf_marrakesh.json": "5a9a7c14a0187a9ec8109e4e396f96f73cbb1e0c263a6d9d5912a9691ee24e5d",
+            "props_marrakesh.json": "d49d7ae07deb95947ea10e5b9b9c5cbab6df21f98610543817f35ade2b1aece6"
+          },
+          "data_sha256": {
+            "Pantheon+SH0ES.dat": "1cb0fc379ef066afdc2ffd1857681cc478024570d8a3eba284fb645775198cf8",
+            "Pantheon+SH0ES_STAT+SYS.cov": "abf806d966485e64afdb359c87bffc0ecc00d05eff0a31ced66f247385df0fdc"
+          }
+        }
+      },
+      "width": 7,
+      "mode": "ideal",
+      "used_active_qubits": 154,
+      "discarded_qubits": 2,
+      "population_per_circuit": 128,
+      "total_population": 2816,
+      "per_group_elite_local_global": [
+        32,
+        32,
+        64
+      ],
+      "best_parameters": [
+        73.5069486467863,
+        0.33144600612141983,
+        -19.24492425695107
+      ],
+      "chi2": 1452.0171727709794,
+      "delta_chi2": 0.0012227908014210698,
+      "initial_delta_chi2": 0.0012227908014210698,
+      "classical_reference": {
+        "p": [
+          73.53278385939608,
+          0.3318120913006932,
+          -19.24405748751191
+        ],
+        "chi2": 1452.015949980178,
+        "success": true,
+        "method": "GLS profile in M and -5log10(H0/70); golden-section Omega_m search"
+      },
+      "fitness_evaluations": 214016,
+      "candidate_rows": 284416,
+      "M_boundary_rows": 18584,
+      "maximum_independent_best_chi2_error": 5.002220859751105e-11,
+      "maximum_probability_trace_error": 5.773159728050814e-15,
+      "training_wall_seconds": 256.08963070000027,
+      "objective_wall_seconds": 73.57548910000241,
+      "factorized_quantum_wall_seconds": 156.47208619999583,
+      "compile_worker_seconds": 836.9881929999792,
+      "simulation_worker_seconds": 108.07688630001212,
+      "shots_times_scheduled_duration_total": 1.2979348000000002,
+      "logical_packed_executions": 100,
+      "full_subpopulation_circuits": 2200,
+      "stages": 8800,
+      "thresholds": {
+        "0.1": {
+          "generation": 0,
+          "fitness_evaluations": 2816,
+          "elapsed_wall_seconds": 2.238313900000321,
+          "scheduled_shot_seconds": 0.0
+        },
+        "0.01": {
+          "generation": 0,
+          "fitness_evaluations": 2816,
+          "elapsed_wall_seconds": 2.238313900000321,
+          "scheduled_shot_seconds": 0.0
+        },
+        "0.001": null
+      },
+      "mean_metrics": {
+        "mean_noise_tvd": 0.0,
+        "mean_sampling_tvd": 0.27392606717677365,
+        "mean_zero_fraction": 0.2609943181818182,
+        "mean_unused_amplitude_probability": 0.09400831520863187,
+        "max_probability_trace_error": 4.1333603206794575e-15,
+        "mean_cz_per_group": 1049.6754545454546,
+        "mean_depth_per_group": 2772.7736363636363,
+        "maximum_scheduled_circuit_seconds": 0.00012979348000000002,
+        "shots_times_scheduled_duration": 0.012979347999999996
+      },
+      "validation": "passed"
+    },
+    {
+      "config": {
+        "qubits_per_circuit": 7,
+        "active_qubits_requested": 156,
+        "parallel_circuits": 22,
+        "generations": 100,
+        "shots": 100,
+        "seed": 7,
+        "mode": "noisy",
+        "provenance": {
+          "source_sha256": {
+            "aeqga.py": "c8245b97c1ca052eb46e1d62c5e014086747b4649863414d7b0ce4cff639c39e",
+            "aeqga_legacy.py": "41a8052f27a2e1c6d26b40cc3a875a57a26b681b1880b53aee417ad36f91b7da",
+            "aeqga_parallel.py": "184162e7e3ed90d1c1f79451ba0573041e0f89ce1558eaa45c6c37fa6d9ecfa2",
+            "aeqga_ibm_noise.py": "0a5922dfb6c3a5a4136e655cdeb905613ced1392670377e86deb3b9921cb1d5e",
+            "aeqga_ibm_noise_legacy.py": "f0c928380510a4220b8aa943d134a8b610e5222cb13f26b0b8b898d52fab132a",
+            "aeqga_profiled_pantheon.py": "280c66b10d4c93db92bff99bb9b58826ea86a16387a929eeafcd46bd643b19b7",
+            "aeqga_factorized_noise.py": "b915a89b3eab1eeeac6fb06c39622d1ae114589b9e6c22c1c792ab4fdb760b33",
+            "aeqga_profiled_ibm.py": "24255d64ce01c8b6f0485707114c3aee27805a77988d03abbbec21b6152dc2df",
+            "run_pantheon_aeqga.py": "520a7b904764e3010297248bdeb291cb7f87973e6afaa872068124e4e08ac55f",
+            "run_marrakesh_profiled_study.py": "ff0c5c0d9ea166083a52a5631ceadc6166d5f1a8099f8f3c35373226430d509c",
+            "test_profiled_marrakesh.py": "fe549f189a7e0559307812095cd623cb9fdc3e93e6fb5cffbbaf89c17b1ede3d",
+            "state_preparation_regression.json": "033946ccc5271dd4499debbb225f31264700b4fe38dd06e480a0323a07133fad"
+          },
+          "snapshot_sha256": {
+            "conf_marrakesh.json": "5a9a7c14a0187a9ec8109e4e396f96f73cbb1e0c263a6d9d5912a9691ee24e5d",
+            "props_marrakesh.json": "d49d7ae07deb95947ea10e5b9b9c5cbab6df21f98610543817f35ade2b1aece6"
+          },
+          "data_sha256": {
+            "Pantheon+SH0ES.dat": "1cb0fc379ef066afdc2ffd1857681cc478024570d8a3eba284fb645775198cf8",
+            "Pantheon+SH0ES_STAT+SYS.cov": "abf806d966485e64afdb359c87bffc0ecc00d05eff0a31ced66f247385df0fdc"
+          }
+        }
+      },
+      "width": 7,
+      "mode": "noisy",
+      "used_active_qubits": 154,
+      "discarded_qubits": 2,
+      "population_per_circuit": 128,
+      "total_population": 2816,
+      "per_group_elite_local_global": [
+        32,
+        32,
+        64
+      ],
+      "best_parameters": [
+        73.51469559333164,
+        0.33147745538154944,
+        -19.244689155404274
+      ],
+      "chi2": 1452.016716072842,
+      "delta_chi2": 0.0007660926639800891,
+      "initial_delta_chi2": 0.0012227908014210698,
+      "classical_reference": {
+        "p": [
+          73.53278385939608,
+          0.3318120913006932,
+          -19.24405748751191
+        ],
+        "chi2": 1452.015949980178,
+        "success": true,
+        "method": "GLS profile in M and -5log10(H0/70); golden-section Omega_m search"
+      },
+      "fitness_evaluations": 214016,
+      "candidate_rows": 284416,
+      "M_boundary_rows": 15276,
+      "maximum_independent_best_chi2_error": 5.070432962384075e-11,
+      "maximum_probability_trace_error": 4.6650233231915195e-07,
+      "training_wall_seconds": 372.7306939,
+      "objective_wall_seconds": 68.60603030000493,
+      "factorized_quantum_wall_seconds": 275.26378810000097,
+      "compile_worker_seconds": 813.8440007999961,
+      "simulation_worker_seconds": 2284.395893100006,
+      "shots_times_scheduled_duration_total": 1.3025188000000005,
+      "logical_packed_executions": 100,
+      "full_subpopulation_circuits": 2200,
+      "stages": 8800,
+      "thresholds": {
+        "0.1": {
+          "generation": 0,
+          "fitness_evaluations": 2816,
+          "elapsed_wall_seconds": 2.241569800000434,
+          "scheduled_shot_seconds": 0.0
+        },
+        "0.01": {
+          "generation": 0,
+          "fitness_evaluations": 2816,
+          "elapsed_wall_seconds": 2.241569800000434,
+          "scheduled_shot_seconds": 0.0
+        },
+        "0.001": {
+          "generation": 77,
+          "fitness_evaluations": 165440,
+          "elapsed_wall_seconds": 286.5606147999997,
+          "scheduled_shot_seconds": 1.0037444000000002
+        }
+      },
+      "mean_metrics": {
+        "mean_noise_tvd": 0.35178055014106396,
+        "mean_sampling_tvd": 0.3802691000383199,
+        "mean_zero_fraction": 0.28844637784090904,
+        "mean_unused_amplitude_probability": 0.31806447049934844,
+        "max_probability_trace_error": 4.0390986713712e-07,
+        "mean_cz_per_group": 1048.659090909091,
+        "mean_depth_per_group": 2776.295,
+        "maximum_scheduled_circuit_seconds": 0.00013025188000000002,
+        "shots_times_scheduled_duration": 0.013025188
+      },
+      "validation": "passed"
+    },
+    {
+      "config": {
+        "qubits_per_circuit": 8,
+        "active_qubits_requested": 156,
+        "parallel_circuits": 19,
+        "generations": 100,
+        "shots": 100,
+        "seed": 7,
+        "mode": "ideal",
+        "provenance": {
+          "source_sha256": {
+            "aeqga.py": "c8245b97c1ca052eb46e1d62c5e014086747b4649863414d7b0ce4cff639c39e",
+            "aeqga_legacy.py": "41a8052f27a2e1c6d26b40cc3a875a57a26b681b1880b53aee417ad36f91b7da",
+            "aeqga_parallel.py": "184162e7e3ed90d1c1f79451ba0573041e0f89ce1558eaa45c6c37fa6d9ecfa2",
+            "aeqga_ibm_noise.py": "0a5922dfb6c3a5a4136e655cdeb905613ced1392670377e86deb3b9921cb1d5e",
+            "aeqga_ibm_noise_legacy.py": "f0c928380510a4220b8aa943d134a8b610e5222cb13f26b0b8b898d52fab132a",
+            "aeqga_profiled_pantheon.py": "280c66b10d4c93db92bff99bb9b58826ea86a16387a929eeafcd46bd643b19b7",
+            "aeqga_factorized_noise.py": "b915a89b3eab1eeeac6fb06c39622d1ae114589b9e6c22c1c792ab4fdb760b33",
+            "aeqga_profiled_ibm.py": "24255d64ce01c8b6f0485707114c3aee27805a77988d03abbbec21b6152dc2df",
+            "run_pantheon_aeqga.py": "520a7b904764e3010297248bdeb291cb7f87973e6afaa872068124e4e08ac55f",
+            "run_marrakesh_profiled_study.py": "ff0c5c0d9ea166083a52a5631ceadc6166d5f1a8099f8f3c35373226430d509c",
+            "test_profiled_marrakesh.py": "fe549f189a7e0559307812095cd623cb9fdc3e93e6fb5cffbbaf89c17b1ede3d",
+            "state_preparation_regression.json": "033946ccc5271dd4499debbb225f31264700b4fe38dd06e480a0323a07133fad"
+          },
+          "snapshot_sha256": {
+            "conf_marrakesh.json": "5a9a7c14a0187a9ec8109e4e396f96f73cbb1e0c263a6d9d5912a9691ee24e5d",
+            "props_marrakesh.json": "d49d7ae07deb95947ea10e5b9b9c5cbab6df21f98610543817f35ade2b1aece6"
+          },
+          "data_sha256": {
+            "Pantheon+SH0ES.dat": "1cb0fc379ef066afdc2ffd1857681cc478024570d8a3eba284fb645775198cf8",
+            "Pantheon+SH0ES_STAT+SYS.cov": "abf806d966485e64afdb359c87bffc0ecc00d05eff0a31ced66f247385df0fdc"
+          }
+        }
+      },
+      "width": 8,
+      "mode": "ideal",
+      "used_active_qubits": 152,
+      "discarded_qubits": 4,
+      "population_per_circuit": 256,
+      "total_population": 4864,
+      "per_group_elite_local_global": [
+        64,
+        64,
+        128
+      ],
+      "best_parameters": [
+        73.53857981203161,
+        0.33156155498096057,
+        -19.24396855476108
+      ],
+      "chi2": 1452.0161575443728,
+      "delta_chi2": 0.00020756419485223887,
+      "initial_delta_chi2": 0.0012227908014210698,
+      "classical_reference": {
+        "p": [
+          73.53278385939608,
+          0.3318120913006932,
+          -19.24405748751191
+        ],
+        "chi2": 1452.015949980178,
+        "success": true,
+        "method": "GLS profile in M and -5log10(H0/70); golden-section Omega_m search"
+      },
+      "fitness_evaluations": 369664,
+      "candidate_rows": 491264,
+      "M_boundary_rows": 25330,
+      "maximum_independent_best_chi2_error": 6.957634468562901e-11,
+      "maximum_probability_trace_error": 7.993605777301127e-15,
+      "training_wall_seconds": 461.31776979999995,
+      "objective_wall_seconds": 158.30821390000438,
+      "factorized_quantum_wall_seconds": 271.56321200000093,
+      "compile_worker_seconds": 1369.2558556000013,
+      "simulation_worker_seconds": 193.65895400001773,
+      "shots_times_scheduled_duration_total": 2.3413616000000013,
+      "logical_packed_executions": 100,
+      "full_subpopulation_circuits": 1900,
+      "stages": 7600,
+      "thresholds": {
+        "0.1": {
+          "generation": 0,
+          "fitness_evaluations": 4864,
+          "elapsed_wall_seconds": 3.849693300000581,
+          "scheduled_shot_seconds": 0.0
+        },
+        "0.01": {
+          "generation": 0,
+          "fitness_evaluations": 4864,
+          "elapsed_wall_seconds": 3.849693300000581,
+          "scheduled_shot_seconds": 0.0
+        },
+        "0.001": {
+          "generation": 8,
+          "fitness_evaluations": 34048,
+          "elapsed_wall_seconds": 40.786301600000115,
+          "scheduled_shot_seconds": 0.1857388
+        }
+      },
+      "mean_metrics": {
+        "mean_noise_tvd": 0.0,
+        "mean_sampling_tvd": 0.38266802111285947,
+        "mean_zero_fraction": 0.4404841694078947,
+        "mean_unused_amplitude_probability": 0.08343227077286279,
+        "max_probability_trace_error": 5.8320015483559474e-15,
+        "mean_cz_per_group": 2153.0063157894733,
+        "mean_depth_per_group": 5897.923157894736,
+        "maximum_scheduled_circuit_seconds": 0.00023413616000000006,
+        "shots_times_scheduled_duration": 0.023413616000000005
+      },
+      "validation": "passed"
+    },
+    {
+      "config": {
+        "qubits_per_circuit": 8,
+        "active_qubits_requested": 156,
+        "parallel_circuits": 19,
+        "generations": 100,
+        "shots": 100,
+        "seed": 7,
+        "mode": "noisy",
+        "provenance": {
+          "source_sha256": {
+            "aeqga.py": "c8245b97c1ca052eb46e1d62c5e014086747b4649863414d7b0ce4cff639c39e",
+            "aeqga_legacy.py": "41a8052f27a2e1c6d26b40cc3a875a57a26b681b1880b53aee417ad36f91b7da",
+            "aeqga_parallel.py": "184162e7e3ed90d1c1f79451ba0573041e0f89ce1558eaa45c6c37fa6d9ecfa2",
+            "aeqga_ibm_noise.py": "0a5922dfb6c3a5a4136e655cdeb905613ced1392670377e86deb3b9921cb1d5e",
+            "aeqga_ibm_noise_legacy.py": "f0c928380510a4220b8aa943d134a8b610e5222cb13f26b0b8b898d52fab132a",
+            "aeqga_profiled_pantheon.py": "280c66b10d4c93db92bff99bb9b58826ea86a16387a929eeafcd46bd643b19b7",
+            "aeqga_factorized_noise.py": "b915a89b3eab1eeeac6fb06c39622d1ae114589b9e6c22c1c792ab4fdb760b33",
+            "aeqga_profiled_ibm.py": "24255d64ce01c8b6f0485707114c3aee27805a77988d03abbbec21b6152dc2df",
+            "run_pantheon_aeqga.py": "520a7b904764e3010297248bdeb291cb7f87973e6afaa872068124e4e08ac55f",
+            "run_marrakesh_profiled_study.py": "ff0c5c0d9ea166083a52a5631ceadc6166d5f1a8099f8f3c35373226430d509c",
+            "test_profiled_marrakesh.py": "fe549f189a7e0559307812095cd623cb9fdc3e93e6fb5cffbbaf89c17b1ede3d",
+            "state_preparation_regression.json": "033946ccc5271dd4499debbb225f31264700b4fe38dd06e480a0323a07133fad"
+          },
+          "snapshot_sha256": {
+            "conf_marrakesh.json": "5a9a7c14a0187a9ec8109e4e396f96f73cbb1e0c263a6d9d5912a9691ee24e5d",
+            "props_marrakesh.json": "d49d7ae07deb95947ea10e5b9b9c5cbab6df21f98610543817f35ade2b1aece6"
+          },
+          "data_sha256": {
+            "Pantheon+SH0ES.dat": "1cb0fc379ef066afdc2ffd1857681cc478024570d8a3eba284fb645775198cf8",
+            "Pantheon+SH0ES_STAT+SYS.cov": "abf806d966485e64afdb359c87bffc0ecc00d05eff0a31ced66f247385df0fdc"
+          }
+        }
+      },
+      "width": 8,
+      "mode": "noisy",
+      "used_active_qubits": 152,
+      "discarded_qubits": 4,
+      "population_per_circuit": 256,
+      "total_population": 4864,
+      "per_group_elite_local_global": [
+        64,
+        64,
+        128
+      ],
+      "best_parameters": [
+        73.53263542718314,
+        0.33171520540890675,
+        -19.244092518976235
+      ],
+      "chi2": 1452.0159796403311,
+      "delta_chi2": 2.966015313177195e-05,
+      "initial_delta_chi2": 0.0012227908014210698,
+      "classical_reference": {
+        "p": [
+          73.53278385939608,
+          0.3318120913006932,
+          -19.24405748751191
+        ],
+        "chi2": 1452.015949980178,
+        "success": true,
+        "method": "GLS profile in M and -5log10(H0/70); golden-section Omega_m search"
+      },
+      "fitness_evaluations": 369664,
+      "candidate_rows": 491264,
+      "M_boundary_rows": 22329,
+      "maximum_independent_best_chi2_error": 7.048583938740194e-11,
+      "maximum_probability_trace_error": 1.2793642343300604e-06,
+      "training_wall_seconds": 670.7718820999999,
+      "objective_wall_seconds": 166.6742351999992,
+      "factorized_quantum_wall_seconds": 471.7505831999988,
+      "compile_worker_seconds": 1364.4163436000126,
+      "simulation_worker_seconds": 4091.5553014999623,
+      "shots_times_scheduled_duration_total": 2.337484000000001,
+      "logical_packed_executions": 100,
+      "full_subpopulation_circuits": 1900,
+      "stages": 7600,
+      "thresholds": {
+        "0.1": {
+          "generation": 0,
+          "fitness_evaluations": 4864,
+          "elapsed_wall_seconds": 3.7465265999999247,
+          "scheduled_shot_seconds": 0.0
+        },
+        "0.01": {
+          "generation": 0,
+          "fitness_evaluations": 4864,
+          "elapsed_wall_seconds": 3.7465265999999247,
+          "scheduled_shot_seconds": 0.0
+        },
+        "0.001": {
+          "generation": 27,
+          "fitness_evaluations": 103360,
+          "elapsed_wall_seconds": 182.53116899999986,
+          "scheduled_shot_seconds": 0.6328380000000001
+        }
+      },
+      "mean_metrics": {
+        "mean_noise_tvd": 0.4076243640329913,
+        "mean_sampling_tvd": 0.5313676836635036,
+        "mean_zero_fraction": 0.5071967516447369,
+        "mean_unused_amplitude_probability": 0.3172402111552453,
+        "max_probability_trace_error": 1.0509758557297743e-06,
+        "mean_cz_per_group": 2153.4915789473685,
+        "mean_depth_per_group": 5895.8110526315795,
+        "maximum_scheduled_circuit_seconds": 0.00023374840000000007,
+        "shots_times_scheduled_duration": 0.023374840000000004
+      },
+      "validation": "passed"
+    }
+  ]
+}

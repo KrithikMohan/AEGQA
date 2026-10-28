@@ -1,0 +1,110 @@
+{
+  "config": {
+    "qubits_per_circuit": 4,
+    "active_qubits_requested": 156,
+    "parallel_circuits": 38,
+    "generations": 100,
+    "shots": 100,
+    "seed": 7,
+    "mode": "ideal",
+    "provenance": {
+      "source_sha256": {
+        "aeqga.py": "c8245b97c1ca052eb46e1d62c5e014086747b4649863414d7b0ce4cff639c39e",
+        "aeqga_legacy.py": "41a8052f27a2e1c6d26b40cc3a875a57a26b681b1880b53aee417ad36f91b7da",
+        "aeqga_parallel.py": "184162e7e3ed90d1c1f79451ba0573041e0f89ce1558eaa45c6c37fa6d9ecfa2",
+        "aeqga_ibm_noise.py": "0a5922dfb6c3a5a4136e655cdeb905613ced1392670377e86deb3b9921cb1d5e",
+        "aeqga_ibm_noise_legacy.py": "f0c928380510a4220b8aa943d134a8b610e5222cb13f26b0b8b898d52fab132a",
+        "aeqga_profiled_pantheon.py": "280c66b10d4c93db92bff99bb9b58826ea86a16387a929eeafcd46bd643b19b7",
+        "aeqga_factorized_noise.py": "b915a89b3eab1eeeac6fb06c39622d1ae114589b9e6c22c1c792ab4fdb760b33",
+        "aeqga_profiled_ibm.py": "24255d64ce01c8b6f0485707114c3aee27805a77988d03abbbec21b6152dc2df",
+        "run_pantheon_aeqga.py": "520a7b904764e3010297248bdeb291cb7f87973e6afaa872068124e4e08ac55f",
+        "run_marrakesh_profiled_study.py": "ff0c5c0d9ea166083a52a5631ceadc6166d5f1a8099f8f3c35373226430d509c",
+        "test_profiled_marrakesh.py": "fe549f189a7e0559307812095cd623cb9fdc3e93e6fb5cffbbaf89c17b1ede3d",
+        "state_preparation_regression.json": "033946ccc5271dd4499debbb225f31264700b4fe38dd06e480a0323a07133fad"
+      },
+      "snapshot_sha256": {
+        "conf_marrakesh.json": "5a9a7c14a0187a9ec8109e4e396f96f73cbb1e0c263a6d9d5912a9691ee24e5d",
+        "props_marrakesh.json": "d49d7ae07deb95947ea10e5b9b9c5cbab6df21f98610543817f35ade2b1aece6"
+      },
+      "data_sha256": {
+        "Pantheon+SH0ES.dat": "1cb0fc379ef066afdc2ffd1857681cc478024570d8a3eba284fb645775198cf8",
+        "Pantheon+SH0ES_STAT+SYS.cov": "abf806d966485e64afdb359c87bffc0ecc00d05eff0a31ced66f247385df0fdc"
+      }
+    }
+  },
+  "width": 4,
+  "mode": "ideal",
+  "used_active_qubits": 152,
+  "discarded_qubits": 4,
+  "population_per_circuit": 16,
+  "total_population": 608,
+  "per_group_elite_local_global": [
+    4,
+    4,
+    8
+  ],
+  "best_parameters": [
+    73.5329395062343,
+    0.3318154039926786,
+    -19.244051915442824
+  ],
+  "chi2": 1452.0159500457562,
+  "delta_chi2": 6.557820597663522e-08,
+  "initial_delta_chi2": 0.044793655869852955,
+  "classical_reference": {
+    "p": [
+      73.53278385939608,
+      0.3318120913006932,
+      -19.24405748751191
+    ],
+    "chi2": 1452.015949980178,
+    "success": true,
+    "method": "GLS profile in M and -5log10(H0/70); golden-section Omega_m search"
+  },
+  "fitness_evaluations": 46208,
+  "candidate_rows": 61408,
+  "M_boundary_rows": 1952,
+  "maximum_independent_best_chi2_error": 7.935341272968799e-11,
+  "maximum_probability_trace_error": 3.1086244689504383e-15,
+  "training_wall_seconds": 73.17996760000096,
+  "objective_wall_seconds": 26.70196350000333,
+  "factorized_quantum_wall_seconds": 28.1187132999994,
+  "compile_worker_seconds": 162.3275270999793,
+  "simulation_worker_seconds": 21.833849699990424,
+  "shots_times_scheduled_duration_total": 0.3403644,
+  "logical_packed_executions": 100,
+  "full_subpopulation_circuits": 3800,
+  "stages": 15200,
+  "thresholds": {
+    "0.1": {
+      "generation": 0,
+      "fitness_evaluations": 608,
+      "elapsed_wall_seconds": 0.6601221000000805,
+      "scheduled_shot_seconds": 0.0
+    },
+    "0.01": {
+      "generation": 2,
+      "fitness_evaluations": 1520,
+      "elapsed_wall_seconds": 1.8350546000001486,
+      "scheduled_shot_seconds": 0.0067664000000000005
+    },
+    "0.001": {
+      "generation": 7,
+      "fitness_evaluations": 3800,
+      "elapsed_wall_seconds": 5.472983999999997,
+      "scheduled_shot_seconds": 0.023764800000000003
+    }
+  },
+  "mean_metrics": {
+    "mean_noise_tvd": 0.0,
+    "mean_sampling_tvd": 0.0975157899953658,
+    "mean_zero_fraction": 0.039597039473684204,
+    "mean_unused_amplitude_probability": 0.15809702923245758,
+    "max_probability_trace_error": 2.1871393585115583e-15,
+    "mean_cz_per_group": 82.03605263157895,
+    "mean_depth_per_group": 324.03763157894736,
+    "maximum_scheduled_circuit_seconds": 3.403644e-05,
+    "shots_times_scheduled_duration": 0.003403644000000001
+  },
+  "validation": "passed"
+}

@@ -1,0 +1,6 @@
+!*.json
+!*.png
+__pycache__/
+*.py[cod]
+reproduction/output/
+reproduction/tmp/

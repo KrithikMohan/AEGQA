@@ -1,0 +1,64 @@
+OBSERVED RESULTS: MARRAKESH CIRCUIT-WIDTH STUDY
+
+All 12 configurations completed 100 updates with 100 shots per packed execution.
+The random seed is 7. Noise and ideal pairs share identical initial populations.
+Archived Marrakesh calibration timestamp: 2025-02-26T14:52:45-05:00.
+
+M is calculated for each (H0, Omega_m) candidate by full-covariance least squares:
+M_raw = [1^T C^-1 (m_b_corr - mu(H0, Omega_m))] / [1^T C^-1 1].
+M = clip(M_raw, -19.6, -19.0). The quantum search has two coordinates.
+Calibrator distance moduli and all covariance correlations are retained.
+The optimum is conditional on each candidate; M is not fixed to one number for the entire search.
+
+The independent classical reference is: {"p": [73.53278385939608, 0.3318120913006932, -19.24405748751191], "chi2": 1452.015949980178, "success": true, "method": "GLS profile in M and -5log10(H0/70); golden-section Omega_m search"}
+Delta chi-square below is chi-square minus this reference, not uncertainty in a fitted parameter.
+
+Final results (noisy):
+q groups used_qubits candidates H0 Omega_m M chi2 excess_chi2 ideal_excess_chi2
+3 52 156 416 73.5333992036 0.3318177231 -19.2440378253 1452.015950504715 5.24536972e-07 1.63462573e-07
+4 38 152 608 73.5328992830 0.3318015491 -19.2440574767 1452.015950324745 3.4456707e-07 6.5578206e-08
+5 31 155 992 73.5258658168 0.3326017043 -19.2440082068 1452.017863885854 0.00191390568 0.000168512595
+6 26 156 1664 73.5354443445 0.3321311422 -19.2438790546 1452.016288528328 0.00033854815 0.00125056313
+7 22 154 2816 73.5146955933 0.3314774554 -19.2446891554 1452.016716072842 0.000766092664 0.0012227908
+8 19 152 4864 73.5326354272 0.3317152054 -19.2440925190 1452.015979640331 2.96601531e-05 0.000207564195
+
+Noise, sampling and decoding (means across the 100 updates):
+q noise_TVD sampling_TVD zero_bin_fraction random_parameter_fraction any_random_offspring_fraction both_random_offspring_fraction mean_CZ_per_group scheduled_gate_shot_seconds
+3 0.085717546 0.077784504 0.0032692308 0.027628205 0.053237179 0.0020192308 26.231538 0.263776
+4 0.1174811 0.1166345 0.015789474 0.027971491 0.050855263 0.0050877193 82.079211 0.3403172
+5 0.2004688 0.17938223 0.037787298 0.047096774 0.085645161 0.0085483871 217.58871 0.462894
+6 0.25808164 0.26478951 0.10825721 0.11989183 0.21079327 0.028990385 506.76346 0.7517732
+7 0.35178055 0.3802691 0.28844638 0.30833333 0.49867898 0.11798769 1048.6591 1.3025188
+8 0.40762436 0.53136768 0.50719675 0.52938048 0.75435307 0.30440789 2153.4916 2.337484
+
+The lowest final noisy excess chi-square in this seed is 3.4456707e-07, at 4 qubits per circuit.
+This is a description of this run, not an estimate of the optimal width over repeated trials.
+
+Interpretation of the measurements:
+- Noise TVD compares exact noisy and ideal probability vectors for the same compiled circuit.
+- Sampling TVD compares the 100-shot histogram with that circuit's noisy probability vector.
+- TVD ranges from 0 to 1. It is a distribution difference, not a gate error probability.
+- Zero-bin fraction is averaged over retained amplitude bins in each stage.
+- The existing decoder replaces lower-bound outcomes with classical uniform random draws.
+  Local draws use the current local box; global draws use the full parameter bounds.
+  Consequently, zero counts can increase classical random exploration. They do not remove candidates.
+- Random-parameter and offspring fractions are weighted by the number of decoded offspring.
+- Circuit width changes candidate population size as well as circuit depth, placement and noise.
+  It also changes the number of elites per group and therefore the local search boxes.
+  The local decoder is lo + (hi - lo) * sqrt(count / shots). For L equal amplitudes,
+  with no intervening mutation/crossover gates, its infinite-shot fraction is 1/sqrt(L).
+  Thus the proposal distribution itself depends on width, even before hardware noise.
+  See threshold_statistics.csv for generations, evaluations and time to the same objective threshold.
+- Candidate evaluation requests count duplicate candidates; cached duplicates do not require a new solve.
+  candidate_diversity.csv separately counts exact distinct (H0, Omega_m) pairs.
+- Scheduled gate-time times shots excludes queueing, communication and classical-feedback overhead.
+  Local training seconds measure this computer and simulator, not a quantum processor.
+
+Scope: independent local channels from the archived calibration; no crosstalk, leakage, drift,
+or separately calibrated reset infidelity. Independent reset stages are simulated as small
+density matrices, then exactly 100 finite-shot outcomes are sampled for each stage.
+These are local simulations and contain no hardware executions.
+
+Main outputs: tradeoff_overview.png, search_efficiency.png, q*_parameter_histories.png,
+tradeoff_metrics.csv, threshold_statistics.csv, report.txt, export_audit.json,
+and q*_*/population_history.csv plus full training/execution JSONL and probability arrays.

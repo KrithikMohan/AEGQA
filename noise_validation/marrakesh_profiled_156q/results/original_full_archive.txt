@@ -1,0 +1,5 @@
+Original complete local training archive
+Filename: marrakesh_profiled_156q.zip
+Bytes: 330324027
+SHA256: aca426f884874049ade98a8c1bb3ab81cf3ffcda99ff3fe59f3f96c00cecd44e
+This archive is separate from the conclusions-and-code distribution.

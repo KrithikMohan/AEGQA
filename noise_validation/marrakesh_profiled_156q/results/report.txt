@@ -1,0 +1,60 @@
+MARRAKESH CIRCUIT-WIDTH STUDY WITH ANALYTICALLY PROFILED M
+
+Settings: {"generations": 100, "shots": 100, "seed": 7, "requested_active_qubits": 156}
+Reference: {"p": [73.53278385939608, 0.3318120913006932, -19.24405748751191], "chi2": 1452.015949980178, "success": true, "method": "GLS profile in M and -5log10(H0/70); golden-section Omega_m search"}
+
+Each run searches H0 and Omega_m. M minimizes the same full-covariance chi-square,
+subject to the original [-19.6, -19.0] bounds. It is not independently encoded.
+Every subpopulation has elite/local/global proportions 1:1:2. Elites are selected
+globally each generation and distributed round-robin.
+
+The Marrakesh snapshot is dated 2025-02-26T14:52:45-05:00. These are local simulations.
+3q and 6q configurations occupy all 156 qubits. 4q uses 38 groups (152 qubits):
+enumeration of all 354 connected four-qubit subsets and an integer-programming
+optimum prove that 39 disjoint groups are impossible on this calibrated graph.
+5q uses 155, 7q uses 154, and 8q uses 152 qubits under integer division.
+
+Independent small density matrices give exact stage probabilities for the selected
+local Markovian noise model. Exactly the requested shot count is then sampled.
+Packed physical circuits and physical layouts are preserved; probability evolution
+is factorized across disjoint groups and full-reset stages, not a dense 156-qubit state.
+The model includes calibrated native gates, relaxation during scheduled idle periods,
+and asymmetric readout. It excludes crosstalk, leakage, drift, and uncalibrated reset error.
+
+Long channel compositions have floating-point trace drift. Every stage logs the
+pre-normalization error; vectors are normalized only below the 1e-5 rejection limit.
+Each run summary reports the maximum observed error. This numerical correction is
+separate from the physical noise and the finite-shot sampling statistics.
+
+Qiskit state-preparation isometry failures caused by roundoff are retried only
+after a uniform amplitude rescaling of less than 1e-14 per component.
+This preserves the normalized target state. Repaired instructions are logged
+under state_preparation_roundoff_repairs in the affected execution block.
+
+Scheduled duration x shots is a gate-time estimate, not measured QPU wall time.
+It excludes queueing, network/classical feedback, and controller overhead beyond
+the gate durations in the snapshot. Local simulation wall time is reported separately.
+Comparisons use one seed. They do not establish a statistically reliable best width.
+Population sizes, sampled physical regions, routing, and sampling sparsity change
+with width; a noisy/ideal pair controls noise within each configuration.
+
+q mode used_qubits candidates initial_delta final_delta simulated_wall_s scheduled_shot_s
+3 ideal 156 416 0.0447936559 1.63462573e-07 57.682 0.263979
+3 noisy 156 416 0.0447936559 5.24536972e-07 109.795 0.263776
+4 ideal 152 608 0.0447936559 6.5578206e-08 73.180 0.340364
+4 noisy 152 608 0.0447936559 3.4456707e-07 166.771 0.340317
+5 ideal 155 992 0.0447936559 0.000168512595 113.120 0.463548
+5 noisy 155 992 0.0447936559 0.00191390568 234.353 0.462894
+6 ideal 156 1664 0.0333195429 0.00125056313 167.989 0.753654
+6 noisy 156 1664 0.0333195429 0.00033854815 282.694 0.751773
+7 ideal 154 2816 0.0012227908 0.0012227908 256.090 1.29793
+7 noisy 154 2816 0.0012227908 0.000766092664 372.731 1.30252
+8 ideal 152 4864 0.0012227908 0.000207564195 461.318 2.34136
+8 noisy 152 4864 0.0012227908 2.96601531e-05 670.772 2.33748
+
+Files: population_history.csv has every candidate including generation 0.
+training_history.jsonl.gz adds global elite assignments and complete parameters.
+execution_history.jsonl.gz contains actual sampled counts, stages, seeds, and gate metrics.
+stage_probabilities.npz stores ideal and selected-mode exact probability vectors.
+last_generation.qpy is the final packed physical circuit, not a hardware submission.
+The reference solution is calculated for analysis and never seeds the populations.

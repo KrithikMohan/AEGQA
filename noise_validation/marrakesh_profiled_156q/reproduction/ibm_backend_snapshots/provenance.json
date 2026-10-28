@@ -1,0 +1,17 @@
+{
+  "source_distribution": "qiskit-ibm-runtime==0.50.0",
+  "downloaded_from": "https://pypi.org/project/qiskit-ibm-runtime/0.50.0/",
+  "files": {
+    "marrakesh/conf_marrakesh.json": {
+      "sha256": "5a9a7c14a0187a9ec8109e4e396f96f73cbb1e0c263a6d9d5912a9691ee24e5d",
+      "wheel_record": "sha256=Wpp8FKAYep7IEJ5OOW-W9zy7HgwmOm2dWRKpaR7iTl0",
+      "verified_unchanged": true
+    },
+    "marrakesh/props_marrakesh.json": {
+      "sha256": "d49d7ae07deb95947ea10e5b9b9c5cbab6df21f98610543817f35ade2b1aece6",
+      "wheel_record": "sha256=1J164H3rlZR-oQ5bm5xcurbfIfmGEFQ4F_Na3isa7OY",
+      "verified_unchanged": true
+    }
+  },
+  "method": "Unmodified bundled public calibration JSON; SHA-256 checked against installed wheel RECORD; no authenticated refresh."
+}

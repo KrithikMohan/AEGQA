@@ -1,0 +1,93 @@
+{
+  "generations": 100,
+  "shots": 100,
+  "seed": 7,
+  "requested_active_qubits": 156,
+  "workers": 24,
+  "objective_threads": 4,
+  "widths": [
+    8,
+    3,
+    7,
+    4,
+    6,
+    5
+  ],
+  "modes": [
+    "noisy",
+    "ideal"
+  ],
+  "snapshot_date": "2025-02-26T14:52:45-05:00",
+  "classical_reference": {
+    "p": [
+      73.53278385939608,
+      0.3318120913006932,
+      -19.24405748751191
+    ],
+    "chi2": 1452.015949980178,
+    "success": true,
+    "method": "GLS profile in M and -5log10(H0/70); golden-section Omega_m search"
+  },
+  "provenance": {
+    "source_sha256": {
+      "aeqga.py": "c8245b97c1ca052eb46e1d62c5e014086747b4649863414d7b0ce4cff639c39e",
+      "aeqga_legacy.py": "41a8052f27a2e1c6d26b40cc3a875a57a26b681b1880b53aee417ad36f91b7da",
+      "aeqga_parallel.py": "184162e7e3ed90d1c1f79451ba0573041e0f89ce1558eaa45c6c37fa6d9ecfa2",
+      "aeqga_ibm_noise.py": "0a5922dfb6c3a5a4136e655cdeb905613ced1392670377e86deb3b9921cb1d5e",
+      "aeqga_ibm_noise_legacy.py": "f0c928380510a4220b8aa943d134a8b610e5222cb13f26b0b8b898d52fab132a",
+      "aeqga_profiled_pantheon.py": "280c66b10d4c93db92bff99bb9b58826ea86a16387a929eeafcd46bd643b19b7",
+      "aeqga_factorized_noise.py": "b915a89b3eab1eeeac6fb06c39622d1ae114589b9e6c22c1c792ab4fdb760b33",
+      "aeqga_profiled_ibm.py": "24255d64ce01c8b6f0485707114c3aee27805a77988d03abbbec21b6152dc2df",
+      "run_pantheon_aeqga.py": "520a7b904764e3010297248bdeb291cb7f87973e6afaa872068124e4e08ac55f",
+      "run_marrakesh_profiled_study.py": "ff0c5c0d9ea166083a52a5631ceadc6166d5f1a8099f8f3c35373226430d509c",
+      "test_profiled_marrakesh.py": "fe549f189a7e0559307812095cd623cb9fdc3e93e6fb5cffbbaf89c17b1ede3d",
+      "state_preparation_regression.json": "033946ccc5271dd4499debbb225f31264700b4fe38dd06e480a0323a07133fad"
+    },
+    "snapshot_sha256": {
+      "conf_marrakesh.json": "5a9a7c14a0187a9ec8109e4e396f96f73cbb1e0c263a6d9d5912a9691ee24e5d",
+      "props_marrakesh.json": "d49d7ae07deb95947ea10e5b9b9c5cbab6df21f98610543817f35ade2b1aece6"
+    },
+    "data_sha256": {
+      "Pantheon+SH0ES.dat": "1cb0fc379ef066afdc2ffd1857681cc478024570d8a3eba284fb645775198cf8",
+      "Pantheon+SH0ES_STAT+SYS.cov": "abf806d966485e64afdb359c87bffc0ecc00d05eff0a31ced66f247385df0fdc"
+    }
+  },
+  "configurations": [
+    {
+      "width": 8,
+      "circuits": 19,
+      "used_qubits": 152,
+      "total_candidates": 4864
+    },
+    {
+      "width": 3,
+      "circuits": 52,
+      "used_qubits": 156,
+      "total_candidates": 416
+    },
+    {
+      "width": 7,
+      "circuits": 22,
+      "used_qubits": 154,
+      "total_candidates": 2816
+    },
+    {
+      "width": 4,
+      "circuits": 38,
+      "used_qubits": 152,
+      "total_candidates": 608
+    },
+    {
+      "width": 6,
+      "circuits": 26,
+      "used_qubits": 156,
+      "total_candidates": 1664
+    },
+    {
+      "width": 5,
+      "circuits": 31,
+      "used_qubits": 155,
+      "total_candidates": 992
+    }
+  ]
+}

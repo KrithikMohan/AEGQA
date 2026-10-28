@@ -1,0 +1,7 @@
+# Preserve the published study's byte-level checksums on every platform.
+marrakesh_profiled_156q/** -text whitespace=cr-at-eol
+# The upstream covariance is retained byte-for-byte and is too large for a useful diff.
+marrakesh_profiled_156q/reproduction/Pantheon+_Data/**/*.cov -diff
+# Preserve upstream documentation and generated SVG formatting without style edits.
+marrakesh_profiled_156q/reproduction/Pantheon+_Data/** -whitespace
+marrakesh_profiled_156q/results/*.svg -whitespace
