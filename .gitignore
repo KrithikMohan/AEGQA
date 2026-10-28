@@ -36,6 +36,12 @@ outputs/pdf/*
 !outputs/pdf/.gitkeep
 !outputs/png/.gitkeep
 !outputs/json/.gitkeep
+
+# Reviewable artifacts for the local 100-shot IonQ-inspired noise pilot.
+!outputs/json/ionq_noise_demo.json
+!outputs/png/ionq_noise_demo.png
+!outputs/svg/ionq_noise_demo.svg
+!outputs/pdf/ionq_noise_demo.pdf
 *.egg-info/
 build/
 dist/
