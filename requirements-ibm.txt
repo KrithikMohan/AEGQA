@@ -1,0 +1,3 @@
+-r requirements.txt
+# Pin exact resolved versions in the environment-specific lockfile before a QPU run.
+qiskit-ibm-runtime>=0.40

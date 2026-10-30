@@ -176,7 +176,7 @@ def run_aeqga_dual(
     problem,
     params: AEQGAParameters,
     simulator=None,
-    *, seed=None, execution_mode="aer", quiet=False,
+    *, seed=None, execution_mode="aer", quiet=False, hardware_executor=None,
 ) -> tuple[GlobalBest, list, list]:
     """Two-circuit AEQGA following the paper's dual-circuit structure (Alg.1).
 
@@ -213,6 +213,8 @@ def run_aeqga_dual(
     params._validate()
     if execution_mode not in {"aer", "statevector_shots"}:
         raise ValueError("execution_mode must be aer or statevector_shots")
+    if hardware_executor is not None and params.num_shots <= 0:
+        raise ValueError("IBM hardware requires positive shots")
     if seed is not None:
         random.seed(seed)
         np.random.seed(seed)
@@ -290,6 +292,23 @@ def run_aeqga_dual(
 
         use_measure = params.num_shots > 0
 
+        # IBM path: assemble ALL dimension/subset circuits in the original
+        # (random, elite) order before requesting one Sampler job per generation.
+        # Classical selection and decoding remain unchanged.
+        hardware_counts = None
+        if hardware_executor is not None:
+            hardware_circuits = []
+            for hardware_d in range(n_dim):
+                hardware_circuits.append(build_dimension_circuit(
+                    P_rand[:, hardware_d], params.p_cross, params.p_mut,
+                    params.num_shots, mode="measure"))
+                hardware_circuits.append(build_dimension_circuit(
+                    P_elite_copy[:, hardware_d], params.p_cross, params.p_mut,
+                    params.num_shots, mode="measure"))
+            hardware_counts = hardware_executor.execute_generation(hardware_circuits, gen)
+            if len(hardware_counts) != 2 * n_dim:
+                raise ValueError("Executor count cardinality mismatch")
+
         for d in range(n_dim):
             # Qubit counts per paper §3.1 p.9:
             #   random: log2(n_p) - 1
@@ -298,36 +317,36 @@ def run_aeqga_dual(
             n_q_elite = n_qubits_for_population(n_p) - 2
 
             # ── Circuit for random subset ──────────────────────
-            qc_rand = build_dimension_circuit(
+            qc_rand = (None if hardware_counts is not None else build_dimension_circuit(
                 P_rand[:, d],
                 p_cross=params.p_cross,
                 p_mut=params.p_mut,
                 num_shots=params.num_shots,
                 mode="measure" if use_measure else "statevector",
-            )
+            ))
             if use_measure:
-                counts_rand = circuit_counts(qc_rand)
+                counts_rand = (hardware_counts[2*d] if hardware_counts is not None else circuit_counts(qc_rand))
                 decoded_random[:, d] = decode_random_subset(
                     counts_rand, n_q_random,
                     float(lower[d]), float(upper[d]), n_random,
                 )
             else:
-                counts_rand = circuit_counts(qc_rand)
+                counts_rand = (hardware_counts[2*d] if hardware_counts is not None else circuit_counts(qc_rand))
                 decoded_random[:, d] = decode_random_subset(
                     counts_rand, n_q_random,
                     float(lower[d]), float(upper[d]), n_random,
                 )
 
             # ── Circuit for elite-copy subset ──────────────────
-            qc_elite = build_dimension_circuit(
+            qc_elite = (None if hardware_counts is not None else build_dimension_circuit(
                 P_elite_copy[:, d],
                 p_cross=params.p_cross,
                 p_mut=params.p_mut,
                 num_shots=params.num_shots,
                 mode="measure" if use_measure else "statevector",
-            )
+            ))
             if use_measure:
-                counts_elite = circuit_counts(qc_elite)
+                counts_elite = (hardware_counts[2*d+1] if hardware_counts is not None else circuit_counts(qc_elite))
                 n_min_e = float(np.min(P_elite[:, d]))
                 n_max_e = float(np.max(P_elite[:, d]))
                 margin = params.elite_margin * (n_max_e - n_min_e)
@@ -338,7 +357,7 @@ def run_aeqga_dual(
                     n_min_e, n_max_e, n_elite,
                 )
             else:
-                counts_elite = circuit_counts(qc_elite)
+                counts_elite = (hardware_counts[2*d+1] if hardware_counts is not None else circuit_counts(qc_elite))
                 n_min_e = float(np.min(P_elite[:, d]))
                 n_max_e = float(np.max(P_elite[:, d]))
                 margin = params.elite_margin * (n_max_e - n_min_e)
