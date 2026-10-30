@@ -18,6 +18,81 @@ class Bowl:
 
 
 class ExperimentTests(unittest.TestCase):
+    def test_namespace_isolates_changes_and_resumes_without_overwrite(self):
+        params = algorithm.AEQGAParameters(pop_size=8,max_gen=1,num_shots=128,progress_bar=False)
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory)/"experiment.json"
+            original = run_ensemble(Bowl(),params,[11],path,provenance={"dataset":"original"})
+            saved = path.read_bytes()
+            saved_run = (path.with_suffix('.runs')/'run_0000.json').read_bytes()
+            with self.assertWarnsRegex(UserWarning,"provenance.dataset"):
+                changed = run_ensemble(Bowl(),params,[11],path,provenance={"dataset":"changed"},
+                                       checkpoint_policy="namespace")
+            self.assertNotEqual(changed["checkpoint"],str(path))
+            self.assertNotEqual(changed["fingerprint"],original["fingerprint"])
+            self.assertEqual(path.read_bytes(),saved)
+            self.assertEqual((path.with_suffix('.runs')/'run_0000.json').read_bytes(),saved_run)
+            with patch("aeqga.experiments.runner.run_aeqga_dual",side_effect=AssertionError("must resume")):
+                with self.assertWarns(UserWarning):
+                    resumed = run_ensemble(Bowl(),params,[11],path,provenance={"dataset":"changed"},
+                                           checkpoint_policy="namespace")
+                compatible = run_ensemble(Bowl(),params,[11],path,provenance={"dataset":"original"},
+                                          checkpoint_policy="namespace")
+            self.assertEqual(changed,resumed)
+            self.assertEqual(original,compatible)
+
+    def test_namespace_fresh_path_and_precise_version_diagnostics(self):
+        params = algorithm.AEQGAParameters(pop_size=8,max_gen=0,num_shots=128,progress_bar=False)
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory)/"experiment.json"
+            result = run_ensemble(Bowl(),params,[11],path,provenance={},checkpoint_policy="namespace")
+            self.assertFalse(path.exists())
+            self.assertTrue(Path(result["checkpoint"]).exists())
+            with patch("aeqga.experiments.runner.run_aeqga_dual",side_effect=AssertionError("must resume")):
+                self.assertEqual(result,run_ensemble(Bowl(),params,[11],path,provenance={},
+                                                     checkpoint_policy="namespace"))
+            strict_path = Path(directory)/"strict.json"
+            run_ensemble(Bowl(),params,[11],strict_path,provenance={})
+            with patch("aeqga.experiments.runner.version",return_value="different-version"):
+                with self.assertRaisesRegex(ValueError,r"versions.numpy: saved=.*current='different-version'"):
+                    run_ensemble(Bowl(),params,[11],strict_path,provenance={})
+                with self.assertWarnsRegex(UserWarning,"versions.numpy"):
+                    changed = run_ensemble(Bowl(),params,[11],strict_path,provenance={},
+                                           checkpoint_policy="namespace")
+            self.assertNotEqual(changed["checkpoint"],str(strict_path))
+
+    def test_namespace_without_extension_keeps_run_directories_separate(self):
+        params = algorithm.AEQGAParameters(pop_size=8,max_gen=0,num_shots=128,progress_bar=False)
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory)/"experiment"
+            first = run_ensemble(Bowl(),params,[11],path,provenance={},checkpoint_policy="namespace")
+            second = run_ensemble(Bowl(),params,[12],path,provenance={},checkpoint_policy="namespace")
+            first_runs = Path(first["checkpoint"]).with_suffix('.runs')
+            second_runs = Path(second["checkpoint"]).with_suffix('.runs')
+            self.assertNotEqual(first_runs,second_runs)
+            self.assertTrue((first_runs/'run_0000.json').exists())
+            with patch("aeqga.experiments.runner.run_aeqga_dual",side_effect=AssertionError("must resume")):
+                self.assertEqual(first,run_ensemble(Bowl(),params,[11],path,provenance={},
+                                                   checkpoint_policy="namespace"))
+
+    def test_namespace_does_not_hide_corruption_or_ignore_resume_false(self):
+        params = algorithm.AEQGAParameters(pop_size=8,max_gen=0,num_shots=128,progress_bar=False)
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory)/"experiment.json"
+            result = run_ensemble(Bowl(),params,[11],path,provenance={},checkpoint_policy="namespace")
+            with self.assertRaises(FileExistsError):
+                run_ensemble(Bowl(),params,[11],path,provenance={},
+                             checkpoint_policy="namespace",resume=False)
+            active = Path(result["checkpoint"])
+            data = json.loads(active.read_text())
+            data["configuration"]["seeds"] = [99]
+            from aeqga.experiments.runner import atomic_json
+            atomic_json(active,data)
+            with self.assertRaisesRegex(ValueError,"manifest is corrupt"):
+                run_ensemble(Bowl(),params,[11],path,provenance={},checkpoint_policy="namespace")
+            with self.assertRaisesRegex(ValueError,"checkpoint_policy"):
+                run_ensemble(Bowl(),params,[11],path,provenance={},checkpoint_policy="unknown")
+
     def test_repeatability_each_backend(self):
         params = algorithm.AEQGAParameters(pop_size=8,max_gen=2,num_shots=256,progress_bar=False)
         for engine in ["aer","statevector_shots"]:

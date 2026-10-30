@@ -28,6 +28,7 @@ class LayoutTests(unittest.TestCase):
                     ast.parse(source)
 
     def test_notebook_has_only_current_scientific_workflow(self):
+        self.assertFalse((PROJECT_ROOT/'AEQGA.ipynb').exists())
         notebook=json.loads((PROJECT_ROOT/'notebooks/AEQGA.ipynb').read_text())
         code='\n'.join(''.join(c['source']) for c in notebook['cells'] if c['cell_type']=='code')
         for obsolete in ['PantheonProblem(', 'load_pantheon(', 'chi2_pantheon_fixed_M',
@@ -43,6 +44,11 @@ class LayoutTests(unittest.TestCase):
             self.assertIn(toggle,source)
         self.assertIn('from aeqga.integrations.hqga import', code)
         self.assertIn('hqga_algorithm.runQGA(', code)
+        self.assertEqual(code.count('checkpoint_policy="namespace"'), 3)
+        self.assertIn('print("Kernel Python:", sys.executable)', code)
+        self.assertIn('CONFIRM_QPU_SUBMISSION', code)
+        self.assertIn('hardware_executor=executor', code)
+        self.assertIn('"qiskit-ibm-runtime"', code)
         for cell in notebook['cells']:
             if cell['cell_type']=='code':
                 self.assertIsNone(cell['execution_count'])

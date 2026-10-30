@@ -33,7 +33,7 @@ def n_qubits_for_population(n_p: int) -> int:
     return n
 
 
-def build_amplitude_circuit(values: np.ndarray) -> QuantumCircuit:
+def build_amplitude_circuit(values: np.ndarray, preparation="initialize") -> QuantumCircuit:
     """Build a quantum circuit encoding `values` via amplitude encoding.
 
     Parameters
@@ -48,7 +48,14 @@ def build_amplitude_circuit(values: np.ndarray) -> QuantumCircuit:
     n_qubits = n_qubits_for_population(n_p)
     norm = _normalise(values)
     qc = QuantumCircuit(n_qubits)
-    qc.initialize(norm, range(n_qubits))
+    if preparation == "initialize":
+        qc.initialize(norm, range(n_qubits))
+    elif preparation == "state_preparation":
+        # Valid only because every circuit begins in |0...0>.
+        from qiskit.circuit.library import StatePreparation
+        qc.append(StatePreparation(norm), range(n_qubits))
+    else:
+        raise ValueError("Unknown state preparation method")
     return qc
 
 

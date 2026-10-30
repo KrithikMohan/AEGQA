@@ -159,6 +159,21 @@ print(f"  Best-fit Omega_m = {Om_best:.4f}")
 print(f"  chi2_min         = {chi2_best:.2f}")
 print(f"  Reduced chi2     = {chi2_best / (problem._data['n_sn'] - 2):.4f}")
 print(f"  Found at gen     = {g_best.gen}")
+from aeqga.analysis.accuracy import accuracy_report, accuracy_markdown
+from aeqga.experiments.runner import atomic_json
+import matplotlib
+matplotlib.use("Agg")
+from aeqga.visualization.scientific_plots import accuracy_comparison, export_figure
+accuracy = accuracy_report([g_best.x], [g_best.fitness], classical_reference,
+                           comparison_reference=dict(label="Paper SNe point; agreement marker, not known truth",
+                                                     H0=float(x_paper[0]), Omega_m=float(x_paper[1])))
+atomic_json(output_path('json', 'pantheon_accuracy.json'), accuracy)
+print(accuracy_markdown(accuracy))
+accuracy_figure = accuracy_comparison(accuracy)
+export_figure(accuracy_figure, 'pantheon_accuracy', provenance=dict(
+    parameters=vars(params), reference=classical_reference))
+import matplotlib.pyplot as plt
+plt.close(accuracy_figure)
 print(f"\n  Paper SNe Ia (Sarracino+26): Ω_M = 0.363±0.016, H0 = 72.81±0.22")
 
 # ---------------------------------------------------------------------------
@@ -175,8 +190,8 @@ try:
 
     fig, ax = plt.subplots(figsize=(8, 4))
     ax.plot(gens, fitvals, linewidth=2, color="steelblue")
-    ax.axhline(chi2_paper, color="tomato", linestyle="--", linewidth=1.2,
-               label=f"Paper best-fit chi2={chi2_paper:.0f}")
+    ax.axhline(classical_reference['chi2'], color="tomato", linestyle="--", linewidth=1.2,
+               label=f"Classical minimum chi2={classical_reference['chi2']:.6f}")
     ax.set_xlabel("Generation", fontsize=12)
     ax.set_ylabel(r"Best $\chi^2$", fontsize=12)
     ax.set_title("AEQGA convergence — calibrated Pantheon+", fontsize=13)
@@ -211,14 +226,15 @@ if not args.no_contour:
         import matplotlib.pyplot as plt
 
         fig, ax = plt.subplots(figsize=(7, 6))
-        levels = [2.30, 6.18, 11.83]
+        from aeqga.visualization.scientific_plots import joint_levels
+        levels = joint_levels((1, 2, 3)).tolist()
         cf = ax.contourf(H0_arr, Om_arr, delta_chi2,
                          levels=[0] + levels + [30],
                          colors=["#2d5a27", "#4a8c3f", "#7db874", "#c8e6c0"])
         cs = ax.contour(H0_arr, Om_arr, delta_chi2,
                         levels=levels,
                         colors=["white"], linewidths=1.2)
-        ax.clabel(cs, fmt={2.30: "1σ", 6.18: "2σ", 11.83: "3σ"}, fontsize=9)
+        ax.clabel(cs, fmt={value: f"{i}σ" for i, value in enumerate(levels, 1)}, fontsize=9)
 
         if H0_arr[0] <= H0_best <= H0_arr[-1] and Om_arr[0] <= Om_best <= Om_arr[-1]:
             ax.plot(H0_best, Om_best, "r*", markersize=14, label="AEQGA best-fit", zorder=5)

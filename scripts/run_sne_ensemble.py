@@ -6,8 +6,9 @@ from aeqga.experiments.runner import run_ensemble, atomic_json, file_digest
 from aeqga.likelihoods.pantheon_problem import PantheonPlusProblem
 from aeqga.steps.evolution.aeqga_algorithm import AEQGAParameters
 from aeqga.paths import output_path
+from aeqga.analysis.accuracy import accuracy_report, accuracy_markdown
 from aeqga.visualization.scientific_plots import (
-    run_diagnostics, objective_contours, optimizer_scatter, export_figure,
+    run_diagnostics, objective_contours, optimizer_scatter, export_figure, accuracy_comparison,
 )
 
 
@@ -43,9 +44,14 @@ def main():
                           progress=lambda n,total: print(f"Completed {n}/{total}",flush=True) if n%10==0 or n==total else None)
     reference = problem.classical_minimum()
     points = np.array([r["best_x"] for r in result["runs"]])
+    chi2 = np.array([r["best_chi2"] for r in result["runs"]])
+    accuracy = accuracy_report(points, chi2, reference)
+    atomic_json(output_path("json", args.name+"_accuracy.json"),
+                dict(accuracy=accuracy, fingerprint=result["fingerprint"], configuration=result["configuration"]))
     figures = [(run_diagnostics(result["runs"][0],reference),"convergence"),
                (objective_contours(problem,reference),"likelihood"),
-               (objective_contours(problem,reference,points=points),"overlay")]
+               (objective_contours(problem,reference,points=points),"overlay"),
+               (accuracy_comparison(accuracy), "accuracy")]
     if args.runs >= 3: figures.append((optimizer_scatter(points,reference),"scatter"))
     if args.runs >= 20: figures.append((optimizer_scatter(points,reference,kde_regions=True),"density"))
     for fig,kind in figures:
@@ -55,6 +61,7 @@ def main():
     chi2 = np.array([r["best_chi2"] for r in result["runs"]])
     summary = {k:v for k,v in result.items() if k != "runs"}
     summary.update(classical_reference=reference,
+                   accuracy=accuracy,
                    best_points=points.tolist(), best_chi2=chi2.tolist(),
                    convergence_gap_quantiles=np.quantile(chi2-reference["chi2"],[0,.5,.9,1]).tolist(),
                    fraction_delta_chi2_below_2_30=float(np.mean(chi2-reference["chi2"]<2.30)),
@@ -64,7 +71,8 @@ def main():
                    exact_paper_reproduction=False)
     atomic_json(output_path("json",args.name+"_summary.json"),summary)
     print("Mean / std [H0, Omega_m]:",summary["mean"],summary["std_ddof0"])
-    print("Gap quantiles / coverage:",summary["convergence_gap_quantiles"],summary["fraction_delta_chi2_below_2_30"])
+    print("Gap quantiles / optimizer success fraction:",summary["convergence_gap_quantiles"],summary["fraction_delta_chi2_below_2_30"])
+    print(accuracy_markdown(accuracy))
 
 
 if __name__ == "__main__": main()
