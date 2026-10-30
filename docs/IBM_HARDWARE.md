@@ -1,5 +1,12 @@
 # IBM Quantum integration and remaining validation
 
+Historical Kingston results from PR #10 are checked in
+[the compatibility summary](PR10_SUMMARY.md) and
+[PDF report](../output/pdf/PR10_SUMMARY.pdf). Completed legacy `state`/`counts`
+ledgers can be read offline using `python -m scripts.recover_ibm_job --checkpoint PATH`.
+New resumable jobs require a fresh directory with current circuit and optimizer
+provenance; legacy fingerprints are not silently converted.
+
 The maintained hardware runner is `python -m scripts.run_ibm_generation`.
 It imports `aeqga.likelihoods.pantheon_problem.PantheonPlusProblem` and the
 package evolution loop. Real data are mandatory. Root-level legacy likelihoods

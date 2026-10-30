@@ -21,6 +21,19 @@ def recover_job(job_id=None, checkpoint_path=None, output_file=None, *, service=
     job_id = saved.get("job_id")
     if not job_id:
         raise ValueError("Checkpoint has no submitted job ID")
+    if saved.get("schema_version") == 1 and "state" in saved:
+        # Completed legacy records lack the logical/ISA archives and RNG state
+        # needed for current scientific resume. Validate cached counts only.
+        from aeqga.analysis.pr10_compatibility import completed_legacy_counts
+        widths = {1: [4], 4: [4, 3, 4, 3]}.get(saved.get("num_circuits"))
+        if widths is None or saved.get("state") != "completed":
+            raise ValueError("Legacy recovery requires a completed PR #10 ledger; "
+                             "unfinished jobs need original register/circuit metadata")
+        counts = completed_legacy_counts(saved, widths)
+        if output_file:
+            CheckpointManager.atomic_write(output_file, dict(
+                job_id=job_id, recovered_counts=counts, legacy_identity_verified=False))
+        return counts
     widths, shots = saved["circuit_widths"], saved["shots"]
     if len(widths) != saved["num_circuits"]:
         raise ValueError("Invalid checkpoint circuit cardinality")

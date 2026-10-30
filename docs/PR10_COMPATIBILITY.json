@@ -1,0 +1,74 @@
+{
+  "pull_request": "https://github.com/KrithikMohan/AEQGA/pull/10",
+  "merged_main_commit": "599927f018fc5d299d7180f3d9424714b656ff76",
+  "live_qpu_submissions": 0,
+  "pilot": {
+    "job_id": "db5qnv4vf2bc73d09org",
+    "backend": "ibm_kingston",
+    "shots": 1024,
+    "observed_states": 16,
+    "tvd": 0.11056529636640379,
+    "max_probability_error": 0.07280473622337824,
+    "monte_carlo_trials": 10000,
+    "finite_shot_mean_tvd": 0.040678693805391984,
+    "finite_shot_p95": 0.05703868195253806,
+    "finite_shot_p99": 0.06498679102395284,
+    "trials_at_least_observed": 0,
+    "interpretation": "Conditional on reconstructed logical input; TVD is not gate fidelity"
+  },
+  "generation": {
+    "job_id": "db5r25imb58s738at2v0",
+    "backend": "ibm_kingston",
+    "shots_per_circuit": 1024,
+    "circuit_widths": [
+      4,
+      3,
+      4,
+      3
+    ],
+    "evaluations": 64,
+    "best_x": [
+      71.95799957622171,
+      0.4609371175115584
+    ],
+    "best_chi2": 1778.7556669812602,
+    "simulator_best_x": [
+      71.95799957622171,
+      0.4609371175115584
+    ],
+    "simulator_best_chi2": 1778.7556669812602,
+    "configured_classical_reference": {
+      "H0": 72.83204069602789,
+      "Omega_m": 0.362876254180602,
+      "chi2": 1752.9040468099465,
+      "grid_size": 300,
+      "selection": "all",
+      "redshift": "hd_hel"
+    },
+    "delta_chi2": 25.851620171313698,
+    "archived_population_max_abs_errors": {
+      "hardware_initial": 0.0,
+      "hardware_final": 0.0,
+      "simulator_initial": 0.0,
+      "simulator_final": 0.0
+    },
+    "retained_elites_equal": true,
+    "hardware_simulator_final_max_abs_difference": 16.862745098039213,
+    "interpretation": "Historical count replay; retained classical elite is not evidence of QPU improvement"
+  },
+  "versions": {
+    "numpy": "2.5.3",
+    "scipy": "1.18.1",
+    "qiskit": "2.5.2",
+    "qiskit-aer": "0.17.2",
+    "qiskit-ibm-runtime": "0.50.0"
+  },
+  "artifact_sha256": {
+    "outputs/json/ibm_first_pilot/generation_0001.json": "f5a9933a514d55035956cbed9069d79fb73fcc86b470ae6a492603829578d184",
+    "outputs/json/ibm_first_pilot/recovered_counts.json": "1f90869dd904ec2146fda725d48103b72ce7e16078f914de9b7c19eafa668dc6",
+    "outputs/json/ibm_generation_01/generation_0001.json": "a6f705f00475e6dd9b99757946e267a3b6e68ad3a94569e06108306a42193a51",
+    "outputs/json/ibm_generation_01/population_comparison.npz": "f884d25d640d60511c4b9ca8868618379b8803cc74a122ac2f0a70d4a594b739"
+  },
+  "legacy_identity_verified": false,
+  "limitations": "Legacy compiled fingerprints cannot be verified without original ISA circuits. Historical records remain separate from new resumable jobs; use a new output directory."
+}
